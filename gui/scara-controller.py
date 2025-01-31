@@ -1,0 +1,1318 @@
+import sys
+import math
+import csv 
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QListWidget, QListWidgetItem, QSlider, QTextEdit, QGridLayout, QFileDialog, QCheckBox
+from PyQt5.QtGui import QPainter, QPen, QBrush, QColor
+from PyQt5.QtCore import Qt, QTimer, QRect, QPoint, QThread, QMutex, QWaitCondition
+import pyqtgraph as pg
+import numpy as np
+from dataclasses import dataclass
+from typing import Tuple, Optional
+import time
+
+# SCARA robot dimensions
+L1 = 180  # Length of the first linkage (mm)
+L2 = 180  # Length of the second linkage (mm)
+Z_MIN = 0  # Minimum Z value
+Z_MAX = 200  # Maximum Z value
+
+GRAPH_WIDTH = 700 
+SIMULATION_WIDTH = 850
+WINDOW_WIDTH = GRAPH_WIDTH + SIMULATION_WIDTH  # Will be dynamically calculated
+WINDOW_HEIGHT = 800
+
+# Colors
+BLACK = QColor(0, 0, 0)
+WHITE = QColor(255, 255, 255)
+RED = QColor(255, 0, 0)
+GREEN = QColor(0, 255, 0)
+BLUE = QColor(0, 0, 255)
+GRAY = QColor(128, 128, 128)
+BUTTON_COLOR = QColor(200, 200, 200)
+
+# Scale factor for displaying the robot
+SCALE = 1
+
+# List to store waypoints
+waypoints = []
+
+class JointStepper:
+    def __init__(self):
+        self.current_position = 0
+        self.target_position = 0
+        self.current_speed = 0
+        self.base_max_speed = 72  # Base maximum speed (degrees per second)
+        self.base_acceleration = 144  # Base acceleration (degrees per second²)
+        self.max_speed = self.base_max_speed
+        self.acceleration = self.base_acceleration
+        self.last_update_time = time.time()
+        self.move_duration = 0
+        
+        # Motion smoothing buffer
+        self.position_buffer = []
+        self.velocity_buffer = []
+        self.time_buffer = []
+        self.buffer_size = 5
+        
+    def set_target(self, target_position: float, move_duration: float = None):
+        self.target_position = target_position
+        if move_duration is not None:
+            self.move_duration = move_duration
+            distance = abs(self.target_position - self.current_position)
+            if distance > 0 and move_duration > 0:
+                half_time = move_duration / 2
+                self.acceleration = (2 * distance) / (half_time * half_time)
+                self.max_speed = self.acceleration * half_time
+                
+                speed_factor = min(1.0, self.base_max_speed / self.max_speed)
+                self.max_speed *= speed_factor
+                self.acceleration *= speed_factor
+    
+    def get_smoothed_velocity(self) -> float:
+        """Calculate smoothed velocity from position buffer"""
+        if len(self.position_buffer) < 2:
+            return 0.0
+            
+        # Use last few points to calculate average velocity
+        positions = self.position_buffer[-self.buffer_size:]
+        times = self.time_buffer[-self.buffer_size:]
+        
+        if len(positions) < 2:
+            return 0.0
+            
+        # Calculate velocities between consecutive points
+        velocities = []
+        for i in range(1, len(positions)):
+            dt = times[i] - times[i-1]
+            if dt > 0:
+                v = (positions[i] - positions[i-1]) / dt
+                velocities.append(v)
+        
+        if not velocities:
+            return 0.0
+            
+        # Apply weighted average (more recent values have higher weight)
+        weights = [i/sum(range(1, len(velocities) + 1)) for i in range(1, len(velocities) + 1)]
+        return sum(v * w for v, w in zip(velocities, weights))
+    
+    def update(self) -> tuple[float, float]:
+        """Update motion and return current position and smoothed velocity"""
+        current_time = time.time()
+        dt = current_time - self.last_update_time
+        
+        # Ensure minimum dt to prevent extreme values during stutters
+        dt = min(dt, 0.1)
+        
+        # Calculate distance to target
+        distance = self.target_position - self.current_position
+        direction = 1 if distance > 0 else -1 if distance < 0 else 0
+
+        if direction == 0:
+            if abs(self.current_speed) > 0:
+                decel = self.acceleration * dt
+                self.current_speed = max(0, abs(self.current_speed) - decel) * (1 if self.current_speed > 0 else -1)
+        else:
+            stopping_dist = (self.current_speed * self.current_speed) / (2 * self.acceleration)
+            
+            if abs(distance) > stopping_dist:
+                self.current_speed += direction * self.acceleration * dt
+                self.current_speed = min(max(self.current_speed, -self.max_speed), self.max_speed)
+            else:
+                decel = self.acceleration * dt
+                self.current_speed = max(0, abs(self.current_speed) - decel) * direction
+
+        # Update position
+        self.current_position += self.current_speed * dt
+        
+        # Clamp to target if overshot
+        if (direction > 0 and self.current_position > self.target_position) or \
+           (direction < 0 and self.current_position < self.target_position):
+            self.current_position = self.target_position
+            self.current_speed = 0
+        
+        # Update buffers
+        self.position_buffer.append(self.current_position)
+        self.time_buffer.append(current_time)
+        
+        # Trim buffers
+        if len(self.position_buffer) > self.buffer_size:
+            self.position_buffer.pop(0)
+            self.time_buffer.pop(0)
+        
+        self.last_update_time = current_time
+        
+        # Return both position and smoothed velocity
+        return self.current_position, self.get_smoothed_velocity()
+
+class SCARAMotionController:
+    def __init__(self):
+        self.shoulder = JointStepper()
+        self.elbow = JointStepper()
+        self.z_axis = JointStepper()
+        self.end_effector = JointStepper()
+
+    def set_target(self, theta1: float, theta2: float, z: float, rotation: float):
+        """Set target positions for all joints with synchronized timing"""
+        shoulder_dist = abs(theta1 - self.shoulder.current_position)
+        elbow_dist = abs(theta2 - self.elbow.current_position)
+        max_dist = max(shoulder_dist, elbow_dist)
+        
+        if max_dist > 0:
+            accel_time = self.shoulder.base_max_speed / self.shoulder.base_acceleration
+            accel_dist = 0.5 * self.shoulder.base_acceleration * accel_time * accel_time
+            
+            if max_dist <= 2 * accel_dist:
+                move_duration = 2 * math.sqrt(max_dist / self.shoulder.base_acceleration)
+            else:
+                constant_velocity_dist = max_dist - 2 * accel_dist
+                constant_velocity_time = constant_velocity_dist / self.shoulder.base_max_speed
+                move_duration = 2 * accel_time + constant_velocity_time
+        else:
+            move_duration = 0.1
+        
+        self.shoulder.set_target(theta1, move_duration)
+        self.elbow.set_target(theta2, move_duration)
+        self.z_axis.set_target(z)
+        self.end_effector.set_target(rotation)
+
+    def update(self) -> tuple[float, float, float, float, float, float]:
+        """Update all joints and return current positions and velocities"""
+        theta1, vel1 = self.shoulder.update()
+        theta2, vel2 = self.elbow.update()
+        z, _ = self.z_axis.update()
+        rotation, _ = self.end_effector.update()
+        
+        return theta1, theta2, z, rotation, vel1, vel2  # Now returns velocities too
+
+    def is_at_target(self, threshold: float = 0.1) -> bool:
+        """Check if all joints are at their targets"""
+        return (abs(self.shoulder.current_position - self.shoulder.target_position) < threshold and
+                abs(self.elbow.current_position - self.elbow.target_position) < threshold and
+                abs(self.z_axis.current_position - self.z_axis.target_position) < threshold and
+                abs(self.end_effector.current_position - self.end_effector.target_position) < threshold)
+    
+
+class AngleGraphWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(GRAPH_WIDTH, WINDOW_HEIGHT)
+        
+        # Main layout
+        layout = QVBoxLayout()
+        layout.setSpacing(0)
+        layout.setContentsMargins(0, 0, 0, 0)
+        
+        # Create angle plot
+        self.angle_plot = pg.PlotWidget(title="Joint Angles")
+        self.angle_plot.setLabel('left', 'Angle', units='degrees')
+        self.angle_plot.setLabel('bottom', 'Time', units='s')
+        self.angle_plot.setYRange(-180, 180)
+        self.angle_plot.showGrid(x=True, y=True)
+        
+        # Create velocity plot
+        self.velocity_plot = pg.PlotWidget(title="Joint Velocities")
+        self.velocity_plot.setLabel('left', 'Velocity', units='deg/s')
+        self.velocity_plot.setLabel('bottom', 'Time', units='s')
+        self.velocity_plot.setYRange(-200, 200)
+        self.velocity_plot.showGrid(x=True, y=True)
+        
+        # Set dark theme
+        self.angle_plot.setBackground('k')
+        self.velocity_plot.setBackground('k')
+        
+        # Create plot lines with different colors and names
+        self.theta1_line = self.angle_plot.plot(pen=pg.mkPen('b', width=2))
+        self.theta2_line = self.angle_plot.plot(pen=pg.mkPen('g', width=2))
+        self.vel1_line = self.velocity_plot.plot(pen=pg.mkPen('b', width=2))
+        self.vel2_line = self.velocity_plot.plot(pen=pg.mkPen('g', width=2))
+        
+        # Add legends with explicit items
+        angle_legend = pg.LegendItem(offset=(50,10))
+        angle_legend.setParentItem(self.angle_plot.graphicsItem())
+        angle_legend.addItem(self.theta1_line, "Theta 1 (Shoulder)")
+        angle_legend.addItem(self.theta2_line, "Theta 2 (Elbow)")
+        
+        velocity_legend = pg.LegendItem(offset=(50,10))
+        velocity_legend.setParentItem(self.velocity_plot.graphicsItem())
+        velocity_legend.addItem(self.vel1_line, "Shoulder Velocity")
+        velocity_legend.addItem(self.vel2_line, "Elbow Velocity")
+        
+        # Add plots to layout
+        layout.addWidget(self.angle_plot)
+        layout.addWidget(self.velocity_plot)
+        self.setLayout(layout)
+        
+        # Initialize data buffers
+        self.time_data = []
+        self.theta1_data = []
+        self.theta2_data = []
+        self.vel1_data = []
+        self.vel2_data = []
+        
+        # Initialize velocity smoothing buffers
+        self.vel1_buffer = []
+        self.vel2_buffer = []
+        self.buffer_size = 5  # Size of smoothing window
+        
+        # Initialize timing variables
+        self.start_time = None
+        self.paused_time = 0
+        self.last_update = None
+        self.display_time = 10  # Show last 10 seconds of data
+        self.keep_history = True  # Keep data after animation ends
+        
+        # Set up update timer
+        self.update_timer = QTimer()
+        self.update_timer.timeout.connect(self.update_display)
+        self.update_timer.start(50)  # 20 FPS update rate
+        
+    def smooth_velocity(self, new_vel, buffer):
+        """Apply smoothing to velocity data"""
+        buffer.append(new_vel)
+        if len(buffer) > self.buffer_size:
+            buffer.pop(0)
+        
+        # Apply Gaussian-like weighting
+        weights = [0.1, 0.2, 0.4, 0.2, 0.1][:len(buffer)]
+        weights = [w/sum(weights) for w in weights]
+        
+        return sum(v * w for v, w in zip(buffer, weights))
+
+    def update_plot(self, theta1, theta2, is_paused=False):
+        current_time = time.time()
+        
+        if self.start_time is None:
+            self.start_time = current_time
+            self.last_update = current_time
+        
+        if is_paused:
+            if self.last_update is not None:
+                self.paused_time += current_time - self.last_update
+        
+        elapsed = current_time - self.start_time - self.paused_time
+        
+        # Add new angle data
+        self.time_data.append(elapsed)
+        self.theta1_data.append(theta1)
+        self.theta2_data.append(theta2)
+        
+        # Calculate velocities with advanced smoothing
+        if len(self.time_data) > 1:
+            dt = max(self.time_data[-1] - self.time_data[-2], 0.001)  # Prevent division by zero
+            raw_vel1 = (theta1 - self.theta1_data[-2]) / dt
+            raw_vel2 = (theta2 - self.theta2_data[-2]) / dt
+            
+            # Apply smoothing
+            smooth_vel1 = self.smooth_velocity(raw_vel1, self.vel1_buffer)
+            smooth_vel2 = self.smooth_velocity(raw_vel2, self.vel2_buffer)
+            
+            # Limit velocity values
+            vel1 = max(min(smooth_vel1, 200), -200)
+            vel2 = max(min(smooth_vel2, 200), -200)
+            
+            self.vel1_data.append(vel1)
+            self.vel2_data.append(vel2)
+        else:
+            self.vel1_data.append(0)
+            self.vel2_data.append(0)
+        
+        # Keep only recent data if not keeping history
+        if not self.keep_history:
+            while len(self.time_data) > 0 and self.time_data[-1] - self.time_data[0] > self.display_time:
+                self.time_data.pop(0)
+                self.theta1_data.pop(0)
+                self.theta2_data.pop(0)
+                self.vel1_data.pop(0)
+                self.vel2_data.pop(0)
+            
+        self.last_update = current_time
+
+    def reset_plot(self):
+        """Clear all plot data"""
+        if not self.keep_history:
+            self.time_data = []
+            self.theta1_data = []
+            self.theta2_data = []
+            self.vel1_data = []
+            self.vel2_data = []
+            self.vel1_buffer = []
+            self.vel2_buffer = []
+        self.start_time = None
+        self.paused_time = 0
+        self.last_update = None
+
+    def update_plot(self, theta1, theta2, vel1, vel2, is_paused=False):
+        """Update plots with new data including velocities"""
+        current_time = time.time()
+        
+        if self.start_time is None:
+            self.start_time = current_time
+            self.last_update = current_time
+        
+        if is_paused:
+            if self.last_update is not None:
+                self.paused_time += current_time - self.last_update
+        
+        elapsed = current_time - self.start_time - self.paused_time
+        
+        # Add new data using provided velocities
+        self.time_data.append(elapsed)
+        self.theta1_data.append(theta1)
+        self.theta2_data.append(theta2)
+        self.vel1_data.append(vel1)
+        self.vel2_data.append(vel2)
+        
+        # Keep only recent data
+        while len(self.time_data) > 0 and self.time_data[-1] - self.time_data[0] > self.display_time:
+            self.time_data.pop(0)
+            self.theta1_data.pop(0)
+            self.theta2_data.pop(0)
+            self.vel1_data.pop(0)
+            self.vel2_data.pop(0)
+            
+        self.last_update = current_time
+
+    def update_display(self):
+        """Update the plot display - called by timer"""
+        if not self.time_data:
+            return
+            
+        try:
+            # Ensure all arrays are the same length
+            min_length = min(len(self.time_data), 
+                           len(self.theta1_data), 
+                           len(self.theta2_data),
+                           len(self.vel1_data),
+                           len(self.vel2_data))
+            
+            time_data = self.time_data[-min_length:]
+            theta1_data = self.theta1_data[-min_length:]
+            theta2_data = self.theta2_data[-min_length:]
+            vel1_data = self.vel1_data[-min_length:]
+            vel2_data = self.vel2_data[-min_length:]
+            
+            # Update the plot data
+            self.theta1_line.setData(time_data, theta1_data)
+            self.theta2_line.setData(time_data, theta2_data)
+            self.vel1_line.setData(time_data, vel1_data)
+            self.vel2_line.setData(time_data, vel2_data)
+            
+            # Update plot ranges
+            current_time = time_data[-1]
+            self.angle_plot.setXRange(max(0, current_time - self.display_time), current_time)
+            self.velocity_plot.setXRange(max(0, current_time - self.display_time), current_time)
+        except Exception as e:
+            print(f"Error updating display: {e}")
+            return
+        
+        # Update plot ranges
+        current_time = self.time_data[-1]
+        self.angle_plot.setXRange(max(0, current_time - self.display_time), current_time)
+        self.velocity_plot.setXRange(max(0, current_time - self.display_time), current_time)
+
+    def reset_plot(self):
+        """Clear all plot data"""
+        self.time_data = []
+        self.theta1_data = []
+        self.theta2_data = []
+        self.vel1_data = []
+        self.vel2_data = []
+        self.start_time = None
+        self.paused_time = 0
+        self.last_update = None
+        
+        # Clear the plots
+        self.theta1_line.setData([], [])
+        self.theta2_line.setData([], [])
+        self.vel1_line.setData([], [])
+        self.vel2_line.setData([], [])
+
+class SimulationWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.theta1 = 45
+        self.theta2 = 45
+        self.z = 0
+        self.rotation = 0
+        self.angle = 0
+        self.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
+        # Initialize stepper drive system
+        self.motion_controller = SCARAMotionController()
+
+        self.setAttribute(Qt.WA_OpaquePaintEvent)
+        self.setAttribute(Qt.WA_NoSystemBackground)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+
+        # Draw the background
+        painter.fillRect(self.rect(), BLACK)
+
+        # Draw the workspace limits first
+        self.draw_workspace_limits(painter)
+        
+        # Draw the robot
+        base, joint1, end_effector = self.draw_robot(painter)
+        
+        # Draw waypoints
+        self.draw_waypoints(painter, draw_paths=True)
+
+        # Draw Z-axis
+        self.draw_z_axis(painter)
+
+        # Draw end-effector rotation last
+        self.draw_end_effector_rotation(painter, end_effector)
+
+    def draw_robot(self, painter):
+        # Convert angles to radians
+        theta1_rad = math.radians(self.theta1)
+        theta2_rad = math.radians(self.theta2)
+
+        # Calculate end-effector position
+        x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
+        y = L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad)
+        theta = math.atan2(y, x)
+
+        # Draw the robot links
+        base = QPoint((SIMULATION_WIDTH // 2) -50, WINDOW_HEIGHT // 2)
+        joint1 = QPoint(base.x() + int(L1 * SCALE * math.cos(theta1_rad)), base.y() + int(L1 * SCALE * math.sin(theta1_rad)))
+        end_effector = QPoint(base.x() + int(x * SCALE), base.y() + int(y * SCALE))
+
+        painter.setPen(QPen(WHITE, 5))
+        painter.drawLine(base, joint1)
+        painter.drawLine(joint1, end_effector)
+
+        # Draw circles at joints and end-effector
+        painter.setBrush(WHITE)
+        painter.drawEllipse(base, 10, 10)
+        painter.setBrush(BLUE)
+        painter.drawEllipse(end_effector, 10, 10)
+
+        # # Visualize angles
+        # angle_radius = 50
+        # angle1_x = base.x() + int(angle_radius * math.cos(theta1_rad))
+        # angle1_y = base.y() + int(angle_radius * math.sin(theta1_rad))
+        # angle2_x = joint1.x() + int(angle_radius * math.sin(theta1_rad))
+        # angle2_y = joint1.y() + int(angle_radius * math.cos(theta1_rad))
+
+        # painter.setPen(QPen(RED, 4))
+        # painter.drawLine(base, QPoint(angle1_x, angle1_y))
+        # painter.drawLine(base, QPoint(base.x() + angle_radius, base.y()))
+
+        # if theta1_rad < 0:
+        #     painter.drawArc(QRect(base.x() - (angle_radius), base.y() - (angle_radius), 2 * (angle_radius), 2 * (angle_radius)), int(-theta1_rad * 16 * 180 / math.pi), 0)
+        # elif theta1_rad >= 0:
+        #     painter.drawArc(QRect(base.x() - (angle_radius), base.y() - (angle_radius), 2 * (angle_radius), 2 * (angle_radius)), 0, int(-theta1_rad * 16 * 180 / math.pi))
+        
+        # painter.setPen(QPen(GREEN, 4))
+        # painter.drawLine(joint1, QPoint(angle2_x, angle2_y))
+        # painter.drawLine(joint1, QPoint(joint1.x() + angle_radius, joint1.y()))
+        # if y >= 0:
+        #     painter.drawArc(QRect(joint1.x() - (angle_radius), joint1.y() - (angle_radius), 2 * (angle_radius), 2 * (angle_radius)), int(-(theta2_rad + theta1_rad) * 16 * 180 / math.pi), int(theta1_rad * 16 * 180 / math.pi))
+        # elif y < 0:
+        #     painter.drawArc(QRect(joint1.x() - (angle_radius), joint1.y() - (angle_radius), 2 * (angle_radius), 2 * (angle_radius)), int(theta1_rad * 16 * 180 / math.pi), int((theta2_rad + theta1_rad) * 16 * 180 / math.pi))
+
+        return base, joint1, end_effector
+    
+    def draw_workspace_limits(self, painter):
+        # Draw a circle representing the workspace limits
+        workspace_radius = (L1 + L2) * SCALE
+        workspace_center = QPoint((SIMULATION_WIDTH // 2)-50, WINDOW_HEIGHT // 2)
+        painter.setPen(QPen(GRAY, 2))
+        painter.drawArc(QRect(workspace_center.x() - (L2 + L1), workspace_center.y() - (L2 + L1), 2 * L2 + 2 * L1, 2 * L2 + 2 * L1), int(math.radians(-130) * 16 * 180 / math.pi), int(math.radians(260) * 16 * 180 / math.pi))
+
+        # Draw two lines representing the joint1 rotation limits
+        joint1_limit_x1 = workspace_center.x() + int(L1 * SCALE * math.cos(math.radians(-130)))
+        joint1_limit_y1 = workspace_center.y() + int(L1 * SCALE * math.sin(math.radians(-130)))
+        joint1_limit_x2 = workspace_center.x() + int(L1 * SCALE * math.cos(math.radians(130)))
+        joint1_limit_y2 = workspace_center.y() + int(L1 * SCALE * math.sin(math.radians(130)))
+        painter.drawLine(workspace_center, QPoint(joint1_limit_x1, joint1_limit_y1))
+        painter.drawLine(workspace_center, QPoint(joint1_limit_x2, joint1_limit_y2))
+        painter.drawLine(QPoint(joint1_limit_x1, joint1_limit_y1), QPoint(joint1_limit_x1 - L2, joint1_limit_y1))
+        painter.drawLine(QPoint(joint1_limit_x2, joint1_limit_y2), QPoint(joint1_limit_x2 - L2, joint1_limit_y2))
+        painter.drawArc(QRect(workspace_center.x() - L2 + int(L2 * SCALE * math.cos(math.radians(-130))), workspace_center.y() - L2 + int(L2 * SCALE * math.sin(math.radians(-130)))-1, 2 * L2, 2 * L2), int(math.radians(130) * 16 * 180 / math.pi), int(math.radians(50) * 16 * 180 / math.pi))
+        painter.drawArc(QRect(workspace_center.x() - L2 + int(L2 * SCALE * math.cos(math.radians(130))), workspace_center.y() - L2 + int(L2 * SCALE * math.sin(math.radians(130)))+1, 2 * L2, 2 * L2), int(math.radians(-130) * 16 * 180 / math.pi), int(math.radians(-50) * 16 * 180 / math.pi))
+
+    def draw_waypoints(self, painter, draw_paths=True):
+        for i in range(len(waypoints)):
+            # Update unpacking to include linear_path
+            x, y, z, rotation, Wtheta1, Wtheta2, stop_at_point, duration, linear_path = waypoints[i]
+            end_effector = QPoint((SIMULATION_WIDTH // 2)-50 + int(x), WINDOW_HEIGHT // 2 - int(y))
+
+            # Draw different markers for stop points vs pass-through points
+            painter.setBrush(RED)
+            if stop_at_point:
+                # Draw a square for stop points
+                painter.drawRect(end_effector.x() - 5, end_effector.y() - 5, 10, 10)
+            else:
+                # Draw a circle for pass-through points
+                painter.drawEllipse(end_effector, 5, 5)
+
+            if draw_paths and i > 0:
+                # Update unpacking for previous waypoint to include linear_path
+                prev_x, prev_y, prev_z, prev_rotation, prev_theta1, prev_theta2, _, _, prev_linear = waypoints[i - 1]
+                prev_end_effector = QPoint((SIMULATION_WIDTH // 2)-50 + int(prev_x), WINDOW_HEIGHT // 2 - int(prev_y))
+                self.draw_path_between_waypoints(painter, prev_end_effector, end_effector, 
+                                               prev_theta1, prev_theta2, Wtheta1, Wtheta2, prev_linear)
+
+    def draw_path_between_waypoints(self, painter, start_point, end_point, start_theta1, start_theta2, 
+                                  end_theta1, end_theta2, is_linear_path):
+        """Draw path between waypoints, either linear or curved."""
+        # If it's a linear path, draw straight line
+        if is_linear_path:
+            painter.setPen(QPen(RED, 1, Qt.SolidLine))
+            painter.drawLine(start_point, end_point)
+            return
+
+        # If any angles are None (point outside workspace), draw dashed line
+        if None in (start_theta1, start_theta2, end_theta1, end_theta2):
+            painter.setPen(QPen(RED, 1, Qt.DashLine))
+            painter.drawLine(start_point, end_point)
+            return
+
+
+        # Function to check if a point along the path is valid
+        def is_valid_position(theta1, theta2):
+            return -130 <= theta1 <= 130 and -160 <= theta2 <= 160
+
+        steps = 30  # Number of intermediate points to check
+        points = []
+        valid_path = True
+
+        for i in range(steps + 1):
+            t = i / steps
+            # Smooth acceleration curve
+            t = t * t * (3 - 2 * t)
+            
+            # Interpolate joint angles
+            curr_theta1 = start_theta1 + (end_theta1 - start_theta1) * t
+            curr_theta2 = start_theta2 + (end_theta2 - start_theta2) * t
+            
+            # Check if this position is valid
+            if not is_valid_position(curr_theta1, curr_theta2):
+                valid_path = False
+                break
+                
+            # Calculate end effector position
+            theta1_rad = math.radians(curr_theta1)
+            theta2_rad = math.radians(curr_theta2)
+            
+            x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
+            y = L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad)
+            
+            point = QPoint(
+                int((SIMULATION_WIDTH // 2) - 50 + (x * SCALE)),
+                int(WINDOW_HEIGHT // 2 + (y * SCALE))
+            )
+            points.append(point)
+
+        # Draw the path
+        if valid_path:
+            painter.setPen(QPen(RED, 1, Qt.SolidLine))
+            for i in range(len(points) - 1):
+                painter.drawLine(points[i], points[i + 1])
+        else:
+            # Draw a dashed line to indicate invalid path
+            painter.setPen(QPen(RED, 1, Qt.DashLine))
+            painter.drawLine(start_point, end_point)
+
+    def draw_z_axis(self, painter):
+        z_axis_x = int(SIMULATION_WIDTH - 50)
+        z_axis_y = 50
+        z_axis_width = 20
+        z_axis_height = WINDOW_HEIGHT - 100
+
+        painter.setPen(QPen(WHITE, 1))
+        painter.setBrush(QBrush(BLACK))
+        painter.drawRect(z_axis_x, z_axis_y, z_axis_width, z_axis_height)
+
+        z_position = int(z_axis_y + z_axis_height - ((self.z - Z_MIN) / (Z_MAX - Z_MIN)) * z_axis_height)
+        painter.setBrush(QBrush(BLUE))
+        painter.drawRect(z_axis_x, z_position, z_axis_width, 10)
+
+    def draw_end_effector_rotation(self, painter, end_effector):
+        mask_length = 18
+        rotation_rad = math.radians(self.rotation)
+        arrow_1_x = int(end_effector.x() + 24 * math.cos(rotation_rad))
+        arrow_1_y = int(end_effector.y() + 24 * math.sin(rotation_rad))
+        arrow_2_x = int(end_effector.x() + 26 * math.cos(rotation_rad))
+        arrow_2_y = int(end_effector.y() + 26 * math.sin(rotation_rad))
+        arrow_3_x = int(end_effector.x() + 28 * math.cos(rotation_rad))
+        arrow_3_y = int(end_effector.y() + 28 * math.sin(rotation_rad))
+
+        mask_end_x = int(end_effector.x() + mask_length * math.cos(rotation_rad))
+        mask_end_y = int(end_effector.y() + mask_length * math.sin(rotation_rad))
+
+        painter.setPen(QPen(QColor(255, 255, 0), 4))  # Yellow color, thickness 4
+        painter.drawLine(QPoint(mask_end_x, mask_end_y), QPoint(arrow_1_x, arrow_1_y))
+        painter.setPen(QPen(QColor(255, 255, 0), 3))
+        painter.drawLine(QPoint(mask_end_x, mask_end_y), QPoint(arrow_2_x, arrow_2_y))
+        painter.setPen(QPen(QColor(255, 255, 0), 2))
+        painter.drawLine(QPoint(mask_end_x, mask_end_y), QPoint(arrow_3_x, arrow_3_y))
+
+    def calculate_robot_points(self, theta1, theta2):
+        # Convert angles to radians
+        theta1_rad = math.radians(theta1)
+        theta2_rad = math.radians(theta2)
+
+        # Calculate end-effector position
+        x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
+        y = L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad)
+
+        # Calculate the points
+        base = QPoint((SIMULATION_WIDTH // 2)-50, WINDOW_HEIGHT // 2)
+        joint1 = QPoint(base.x() + int(L1 * SCALE * math.cos(theta1_rad)), base.y() + int(L1 * SCALE * math.sin(theta1_rad)))
+        end_effector = QPoint(base.x() + int(x * SCALE), base.y() + int(y * SCALE))
+
+        return base, joint1, end_effector
+
+class Sidebar(QWidget):
+    def __init__(self, simulation_widget):
+        super().__init__()
+        self.simulation_widget = simulation_widget
+        self.waypoints_list = QListWidget()
+
+        # Create the main layout
+        layout = QVBoxLayout()
+
+        self.initUI(layout)
+        self.update_waypoints_list()
+        self.initialize_file_handling()
+
+    def initUI(self, layout):
+        title_label = QLabel("Current Position")
+        layout.addWidget(title_label)
+
+        self.end_effector_x_label = QLabel("End Effector X:")
+        self.end_effector_x_text = QLineEdit()
+        self.end_effector_x_text.setReadOnly(True)
+
+        self.end_effector_y_label = QLabel("End Effector Y:")
+        self.end_effector_y_text = QLineEdit()
+        self.end_effector_y_text.setReadOnly(True)
+
+        self.end_effector_z_label = QLabel("End Effector Z:")
+        self.end_effector_z_text = QLineEdit()
+        self.end_effector_z_text.setReadOnly(True)
+
+        self.end_effector_rotation_label = QLabel("End Effector Rotation:")
+        self.end_effector_rotation_text = QLineEdit()
+        self.end_effector_rotation_text.setReadOnly(True)
+
+        self.theta1_label = QLabel("Theta1:")
+        self.theta1_text = QLineEdit()
+        self.theta1_text.setReadOnly(True)
+
+        self.theta2_label = QLabel("Theta2:")
+        self.theta2_text = QLineEdit()
+        self.theta2_text.setReadOnly(True)
+
+        info_layout = QGridLayout()
+        info_layout.addWidget(self.end_effector_x_label, 0, 0)
+        info_layout.addWidget(self.end_effector_x_text, 0, 1)
+        info_layout.addWidget(self.end_effector_y_label, 1, 0)
+        info_layout.addWidget(self.end_effector_y_text, 1, 1)
+        info_layout.addWidget(self.end_effector_z_label, 2, 0)
+        info_layout.addWidget(self.end_effector_z_text, 2, 1)
+        info_layout.addWidget(self.end_effector_rotation_label, 3, 0)
+        info_layout.addWidget(self.end_effector_rotation_text, 3, 1)
+        info_layout.addWidget(self.theta1_label, 4, 0)
+        info_layout.addWidget(self.theta1_text, 4, 1)
+        info_layout.addWidget(self.theta2_label, 5, 0)
+        info_layout.addWidget(self.theta2_text, 5, 1)
+        layout.addLayout(info_layout)
+
+        title_label = QLabel("Waypoints")
+        layout.addWidget(title_label)
+
+        input_layout = QGridLayout()
+        x_label = QLabel("X:")
+        self.x_input = QLineEdit()
+        y_label = QLabel("Y:")
+        self.y_input = QLineEdit()
+        z_label = QLabel("Z:")
+        self.z_input = QLineEdit()
+        rotation_label = QLabel("Rotation:")
+        self.rotation_input = QLineEdit()
+        input_layout.addWidget(x_label, 0, 0)
+        input_layout.addWidget(self.x_input, 0, 1)
+        input_layout.addWidget(y_label, 1, 0)
+        input_layout.addWidget(self.y_input, 1, 1)
+        input_layout.addWidget(z_label, 2, 0)
+        input_layout.addWidget(self.z_input, 2, 1)
+        input_layout.addWidget(rotation_label, 3, 0)
+        input_layout.addWidget(self.rotation_input, 3, 1)
+
+        self.stop_at_point_check = QCheckBox("Stop at Point")
+        self.duration_label = QLabel("Duration (s):")
+        self.duration_input = QLineEdit()
+        self.duration_input.setEnabled(False)  # Disabled by default
+        self.stop_at_point_check.stateChanged.connect(self.toggle_duration_input)
+        
+        input_layout.addWidget(self.stop_at_point_check, 4, 0)
+        input_layout.addWidget(self.duration_label, 5, 0)
+        input_layout.addWidget(self.duration_input, 5, 1)
+        self.linear_path_check = QCheckBox("Linear Path to Next Point")
+        input_layout.addWidget(self.linear_path_check, 6, 0)  # Add after duration input
+        layout.addLayout(input_layout)
+        add_button = QPushButton("Add Waypoint")
+        add_button.clicked.connect(self.add_waypoint)
+        layout.addWidget(add_button)
+
+        self.waypoints_list = QListWidget()
+        self.waypoints_list.itemClicked.connect(self.select_waypoint)
+        layout.addWidget(self.waypoints_list)
+
+        # Add buttons for loading and saving waypoints
+        load_button = QPushButton("Load Waypoints")
+        load_button.clicked.connect(self.load_waypoints_from_csv)
+        save_button = QPushButton("Save Waypoints")
+        save_button.clicked.connect(self.save_waypoints_to_csv)
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(load_button)
+        button_layout.addWidget(save_button)
+        layout.addLayout(button_layout)
+
+        edit_layout = QGridLayout()
+        edit_x_label = QLabel("Edit X:")
+        self.edit_x_input = QLineEdit()
+        edit_y_label = QLabel("Edit Y:")
+        self.edit_y_input = QLineEdit()
+        edit_z_label = QLabel("Edit Z:")
+        self.edit_z_input = QLineEdit()
+        edit_rotation_label = QLabel("Edit Rotation:")
+        self.edit_rotation_input = QLineEdit()
+        edit_layout.addWidget(edit_x_label, 0, 0)
+        edit_layout.addWidget(self.edit_x_input, 0, 1)
+        edit_layout.addWidget(edit_y_label, 1, 0)
+        edit_layout.addWidget(self.edit_y_input, 1, 1)
+        edit_layout.addWidget(edit_z_label, 2, 0)
+        edit_layout.addWidget(self.edit_z_input, 2, 1)
+        edit_layout.addWidget(edit_rotation_label, 3, 0)
+        edit_layout.addWidget(self.edit_rotation_input, 3, 1)
+        self.edit_stop_at_point_check = QCheckBox("Stop at Point")
+        self.edit_duration_label = QLabel("Duration (s):")
+        self.edit_duration_input = QLineEdit()
+        self.edit_duration_input.setEnabled(False)
+        self.edit_stop_at_point_check.stateChanged.connect(self.toggle_edit_duration_input)
+        
+        edit_layout.addWidget(self.edit_stop_at_point_check, 4, 0)
+        edit_layout.addWidget(self.edit_duration_label, 5, 0)
+        edit_layout.addWidget(self.edit_duration_input, 5, 1)
+        self.edit_linear_path_check = QCheckBox("Linear Path to Next Point")
+        edit_layout.addWidget(self.edit_linear_path_check, 6, 0)  # Add after edit duration input
+        layout.addLayout(edit_layout)
+
+        update_button = QPushButton("Update")
+        update_button.clicked.connect(self.update_waypoint)
+        delete_button = QPushButton("Delete")
+        delete_button.clicked.connect(self.delete_waypoint)
+        button_layout = QHBoxLayout()
+        button_layout.addWidget(update_button)
+        button_layout.addWidget(delete_button)
+        layout.addLayout(button_layout)
+
+        # Animation controls
+        animation_layout = QVBoxLayout()
+        animation_buttons_layout = QHBoxLayout()
+        self.play_button = QPushButton("Play")
+        self.play_button.clicked.connect(self.play_animation)
+        animation_buttons_layout.addWidget(self.play_button)
+
+        self.loop_button = QPushButton("Loop")
+        self.loop_button.setCheckable(True)
+        animation_buttons_layout.addWidget(self.loop_button)
+
+        self.pause_button = QPushButton("Pause")
+        self.pause_button.clicked.connect(self.pause_animation)
+        animation_buttons_layout.addWidget(self.pause_button)
+
+        self.stop_button = QPushButton("Stop")
+        self.stop_button.clicked.connect(self.stop_animation)
+        animation_buttons_layout.addWidget(self.stop_button)
+        animation_layout.addLayout(animation_buttons_layout)
+
+        layout.addLayout(animation_layout)
+
+        self.setLayout(layout)
+
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.animate)
+        self.animation_speed = 10
+        self.waypoint_index = 0
+        self.is_animating = False
+        self.is_paused = False
+        self.reset_position = True
+        self.loop_animation = False
+        self.reverse_animation = False
+
+    def toggle_duration_input(self, state):
+        self.duration_input.setEnabled(state == Qt.Checked)
+        if state != Qt.Checked:
+            self.duration_input.clear()
+
+    def toggle_edit_duration_input(self, state):
+        self.edit_duration_input.setEnabled(state == Qt.Checked)
+        if state != Qt.Checked:
+            self.edit_duration_input.clear()
+
+    def update_waypoints_list(self):
+        self.waypoints_list.clear()
+        for i, waypoint in enumerate(waypoints):
+            x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path = waypoint
+            if theta1 is None or theta2 is None:
+                item = QListWidgetItem(f"{i+1}. ({x}, {y}, {z}, {rotation}) - Outside workspace")
+            else:
+                stop_text = f" - Stop for {duration}s" if stop_at_point else " - Pass through"
+                linear_text = " - Linear path" if linear_path else ""
+                item = QListWidgetItem(f"{i+1}. ({x}, {y}, {z}, {rotation}) - Theta1: {theta1:.2f}, Theta2: {theta2:.2f}{stop_text}{linear_text}")
+            self.waypoints_list.addItem(item)
+
+    def calculate_target_angles(self, waypoint, prev_theta1=None, prev_theta2=None):
+        x, y, _, _ = waypoint
+        # Flip the y-coordinate to match the robot's coordinate system
+        y = -y
+        
+        r = math.sqrt(x ** 2 + y ** 2)
+        if r > L1 + L2:
+            print(f"Warning: Point ({x}, {y}) is outside maximum reach")
+            return None, None
+
+        c2 = (x ** 2 + y ** 2 - L1 ** 2 - L2 ** 2) / (2 * L1 * L2)
+        if abs(c2) > 1:
+            return None, None
+
+        s2 = math.sqrt(1 - c2 ** 2)
+        theta2_1 = math.degrees(math.atan2(s2, c2))  # elbow-up
+        theta2_2 = math.degrees(math.atan2(-s2, c2))  # elbow-down
+        
+        # Base angle to target point
+        base = math.degrees(math.atan2(y, x))
+        k1 = L1 + L2 * math.cos(math.radians(theta2_1))
+        k2_1 = L2 * math.sin(math.radians(theta2_1))
+        k2_2 = L2 * math.sin(math.radians(theta2_2))
+        
+        theta1_1 = base - math.degrees(math.atan2(k2_1, k1))  # for elbow-up
+        theta1_2 = base - math.degrees(math.atan2(k2_2, k1))  # for elbow-down
+
+        # Check solutions against joint limits
+        sol1_valid = -130 <= theta1_1 <= 130 and -160 <= theta2_1 <= 160
+        sol2_valid = -130 <= theta1_2 <= 130 and -160 <= theta2_2 <= 160
+
+        if not sol1_valid and not sol2_valid:
+            return None, None
+
+        # If we have previous angles, strongly prefer maintaining configuration
+        if prev_theta1 is not None and prev_theta2 is not None:
+            # Determine if previous configuration was elbow-up or elbow-down
+            prev_elbow_up = prev_theta2 > 0
+            
+            # First try to maintain the same configuration
+            if prev_elbow_up and sol1_valid:
+                return theta1_1, theta2_1
+            elif not prev_elbow_up and sol2_valid:
+                return theta1_2, theta2_2
+                
+            # If that's not possible, use the other valid solution
+            if sol1_valid:
+                return theta1_1, theta2_1
+            elif sol2_valid:
+                return theta1_2, theta2_2
+        else:
+            # No previous angles - use x-coordinate preference
+            if x < 0:  # Left half
+                if sol2_valid:
+                    return theta1_2, theta2_2
+                elif sol1_valid:
+                    return theta1_1, theta2_1
+            else:  # Right half
+                if sol1_valid:
+                    return theta1_1, theta2_1
+                elif sol2_valid:
+                    return theta1_2, theta2_2
+
+        return None, None
+
+    def add_waypoint(self):
+        x = float(self.x_input.text())
+        y = float(self.y_input.text())
+        z = float(self.z_input.text())
+        rotation = float(self.rotation_input.text())
+        
+        stop_at_point = self.stop_at_point_check.isChecked()
+        linear_path = self.linear_path_check.isChecked()
+        duration = float(self.duration_input.text()) if stop_at_point else 0.0
+        
+        prev_theta1 = None
+        prev_theta2 = None
+        if waypoints:
+            _, _, _, _, prev_theta1, prev_theta2, _, _, _ = waypoints[-1]
+        
+        theta1, theta2 = self.calculate_target_angles((x, y, z, rotation), prev_theta1, prev_theta2)
+        waypoints.append((x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path))
+        self.update_waypoints_list()
+        
+        # Clear inputs
+        self.x_input.clear()
+        self.y_input.clear()
+        self.z_input.clear()
+        self.rotation_input.clear()
+        self.stop_at_point_check.setChecked(False)
+        self.linear_path_check.setChecked(False)
+        self.duration_input.clear()
+        self.simulation_widget.update()
+
+    def update_waypoint(self):
+        index = self.waypoints_list.currentRow()
+        if index != -1:
+            x = float(self.edit_x_input.text())
+            y = float(self.edit_y_input.text())
+            z = float(self.edit_z_input.text())
+            rotation = float(self.edit_rotation_input.text())
+            
+            stop_at_point = self.edit_stop_at_point_check.isChecked()
+            linear_path = self.edit_linear_path_check.isChecked()
+            duration = float(self.edit_duration_input.text()) if stop_at_point else 0.0
+            
+            prev_theta1 = None
+            prev_theta2 = None
+            if index > 0:
+                _, _, _, _, prev_theta1, prev_theta2, _, _, _ = waypoints[index - 1]
+                
+            theta1, theta2 = self.calculate_target_angles((x, y, z, rotation), prev_theta1, prev_theta2)
+            waypoints[index] = (x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path)
+            self.update_waypoints_list()
+            
+            # Clear inputs
+            self.edit_x_input.clear()
+            self.edit_y_input.clear()
+            self.edit_z_input.clear()
+            self.edit_rotation_input.clear()
+            self.edit_stop_at_point_check.setChecked(False)
+            self.edit_linear_path_check.setChecked(False)
+            self.edit_duration_input.clear()
+            self.simulation_widget.update()
+
+    def select_waypoint(self, item):
+        index = self.waypoints_list.row(item)
+        x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path = waypoints[index]
+        self.edit_x_input.setText(str(x))
+        self.edit_y_input.setText(str(y))
+        self.edit_z_input.setText(str(z))
+        self.edit_rotation_input.setText(str(rotation))
+        self.edit_stop_at_point_check.setChecked(stop_at_point)
+        self.edit_linear_path_check.setChecked(linear_path)
+        if stop_at_point:
+            self.edit_duration_input.setText(str(duration))
+
+    def delete_waypoint(self):
+        index = self.waypoints_list.currentRow()
+        if index != -1:
+            waypoints.pop(index)
+            self.update_waypoints_list()
+            self.edit_x_input.clear()
+            self.edit_y_input.clear()
+            self.edit_z_input.clear()
+            self.edit_rotation_input.clear()
+
+    def play_animation(self):
+        if self.is_paused:
+            self.simulation_widget.motion_controller.reset_timing()
+        self.is_animating = True
+        self.is_paused = False
+        # Use a more conservative frame rate for smoother motion
+        self.timer.start(20)  # 50 FPS
+
+    def pause_animation(self):
+        self.is_paused = True
+        self.timer.stop()
+
+    def stop_animation(self):
+        self.is_animating = False
+        self.is_paused = False
+        self.timer.stop()
+        self.waypoint_index = 0
+        self.reverse_animation = False
+        self.reset_position = True
+        if hasattr(self, 'wait_time'):
+            delattr(self, 'wait_time')
+        if hasattr(self, 'wait_start_time'):
+            delattr(self, 'wait_start_time')
+
+    def generate_linear_path_points(self, start_point, end_point, num_points=20):
+        """Generate evenly spaced points along a straight line."""
+        x1, y1, z1, r1, _, _, _, _, _ = start_point
+        x2, y2, z2, r2, _, _, _, _, _ = end_point
+        
+        points = []
+        
+        # Calculate distance and adjust number of points
+        distance = math.sqrt((x2-x1)**2 + (y2-y1)**2)
+        num_points = max(20, int(distance / 10))  # One point every 10mm
+        
+        # Store start point configuration to maintain it
+        prev_theta1, prev_theta2 = self.calculate_target_angles((x1, y1, z1, r1))
+        
+        for i in range(num_points):
+            t = i / (num_points - 1)
+            # Linear interpolation
+            x = x1 + (x2 - x1) * t
+            y = y1 + (y2 - y1) * t
+            z = z1 + (z2 - z1) * t
+            r = r1 + (r2 - r1) * t
+            
+            # Calculate angles for this point
+            theta1, theta2 = self.calculate_target_angles((x, y, z, r), prev_theta1, prev_theta2)
+            if theta1 is None or theta2 is None:
+                continue
+            
+            # Store angles for next iteration
+            prev_theta1, prev_theta2 = theta1, theta2
+            
+            # All intermediate points are pass-through
+            points.append((x, y, z, r, theta1, theta2, False, 0.0, False))
+            
+        return points
+
+    def animate(self):
+        if not self.is_animating or self.waypoint_index >= len(waypoints):
+            if self.loop_button.isChecked():
+                self.waypoint_index = 0
+            else:
+                self.stop_animation()
+                return
+
+        # Initialize or check interpolated points
+        if not hasattr(self, 'interpolated_points'):
+            self.interpolated_points = []
+            self.interpolated_index = 0
+
+        # Generate interpolated points if needed
+        if not self.interpolated_points:
+            current_point = waypoints[self.waypoint_index]
+            
+            # Check if this point has linear_path enabled and there's a next point
+            if (self.waypoint_index < len(waypoints) - 1 and current_point[8]):  # linear_path flag
+                next_point = waypoints[self.waypoint_index + 1]
+                self.interpolated_points = self.generate_linear_path_points(current_point, next_point)
+                if not self.interpolated_points:
+                    self.interpolated_points = [current_point]
+                self.interpolated_index = 0
+            else:
+                # Use original waypoint for normal motion
+                self.interpolated_points = [current_point]
+                self.interpolated_index = 0
+
+        # Get current target point
+        current_point = self.interpolated_points[self.interpolated_index]
+        x, y, z, rotation, theta1, theta2, stop_at_point, duration, _ = current_point
+
+        if theta1 is None or theta2 is None:
+            self.interpolated_index += 1
+            if self.interpolated_index >= len(self.interpolated_points):
+                self.interpolated_points = []
+                self.waypoint_index += 1
+            return
+
+        # Set target for motion controller (maintains acceleration)
+        self.simulation_widget.motion_controller.set_target(theta1, theta2, z, rotation)
+
+        # Update motion using existing acceleration control
+        current_theta1, current_theta2, current_z, current_rotation, vel1, vel2 = \
+            self.simulation_widget.motion_controller.update()
+
+        # Update simulation widget
+        self.simulation_widget.theta1 = current_theta1
+        self.simulation_widget.theta2 = current_theta2
+        self.simulation_widget.z = current_z
+        self.simulation_widget.rotation = current_rotation
+
+        # Calculate current end effector position
+        theta1_rad = math.radians(current_theta1)
+        theta2_rad = math.radians(current_theta2)
+        current_x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
+        current_y = -(L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad))
+
+        # Update displays
+        self.update_end_effector_info(current_x, current_y, current_z, current_rotation,
+                                    current_theta1, current_theta2)
+        self.graph_widget.update_plot(current_theta1, current_theta2, vel1, vel2, self.is_paused)
+
+        # Update display
+        self.simulation_widget.update()
+
+        # Check if target is reached
+        if self.simulation_widget.motion_controller.is_at_target():
+            if stop_at_point:
+                current_time = time.time()
+                if not hasattr(self, 'wait_start_time'):
+                    self.wait_start_time = current_time
+                    return
+                    
+                elapsed_wait = current_time - self.wait_start_time
+                if elapsed_wait < duration:
+                    self.graph_widget.update_plot(current_theta1, current_theta2, vel1, vel2, False)
+                    return
+                    
+                delattr(self, 'wait_start_time')
+            
+            # Move to next point
+            self.interpolated_index += 1
+            if self.interpolated_index >= len(self.interpolated_points):
+                self.interpolated_points = []
+                self.waypoint_index += 1
+    
+    QApplication.processEvents()
+
+    def update_end_effector_info(self, end_effector_x, end_effector_y, end_effector_z, end_effector_rotation, theta1, theta2):
+        self.end_effector_x_text.setText(f"{end_effector_x:.2f}")
+        self.end_effector_y_text.setText(f"{end_effector_y:.2f}")
+        self.end_effector_z_text.setText(f"{end_effector_z:.2f}")
+        self.end_effector_rotation_text.setText(f"{end_effector_rotation:.2f}")
+        self.theta1_text.setText(f"{theta1:.2f}")
+        self.theta2_text.setText(f"{theta2:.2f}")
+
+    def initialize_file_handling(self):
+        """Initialize file handling system - call this in __init__"""
+        # Create a dummy file operation to initialize the system
+        try:
+            with open('_init.csv', 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(['init'])
+            import os
+            if os.path.exists('_init.csv'):
+                os.remove('_init.csv')
+        except Exception as e:
+            print(f"Initialization note: {str(e)}")
+
+    def load_waypoints_from_csv(self):
+        try:
+            file_path, _ = QFileDialog.getOpenFileName(
+                self,
+                "Load Waypoints",
+                "",
+                "CSV Files (*.csv)"
+            )
+            
+            if not file_path:
+                return
+
+            loaded_points = []
+            try:
+                with open(file_path, 'r', newline='') as f:
+                    reader = csv.reader(f)
+                    header = next(reader)  # Read header
+                    
+                    # Verify header format
+                    expected_header = ['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'StopAtPoint', 'Duration']
+                    if not all(h1.lower() == h2.lower() for h1, h2 in zip(header, expected_header)):
+                        print("Warning: CSV header format doesn't match expected format")
+                    
+                    for i, row in enumerate(reader, start=2):  # start=2 because row 1 is header
+                        if len(row) != 8:
+                            print(f"Warning: Skipping row {i}, incorrect number of columns")
+                            continue
+                        
+                        try:
+                            x = float(row[0].strip())
+                            y = float(row[1].strip())
+                            z = float(row[2].strip())
+                            rotation = float(row[3].strip())
+                            theta1 = float(row[4].strip()) if row[4].strip().lower() != 'none' else None
+                            theta2 = float(row[5].strip()) if row[5].strip().lower() != 'none' else None
+                            stop_at_point = bool(int(row[6].strip()))
+                            duration = float(row[7].strip())
+                            
+                            loaded_points.append((x, y, z, rotation, theta1, theta2, stop_at_point, duration))
+                        except ValueError as e:
+                            print(f"Warning: Error parsing row {i}: {e}")
+                            continue
+
+                if loaded_points:
+                    global waypoints
+                    waypoints = loaded_points
+                    self.update_waypoints_list()
+                    self.simulation_widget.update()
+                else:
+                    print("Warning: No valid waypoints found in CSV")
+                    
+            except csv.Error as e:
+                print(f"CSV Error: {e}")
+                return
+                
+        except Exception as e:
+            print(f"Load error: {e}")
+
+    def save_waypoints_to_csv(self):
+        try:
+            if not waypoints:
+                print("No waypoints to save")
+                return
+
+            file_path, _ = QFileDialog.getSaveFileName(
+                self,
+                "Save Waypoints",
+                "",
+                "CSV Files (*.csv)"
+            )
+            
+            if not file_path:
+                return
+
+            if not file_path.lower().endswith('.csv'):
+                file_path += '.csv'
+
+            try:
+                with open(file_path, 'w', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'StopAtPoint', 'Duration', 'LinearPath'])
+                    for wp in waypoints:
+                        writer.writerow([
+                            f"{wp[0]:.6f}",  # x
+                            f"{wp[1]:.6f}",  # y 
+                            f"{wp[2]:.6f}",  # z
+                            f"{wp[3]:.6f}",  # rotation
+                            'None' if wp[4] is None else f"{wp[4]:.6f}",  # theta1
+                            'None' if wp[5] is None else f"{wp[5]:.6f}",  # theta2
+                            1 if wp[6] else 0,  # stop_at_point
+                            f"{wp[7]:.6f}",  # duration
+                            1 if wp[8] else 0   # linear_path
+                        ])
+                        
+            except csv.Error as e:
+                print(f"CSV Error: {e}")
+                return
+                        
+        except Exception as e:
+            print(f"Save error: {e}")
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+
+    # Create widgets
+    graph_widget = AngleGraphWidget()
+    simulation_widget = SimulationWidget()
+    sidebar = Sidebar(simulation_widget)
+
+    # Store graph widget reference in sidebar for updates
+    sidebar.graph_widget = graph_widget
+
+    # Create layout
+    layout = QHBoxLayout()
+    layout.addWidget(graph_widget)
+    layout.addWidget(simulation_widget)
+    layout.addWidget(sidebar)
+
+    main_window = QWidget()
+    main_window.setLayout(layout)
+    main_window.show()
+
+    # Populate current position data when the application starts
+    end_effector_x = L1 * math.cos(math.radians(45)) + L2 * math.cos(math.radians(45 + 45))
+    end_effector_y = -1 * (L1 * math.sin(math.radians(45)) + L2 * math.sin(math.radians(45 + 45)))
+    end_effector_z = 0
+    end_effector_rotation = 0
+    sidebar.update_end_effector_info(end_effector_x, end_effector_y, end_effector_z, end_effector_rotation, 45, 45)
+
+    sys.exit(app.exec_())
