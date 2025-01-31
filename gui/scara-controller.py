@@ -1,20 +1,18 @@
 import sys
 import math
 import csv 
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QListWidget, QListWidgetItem, QSlider, QTextEdit, QGridLayout, QFileDialog, QCheckBox
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QListWidget, QListWidgetItem, QGridLayout, QFileDialog, QCheckBox
 from PyQt5.QtGui import QPainter, QPen, QBrush, QColor
-from PyQt5.QtCore import Qt, QTimer, QRect, QPoint, QThread, QMutex, QWaitCondition
+from PyQt5.QtCore import Qt, QTimer, QRect, QPoint
 import pyqtgraph as pg
 import numpy as np
-from dataclasses import dataclass
-from typing import Tuple, Optional
 import time
 
 # SCARA robot dimensions
 L1 = 180  # Length of the first linkage (mm)
 L2 = 180  # Length of the second linkage (mm)
 Z_MIN = 0  # Minimum Z value
-Z_MAX = 200  # Maximum Z value
+Z_MAX = 80  # Maximum Z value
 
 GRAPH_WIDTH = 700 
 SIMULATION_WIDTH = 850
@@ -158,6 +156,7 @@ class SCARAMotionController:
         max_dist = max(shoulder_dist, elbow_dist)
         
         if max_dist > 0:
+            # Calculate move duration based on the longest movement
             accel_time = self.shoulder.base_max_speed / self.shoulder.base_acceleration
             accel_dist = 0.5 * self.shoulder.base_acceleration * accel_time * accel_time
             
@@ -167,11 +166,25 @@ class SCARAMotionController:
                 constant_velocity_dist = max_dist - 2 * accel_dist
                 constant_velocity_time = constant_velocity_dist / self.shoulder.base_max_speed
                 move_duration = 2 * accel_time + constant_velocity_time
+            
+            # Scale speeds based on relative distances
+            shoulder_speed_scale = shoulder_dist / max_dist if max_dist > 0 else 1
+            elbow_speed_scale = elbow_dist / max_dist if max_dist > 0 else 1
+            
+            # Set targets with scaled speeds
+            self.shoulder.set_target(theta1, move_duration)
+            self.elbow.set_target(theta2, move_duration)
+            
+            # Apply speed scaling to each joint
+            self.shoulder.max_speed *= shoulder_speed_scale
+            self.shoulder.acceleration *= shoulder_speed_scale
+            self.elbow.max_speed *= elbow_speed_scale
+            self.elbow.acceleration *= elbow_speed_scale
         else:
             move_duration = 0.1
+            self.shoulder.set_target(theta1, move_duration)
+            self.elbow.set_target(theta2, move_duration)
         
-        self.shoulder.set_target(theta1, move_duration)
-        self.elbow.set_target(theta2, move_duration)
         self.z_axis.set_target(z)
         self.end_effector.set_target(rotation)
 
@@ -223,14 +236,16 @@ class AngleGraphWidget(QWidget):
         # Create plot lines with different colors and names
         self.theta1_line = self.angle_plot.plot(pen=pg.mkPen('b', width=2))
         self.theta2_line = self.angle_plot.plot(pen=pg.mkPen('g', width=2))
+        self.theta3_line = self.angle_plot.plot(pen=pg.mkPen('r', width=2))
         self.vel1_line = self.velocity_plot.plot(pen=pg.mkPen('b', width=2))
         self.vel2_line = self.velocity_plot.plot(pen=pg.mkPen('g', width=2))
         
-        # Add legends with explicit items
+        # Add legends
         angle_legend = pg.LegendItem(offset=(50,10))
         angle_legend.setParentItem(self.angle_plot.graphicsItem())
         angle_legend.addItem(self.theta1_line, "Theta 1 (Shoulder)")
         angle_legend.addItem(self.theta2_line, "Theta 2 (Elbow)")
+        angle_legend.addItem(self.theta3_line, "Theta 3 (Wrist)")
         
         velocity_legend = pg.LegendItem(offset=(50,10))
         velocity_legend.setParentItem(self.velocity_plot.graphicsItem())
@@ -246,134 +261,59 @@ class AngleGraphWidget(QWidget):
         self.time_data = []
         self.theta1_data = []
         self.theta2_data = []
+        self.theta3_data = []
         self.vel1_data = []
         self.vel2_data = []
-        
-        # Initialize velocity smoothing buffers
-        self.vel1_buffer = []
-        self.vel2_buffer = []
-        self.buffer_size = 5  # Size of smoothing window
         
         # Initialize timing variables
         self.start_time = None
         self.paused_time = 0
         self.last_update = None
         self.display_time = 10  # Show last 10 seconds of data
-        self.keep_history = True  # Keep data after animation ends
         
         # Set up update timer
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self.update_display)
         self.update_timer.start(50)  # 20 FPS update rate
-        
-    def smooth_velocity(self, new_vel, buffer):
-        """Apply smoothing to velocity data"""
-        buffer.append(new_vel)
-        if len(buffer) > self.buffer_size:
-            buffer.pop(0)
-        
-        # Apply Gaussian-like weighting
-        weights = [0.1, 0.2, 0.4, 0.2, 0.1][:len(buffer)]
-        weights = [w/sum(weights) for w in weights]
-        
-        return sum(v * w for v, w in zip(buffer, weights))
 
-    def update_plot(self, theta1, theta2, is_paused=False):
+    # 2. Add this new update_plot method:
+    def update_plot(self, theta1, theta2, theta3, vel1, vel2, is_paused=False):
+        """Update plots with new data including theta3"""
         current_time = time.time()
         
         if self.start_time is None:
             self.start_time = current_time
             self.last_update = current_time
+            self.paused_time = 0
         
-        if is_paused:
-            if self.last_update is not None:
-                self.paused_time += current_time - self.last_update
-        
+        # Calculate elapsed time
+        if is_paused and self.last_update is not None:
+            self.paused_time += current_time - self.last_update
+            
         elapsed = current_time - self.start_time - self.paused_time
         
-        # Add new angle data
+        # Add new data point
         self.time_data.append(elapsed)
         self.theta1_data.append(theta1)
         self.theta2_data.append(theta2)
-        
-        # Calculate velocities with advanced smoothing
-        if len(self.time_data) > 1:
-            dt = max(self.time_data[-1] - self.time_data[-2], 0.001)  # Prevent division by zero
-            raw_vel1 = (theta1 - self.theta1_data[-2]) / dt
-            raw_vel2 = (theta2 - self.theta2_data[-2]) / dt
-            
-            # Apply smoothing
-            smooth_vel1 = self.smooth_velocity(raw_vel1, self.vel1_buffer)
-            smooth_vel2 = self.smooth_velocity(raw_vel2, self.vel2_buffer)
-            
-            # Limit velocity values
-            vel1 = max(min(smooth_vel1, 200), -200)
-            vel2 = max(min(smooth_vel2, 200), -200)
-            
-            self.vel1_data.append(vel1)
-            self.vel2_data.append(vel2)
-        else:
-            self.vel1_data.append(0)
-            self.vel2_data.append(0)
-        
-        # Keep only recent data if not keeping history
-        if not self.keep_history:
-            while len(self.time_data) > 0 and self.time_data[-1] - self.time_data[0] > self.display_time:
-                self.time_data.pop(0)
-                self.theta1_data.pop(0)
-                self.theta2_data.pop(0)
-                self.vel1_data.pop(0)
-                self.vel2_data.pop(0)
-            
-        self.last_update = current_time
-
-    def reset_plot(self):
-        """Clear all plot data"""
-        if not self.keep_history:
-            self.time_data = []
-            self.theta1_data = []
-            self.theta2_data = []
-            self.vel1_data = []
-            self.vel2_data = []
-            self.vel1_buffer = []
-            self.vel2_buffer = []
-        self.start_time = None
-        self.paused_time = 0
-        self.last_update = None
-
-    def update_plot(self, theta1, theta2, vel1, vel2, is_paused=False):
-        """Update plots with new data including velocities"""
-        current_time = time.time()
-        
-        if self.start_time is None:
-            self.start_time = current_time
-            self.last_update = current_time
-        
-        if is_paused:
-            if self.last_update is not None:
-                self.paused_time += current_time - self.last_update
-        
-        elapsed = current_time - self.start_time - self.paused_time
-        
-        # Add new data using provided velocities
-        self.time_data.append(elapsed)
-        self.theta1_data.append(theta1)
-        self.theta2_data.append(theta2)
+        self.theta3_data.append(theta3)
         self.vel1_data.append(vel1)
         self.vel2_data.append(vel2)
         
         # Keep only recent data
-        while len(self.time_data) > 0 and self.time_data[-1] - self.time_data[0] > self.display_time:
+        while len(self.time_data) > 1 and self.time_data[-1] - self.time_data[0] > self.display_time:
             self.time_data.pop(0)
             self.theta1_data.pop(0)
             self.theta2_data.pop(0)
+            self.theta3_data.pop(0)
             self.vel1_data.pop(0)
             self.vel2_data.pop(0)
-            
+        
         self.last_update = current_time
 
+    # 3. Update the update_display method:
     def update_display(self):
-        """Update the plot display - called by timer"""
+        """Update the plot display"""
         if not self.time_data:
             return
             
@@ -382,18 +322,21 @@ class AngleGraphWidget(QWidget):
             min_length = min(len(self.time_data), 
                            len(self.theta1_data), 
                            len(self.theta2_data),
+                           len(self.theta3_data),
                            len(self.vel1_data),
                            len(self.vel2_data))
             
             time_data = self.time_data[-min_length:]
             theta1_data = self.theta1_data[-min_length:]
             theta2_data = self.theta2_data[-min_length:]
+            theta3_data = self.theta3_data[-min_length:]
             vel1_data = self.vel1_data[-min_length:]
             vel2_data = self.vel2_data[-min_length:]
             
             # Update the plot data
             self.theta1_line.setData(time_data, theta1_data)
             self.theta2_line.setData(time_data, theta2_data)
+            self.theta3_line.setData(time_data, theta3_data)
             self.vel1_line.setData(time_data, vel1_data)
             self.vel2_line.setData(time_data, vel2_data)
             
@@ -404,17 +347,14 @@ class AngleGraphWidget(QWidget):
         except Exception as e:
             print(f"Error updating display: {e}")
             return
-        
-        # Update plot ranges
-        current_time = self.time_data[-1]
-        self.angle_plot.setXRange(max(0, current_time - self.display_time), current_time)
-        self.velocity_plot.setXRange(max(0, current_time - self.display_time), current_time)
 
+    # 4. Update the reset_plot method:
     def reset_plot(self):
         """Clear all plot data"""
         self.time_data = []
         self.theta1_data = []
         self.theta2_data = []
+        self.theta3_data = []
         self.vel1_data = []
         self.vel2_data = []
         self.start_time = None
@@ -424,6 +364,7 @@ class AngleGraphWidget(QWidget):
         # Clear the plots
         self.theta1_line.setData([], [])
         self.theta2_line.setData([], [])
+        self.theta3_line.setData([], [])
         self.vel1_line.setData([], [])
         self.vel2_line.setData([], [])
 
@@ -632,8 +573,14 @@ class SimulationWidget(QWidget):
         painter.drawRect(z_axis_x, z_position, z_axis_width, 10)
 
     def draw_end_effector_rotation(self, painter, end_effector):
-        mask_length = 18
+        # Calculate total rotation (theta1 + theta2 + theta3)
+        absolute_angle = self.theta1 + self.theta2
+        corrective_angle = self.rotation - absolute_angle
+        
+        # Convert to radians for drawing
         rotation_rad = math.radians(self.rotation)
+        
+        mask_length = 18
         arrow_1_x = int(end_effector.x() + 24 * math.cos(rotation_rad))
         arrow_1_y = int(end_effector.y() + 24 * math.sin(rotation_rad))
         arrow_2_x = int(end_effector.x() + 26 * math.cos(rotation_rad))
@@ -644,12 +591,15 @@ class SimulationWidget(QWidget):
         mask_end_x = int(end_effector.x() + mask_length * math.cos(rotation_rad))
         mask_end_y = int(end_effector.y() + mask_length * math.sin(rotation_rad))
 
-        painter.setPen(QPen(QColor(255, 255, 0), 4))  # Yellow color, thickness 4
+        # Draw the indicator
+        painter.setPen(QPen(QColor(255, 255, 0), 4))
         painter.drawLine(QPoint(mask_end_x, mask_end_y), QPoint(arrow_1_x, arrow_1_y))
         painter.setPen(QPen(QColor(255, 255, 0), 3))
         painter.drawLine(QPoint(mask_end_x, mask_end_y), QPoint(arrow_2_x, arrow_2_y))
         painter.setPen(QPen(QColor(255, 255, 0), 2))
         painter.drawLine(QPoint(mask_end_x, mask_end_y), QPoint(arrow_3_x, arrow_3_y))
+        
+        return corrective_angle
 
     def calculate_robot_points(self, theta1, theta2):
         # Convert angles to radians
@@ -707,6 +657,10 @@ class Sidebar(QWidget):
         self.theta2_label = QLabel("Theta2:")
         self.theta2_text = QLineEdit()
         self.theta2_text.setReadOnly(True)
+        
+        self.theta3_label = QLabel("Theta3:")
+        self.theta3_text = QLineEdit()
+        self.theta3_text.setReadOnly(True)
 
         info_layout = QGridLayout()
         info_layout.addWidget(self.end_effector_x_label, 0, 0)
@@ -721,6 +675,8 @@ class Sidebar(QWidget):
         info_layout.addWidget(self.theta1_text, 4, 1)
         info_layout.addWidget(self.theta2_label, 5, 0)
         info_layout.addWidget(self.theta2_text, 5, 1)
+        info_layout.addWidget(self.theta3_label, 6, 0)
+        info_layout.addWidget(self.theta3_text, 6, 1)
         layout.addLayout(info_layout)
 
         title_label = QLabel("Waypoints")
@@ -1025,12 +981,19 @@ class Sidebar(QWidget):
         self.waypoints_list.clear()
         for i, waypoint in enumerate(waypoints):
             x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path = waypoint
+            # Calculate theta3 for display
+            theta3 = rotation - (theta1 + theta2) if theta1 is not None and theta2 is not None else None
+            
             if theta1 is None or theta2 is None:
                 item = QListWidgetItem(f"{i+1}. ({x}, {y}, {z}, {rotation}) - Outside workspace")
             else:
                 stop_text = f" - Stop for {duration}s" if stop_at_point else " - Pass through"
                 linear_text = " - Linear path" if linear_path else ""
-                item = QListWidgetItem(f"{i+1}. ({x}, {y}, {z}, {rotation}) - Theta1: {theta1:.2f}, Theta2: {theta2:.2f}{stop_text}{linear_text}")
+                theta3_text = f", Theta3: {theta3:.2f}" if theta3 is not None else ""
+                item = QListWidgetItem(
+                    f"{i+1}. ({x}, {y}, {z}, {rotation}) - " + 
+                    f"Theta1: {theta1:.2f}, Theta2: {theta2:.2f}{theta3_text}{stop_text}{linear_text}"
+                )
             self.waypoints_list.addItem(item)
 
     def calculate_target_angles(self, waypoint, prev_theta1=None, prev_theta2=None):
@@ -1301,7 +1264,6 @@ class Sidebar(QWidget):
         if not self.interpolated_points:
             current_point = waypoints[self.waypoint_index]
             
-            # Check if this point has linear_path enabled and there's a next point
             if (self.waypoint_index < len(waypoints) - 1 and current_point[8]):  # linear_path flag
                 next_point = waypoints[self.waypoint_index + 1]
                 self.interpolated_points = self.generate_linear_path_points(current_point, next_point)
@@ -1309,7 +1271,6 @@ class Sidebar(QWidget):
                     self.interpolated_points = [current_point]
                 self.interpolated_index = 0
             else:
-                # Use original waypoint for normal motion
                 self.interpolated_points = [current_point]
                 self.interpolated_index = 0
 
@@ -1324,7 +1285,7 @@ class Sidebar(QWidget):
                 self.waypoint_index += 1
             return
 
-        # Set target for motion controller (maintains acceleration)
+        # Set target for motion controller
         self.simulation_widget.motion_controller.set_target(theta1, theta2, z, rotation)
 
         # Update motion using existing acceleration control
@@ -1343,44 +1304,53 @@ class Sidebar(QWidget):
         current_x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
         current_y = -(L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad))
 
-        # Update displays
-        self.update_end_effector_info(current_x, current_y, current_z, current_rotation,
-                                    current_theta1, current_theta2)
-        self.graph_widget.update_plot(current_theta1, current_theta2, vel1, vel2, self.is_paused)
+        # Calculate theta3 (corrective angle)
+        absolute_angle = current_theta1 + current_theta2
+        theta3 = current_rotation - absolute_angle
 
-        # Update display
-        self.simulation_widget.update()
-
-        # Check if target is reached
+        # Check if we're at target and need to wait
+        is_waiting = False
         if self.simulation_widget.motion_controller.is_at_target():
             if stop_at_point:
                 current_time = time.time()
                 if not hasattr(self, 'wait_start_time'):
                     self.wait_start_time = current_time
-                    return
                     
                 elapsed_wait = current_time - self.wait_start_time
                 if elapsed_wait < duration:
-                    self.graph_widget.update_plot(current_theta1, current_theta2, vel1, vel2, False)
-                    return
-                    
-                delattr(self, 'wait_start_time')
-            
-            # Move to next point
-            self.interpolated_index += 1
-            if self.interpolated_index >= len(self.interpolated_points):
-                self.interpolated_points = []
-                self.waypoint_index += 1
-    
-    QApplication.processEvents()
+                    is_waiting = True
+                else:
+                    delattr(self, 'wait_start_time')
+                    self.interpolated_index += 1
+                    if self.interpolated_index >= len(self.interpolated_points):
+                        self.interpolated_points = []
+                        self.waypoint_index += 1
+            else:
+                self.interpolated_index += 1
+                if self.interpolated_index >= len(self.interpolated_points):
+                    self.interpolated_points = []
+                    self.waypoint_index += 1
+
+        # Update displays
+        self.update_end_effector_info(current_x, current_y, current_z, current_rotation,
+                                    current_theta1, current_theta2)
+        self.graph_widget.update_plot(current_theta1, current_theta2, theta3, vel1, vel2, is_waiting)
+
+        # Update simulation display
+        self.simulation_widget.update()
+        QApplication.processEvents()
 
     def update_end_effector_info(self, end_effector_x, end_effector_y, end_effector_z, end_effector_rotation, theta1, theta2):
+        absolute_angle = theta1 + theta2
+        theta3 = end_effector_rotation - absolute_angle
+        
         self.end_effector_x_text.setText(f"{end_effector_x:.2f}")
         self.end_effector_y_text.setText(f"{end_effector_y:.2f}")
         self.end_effector_z_text.setText(f"{end_effector_z:.2f}")
         self.end_effector_rotation_text.setText(f"{end_effector_rotation:.2f}")
         self.theta1_text.setText(f"{theta1:.2f}")
         self.theta2_text.setText(f"{theta2:.2f}")
+        self.theta3_text.setText(f"{theta3:.2f}")
 
     def initialize_file_handling(self):
         """Initialize file handling system - call this in __init__"""
@@ -1394,63 +1364,6 @@ class Sidebar(QWidget):
                 os.remove('_init.csv')
         except Exception as e:
             print(f"Initialization note: {str(e)}")
-
-    def load_waypoints_from_csv(self):
-        try:
-            file_path, _ = QFileDialog.getOpenFileName(
-                self,
-                "Load Waypoints",
-                "",
-                "CSV Files (*.csv)"
-            )
-            
-            if not file_path:
-                return
-
-            loaded_points = []
-            try:
-                with open(file_path, 'r', newline='') as f:
-                    reader = csv.reader(f)
-                    header = next(reader)  # Read header
-                    
-                    # Verify header format
-                    expected_header = ['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'StopAtPoint', 'Duration', 'LinearPath']
-                    if not all(h1.lower() == h2.lower() for h1, h2 in zip(header[:len(expected_header)], expected_header)):
-                        print("Warning: CSV header format doesn't match expected format")
-                    
-                    for i, row in enumerate(reader, start=2):  # start=2 because row 1 is header
-                        try:
-                            x = float(row[0].strip())
-                            y = float(row[1].strip())
-                            z = float(row[2].strip())
-                            rotation = float(row[3].strip())
-                            theta1 = float(row[4].strip()) if row[4].strip().lower() != 'none' else None
-                            theta2 = float(row[5].strip()) if row[5].strip().lower() != 'none' else None
-                            stop_at_point = bool(int(row[6].strip()))
-                            duration = float(row[7].strip())
-                            # Handle LinearPath column, default to False if not present
-                            linear_path = bool(int(row[8].strip())) if len(row) > 8 else False
-                            
-                            loaded_points.append((x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path))
-                        except (ValueError, IndexError) as e:
-                            print(f"Warning: Error parsing row {i}: {e}")
-                            continue
-
-                if loaded_points:
-                    global waypoints
-                    waypoints = loaded_points
-                    self.update_waypoints_list()
-                    self.simulation_widget.update()
-                    print(f"Successfully loaded {len(loaded_points)} waypoints")
-                else:
-                    print("Warning: No valid waypoints found in CSV")
-                    
-            except csv.Error as e:
-                print(f"CSV Error: {e}")
-                return
-                
-        except Exception as e:
-            print(f"Load error: {e}")
 
     def save_waypoints_to_csv(self):
         try:
@@ -1474,11 +1387,14 @@ class Sidebar(QWidget):
             try:
                 with open(file_path, 'w', newline='') as f:
                     writer = csv.writer(f)
-                    # Write header
-                    writer.writerow(['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'StopAtPoint', 'Duration', 'LinearPath'])
+                    # Write header with theta3
+                    writer.writerow(['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'Theta3', 
+                                'StopAtPoint', 'Duration', 'LinearPath'])
                     # Write data
                     for wp in waypoints:
                         x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path = wp
+                        # Calculate theta3 for each waypoint
+                        theta3 = rotation - (theta1 + theta2) if theta1 is not None and theta2 is not None else None
                         writer.writerow([
                             f"{x:.6f}",  # x
                             f"{y:.6f}",  # y 
@@ -1486,6 +1402,7 @@ class Sidebar(QWidget):
                             f"{rotation:.6f}",  # rotation
                             'None' if theta1 is None else f"{theta1:.6f}",  # theta1
                             'None' if theta2 is None else f"{theta2:.6f}",  # theta2
+                            'None' if theta3 is None else f"{theta3:.6f}",  # theta3
                             1 if stop_at_point else 0,  # stop_at_point
                             f"{duration:.6f}",  # duration
                             1 if linear_path else 0   # linear_path
@@ -1498,6 +1415,66 @@ class Sidebar(QWidget):
                         
         except Exception as e:
             print(f"Save error: {e}")
+
+    def load_waypoints_from_csv(self):
+        try:
+            file_path, _ = QFileDialog.getOpenFileName(
+                self,
+                "Load Waypoints",
+                "",
+                "CSV Files (*.csv)"
+            )
+            
+            if not file_path:
+                return
+
+            loaded_points = []
+            try:
+                with open(file_path, 'r', newline='') as f:
+                    reader = csv.reader(f)
+                    header = next(reader)  # Read header
+                    
+                    # Verify header format
+                    expected_header = ['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'Theta3', 
+                                    'StopAtPoint', 'Duration', 'LinearPath']
+                    if not all(h1.lower() == h2.lower() for h1, h2 in zip(header[:len(expected_header)], expected_header)):
+                        print("Warning: CSV header format doesn't match expected format")
+                    
+                    for i, row in enumerate(reader, start=2):  # start=2 because row 1 is header
+                        try:
+                            x = float(row[0].strip())
+                            y = float(row[1].strip())
+                            z = float(row[2].strip())
+                            rotation = float(row[3].strip())
+                            theta1 = float(row[4].strip()) if row[4].strip().lower() != 'none' else None
+                            theta2 = float(row[5].strip()) if row[5].strip().lower() != 'none' else None
+                            # Theta3 is read but not stored in waypoints as it's calculated
+                            stop_at_point = bool(int(row[7].strip()))
+                            duration = float(row[8].strip())
+                            linear_path = bool(int(row[9].strip())) if len(row) > 9 else False
+                            
+                            # Store waypoint without theta3 as it's dynamically calculated
+                            loaded_points.append((x, y, z, rotation, theta1, theta2, 
+                                            stop_at_point, duration, linear_path))
+                        except (ValueError, IndexError) as e:
+                            print(f"Warning: Error parsing row {i}: {e}")
+                            continue
+
+                if loaded_points:
+                    global waypoints
+                    waypoints = loaded_points
+                    self.update_waypoints_list()
+                    self.simulation_widget.update()
+                    print(f"Successfully loaded {len(loaded_points)} waypoints")
+                else:
+                    print("Warning: No valid waypoints found in CSV")
+                    
+            except csv.Error as e:
+                print(f"CSV Error: {e}")
+                return
+                
+        except Exception as e:
+            print(f"Load error: {e}")
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
