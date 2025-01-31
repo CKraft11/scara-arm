@@ -1414,15 +1414,11 @@ class Sidebar(QWidget):
                     header = next(reader)  # Read header
                     
                     # Verify header format
-                    expected_header = ['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'StopAtPoint', 'Duration']
-                    if not all(h1.lower() == h2.lower() for h1, h2 in zip(header, expected_header)):
+                    expected_header = ['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'StopAtPoint', 'Duration', 'LinearPath']
+                    if not all(h1.lower() == h2.lower() for h1, h2 in zip(header[:len(expected_header)], expected_header)):
                         print("Warning: CSV header format doesn't match expected format")
                     
                     for i, row in enumerate(reader, start=2):  # start=2 because row 1 is header
-                        if len(row) != 8:
-                            print(f"Warning: Skipping row {i}, incorrect number of columns")
-                            continue
-                        
                         try:
                             x = float(row[0].strip())
                             y = float(row[1].strip())
@@ -1432,9 +1428,11 @@ class Sidebar(QWidget):
                             theta2 = float(row[5].strip()) if row[5].strip().lower() != 'none' else None
                             stop_at_point = bool(int(row[6].strip()))
                             duration = float(row[7].strip())
+                            # Handle LinearPath column, default to False if not present
+                            linear_path = bool(int(row[8].strip())) if len(row) > 8 else False
                             
-                            loaded_points.append((x, y, z, rotation, theta1, theta2, stop_at_point, duration))
-                        except ValueError as e:
+                            loaded_points.append((x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path))
+                        except (ValueError, IndexError) as e:
                             print(f"Warning: Error parsing row {i}: {e}")
                             continue
 
@@ -1443,6 +1441,7 @@ class Sidebar(QWidget):
                     waypoints = loaded_points
                     self.update_waypoints_list()
                     self.simulation_widget.update()
+                    print(f"Successfully loaded {len(loaded_points)} waypoints")
                 else:
                     print("Warning: No valid waypoints found in CSV")
                     
@@ -1475,19 +1474,23 @@ class Sidebar(QWidget):
             try:
                 with open(file_path, 'w', newline='') as f:
                     writer = csv.writer(f)
+                    # Write header
                     writer.writerow(['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'StopAtPoint', 'Duration', 'LinearPath'])
+                    # Write data
                     for wp in waypoints:
+                        x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path = wp
                         writer.writerow([
-                            f"{wp[0]:.6f}",  # x
-                            f"{wp[1]:.6f}",  # y 
-                            f"{wp[2]:.6f}",  # z
-                            f"{wp[3]:.6f}",  # rotation
-                            'None' if wp[4] is None else f"{wp[4]:.6f}",  # theta1
-                            'None' if wp[5] is None else f"{wp[5]:.6f}",  # theta2
-                            1 if wp[6] else 0,  # stop_at_point
-                            f"{wp[7]:.6f}",  # duration
-                            1 if wp[8] else 0   # linear_path
+                            f"{x:.6f}",  # x
+                            f"{y:.6f}",  # y 
+                            f"{z:.6f}",  # z
+                            f"{rotation:.6f}",  # rotation
+                            'None' if theta1 is None else f"{theta1:.6f}",  # theta1
+                            'None' if theta2 is None else f"{theta2:.6f}",  # theta2
+                            1 if stop_at_point else 0,  # stop_at_point
+                            f"{duration:.6f}",  # duration
+                            1 if linear_path else 0   # linear_path
                         ])
+                print(f"Successfully saved {len(waypoints)} waypoints to {file_path}")
                         
             except csv.Error as e:
                 print(f"CSV Error: {e}")
