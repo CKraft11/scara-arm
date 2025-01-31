@@ -847,6 +847,170 @@ class Sidebar(QWidget):
         self.loop_animation = False
         self.reverse_animation = False
 
+    def validate_input_fields(self):
+        """Validate all input fields before adding or updating waypoints"""
+        error_messages = []
+        
+        # Validate X coordinate
+        try:
+            x = self.x_input.text().strip()
+            if not x:
+                error_messages.append("X coordinate is required")
+            else:
+                x = float(x)
+                if abs(x) > (L1 + L2):
+                    error_messages.append(f"X coordinate must be between {-(L1 + L2)} and {L1 + L2}")
+        except ValueError:
+            error_messages.append("X coordinate must be a number")
+
+        # Validate Y coordinate
+        try:
+            y = self.y_input.text().strip()
+            if not y:
+                error_messages.append("Y coordinate is required")
+            else:
+                y = float(y)
+                if abs(y) > (L1 + L2):
+                    error_messages.append(f"Y coordinate must be between {-(L1 + L2)} and {L1 + L2}")
+        except ValueError:
+            error_messages.append("Y coordinate must be a number")
+
+        # Validate Z coordinate
+        try:
+            z = self.z_input.text().strip()
+            if not z:
+                error_messages.append("Z coordinate is required")
+            else:
+                z = float(z)
+                if not (Z_MIN <= z <= Z_MAX):
+                    error_messages.append(f"Z coordinate must be between {Z_MIN} and {Z_MAX}")
+        except ValueError:
+            error_messages.append("Z coordinate must be a number")
+
+        # Validate rotation
+        try:
+            rotation = self.rotation_input.text().strip()
+            if not rotation:
+                error_messages.append("Rotation is required")
+            else:
+                rotation = float(rotation)
+                if not (-360 <= rotation <= 360):
+                    error_messages.append("Rotation must be between -360 and 360 degrees")
+        except ValueError:
+            error_messages.append("Rotation must be a number")
+
+        # Validate duration if stop at point is checked
+        if self.stop_at_point_check.isChecked():
+            try:
+                duration = self.duration_input.text().strip()
+                if not duration:
+                    error_messages.append("Duration is required when 'Stop at Point' is checked")
+                else:
+                    duration = float(duration)
+                    if duration <= 0:
+                        error_messages.append("Duration must be greater than 0")
+            except ValueError:
+                error_messages.append("Duration must be a number")
+
+        if error_messages:
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Critical)
+            error_dialog.setWindowTitle("Input Error")
+            error_dialog.setText("\n".join(error_messages))
+            error_dialog.exec_()
+            return None
+
+        # If validation passes, return the validated values
+        return {
+            'x': float(x),
+            'y': float(y),
+            'z': float(z),
+            'rotation': float(rotation),
+            'duration': float(duration) if self.stop_at_point_check.isChecked() else 0.0
+        }
+
+    def validate_edit_fields(self):
+        """Validate all edit fields before updating waypoints"""
+        error_messages = []
+        
+        # Validate X coordinate
+        try:
+            x = self.edit_x_input.text().strip()
+            if not x:
+                error_messages.append("X coordinate is required")
+            else:
+                x = float(x)
+                if abs(x) > (L1 + L2):
+                    error_messages.append(f"X coordinate must be between {-(L1 + L2)} and {L1 + L2}")
+        except ValueError:
+            error_messages.append("X coordinate must be a number")
+
+        # Validate Y coordinate
+        try:
+            y = self.edit_y_input.text().strip()
+            if not y:
+                error_messages.append("Y coordinate is required")
+            else:
+                y = float(y)
+                if abs(y) > (L1 + L2):
+                    error_messages.append(f"Y coordinate must be between {-(L1 + L2)} and {L1 + L2}")
+        except ValueError:
+            error_messages.append("Y coordinate must be a number")
+
+        # Validate Z coordinate
+        try:
+            z = self.edit_z_input.text().strip()
+            if not z:
+                error_messages.append("Z coordinate is required")
+            else:
+                z = float(z)
+                if not (Z_MIN <= z <= Z_MAX):
+                    error_messages.append(f"Z coordinate must be between {Z_MIN} and {Z_MAX}")
+        except ValueError:
+            error_messages.append("Z coordinate must be a number")
+
+        # Validate rotation
+        try:
+            rotation = self.edit_rotation_input.text().strip()
+            if not rotation:
+                error_messages.append("Rotation is required")
+            else:
+                rotation = float(rotation)
+                if not (-360 <= rotation <= 360):
+                    error_messages.append("Rotation must be between -360 and 360 degrees")
+        except ValueError:
+            error_messages.append("Rotation must be a number")
+
+        # Validate duration if stop at point is checked
+        if self.edit_stop_at_point_check.isChecked():
+            try:
+                duration = self.edit_duration_input.text().strip()
+                if not duration:
+                    error_messages.append("Duration is required when 'Stop at Point' is checked")
+                else:
+                    duration = float(duration)
+                    if duration <= 0:
+                        error_messages.append("Duration must be greater than 0")
+            except ValueError:
+                error_messages.append("Duration must be a number")
+
+        if error_messages:
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Critical)
+            error_dialog.setWindowTitle("Input Error")
+            error_dialog.setText("\n".join(error_messages))
+            error_dialog.exec_()
+            return None
+
+        # If validation passes, return the validated values
+        return {
+            'x': float(x),
+            'y': float(y),
+            'z': float(z),
+            'rotation': float(rotation),
+            'duration': float(duration) if self.edit_stop_at_point_check.isChecked() else 0.0
+        }
+
     def toggle_duration_input(self, state):
         self.duration_input.setEnabled(state == Qt.Checked)
         if state != Qt.Checked:
@@ -935,21 +1099,40 @@ class Sidebar(QWidget):
         return None, None
 
     def add_waypoint(self):
-        x = float(self.x_input.text())
-        y = float(self.y_input.text())
-        z = float(self.z_input.text())
-        rotation = float(self.rotation_input.text())
+        """Add a new waypoint with input validation"""
+        # First validate all inputs
+        validated_data = self.validate_input_fields()
+        if validated_data is None:
+            return
+        
+        x = validated_data['x']
+        y = validated_data['y']
+        z = validated_data['z']
+        rotation = validated_data['rotation']
+        duration = validated_data['duration']
         
         stop_at_point = self.stop_at_point_check.isChecked()
         linear_path = self.linear_path_check.isChecked()
-        duration = float(self.duration_input.text()) if stop_at_point else 0.0
         
+        # Get previous angles for configuration preference
         prev_theta1 = None
         prev_theta2 = None
         if waypoints:
             _, _, _, _, prev_theta1, prev_theta2, _, _, _ = waypoints[-1]
         
+        # Calculate target angles
         theta1, theta2 = self.calculate_target_angles((x, y, z, rotation), prev_theta1, prev_theta2)
+        
+        # Check if point is reachable
+        if theta1 is None or theta2 is None:
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Warning)
+            error_dialog.setWindowTitle("Unreachable Point")
+            error_dialog.setText("The specified point is outside the robot's reachable workspace.")
+            error_dialog.exec_()
+            return
+        
+        # Add the waypoint
         waypoints.append((x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path))
         self.update_waypoints_list()
         
@@ -964,35 +1147,61 @@ class Sidebar(QWidget):
         self.simulation_widget.update()
 
     def update_waypoint(self):
+        """Update existing waypoint with input validation"""
         index = self.waypoints_list.currentRow()
-        if index != -1:
-            x = float(self.edit_x_input.text())
-            y = float(self.edit_y_input.text())
-            z = float(self.edit_z_input.text())
-            rotation = float(self.edit_rotation_input.text())
+        if index == -1:
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Warning)
+            error_dialog.setWindowTitle("No Selection")
+            error_dialog.setText("Please select a waypoint to update.")
+            error_dialog.exec_()
+            return
             
-            stop_at_point = self.edit_stop_at_point_check.isChecked()
-            linear_path = self.edit_linear_path_check.isChecked()
-            duration = float(self.edit_duration_input.text()) if stop_at_point else 0.0
-            
-            prev_theta1 = None
-            prev_theta2 = None
-            if index > 0:
-                _, _, _, _, prev_theta1, prev_theta2, _, _, _ = waypoints[index - 1]
-                
-            theta1, theta2 = self.calculate_target_angles((x, y, z, rotation), prev_theta1, prev_theta2)
-            waypoints[index] = (x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path)
-            self.update_waypoints_list()
-            
-            # Clear inputs
-            self.edit_x_input.clear()
-            self.edit_y_input.clear()
-            self.edit_z_input.clear()
-            self.edit_rotation_input.clear()
-            self.edit_stop_at_point_check.setChecked(False)
-            self.edit_linear_path_check.setChecked(False)
-            self.edit_duration_input.clear()
-            self.simulation_widget.update()
+        # Validate all inputs
+        validated_data = self.validate_edit_fields()
+        if validated_data is None:
+            return
+        
+        x = validated_data['x']
+        y = validated_data['y']
+        z = validated_data['z']
+        rotation = validated_data['rotation']
+        duration = validated_data['duration']
+        
+        stop_at_point = self.edit_stop_at_point_check.isChecked()
+        linear_path = self.edit_linear_path_check.isChecked()
+        
+        # Get previous angles for configuration preference
+        prev_theta1 = None
+        prev_theta2 = None
+        if index > 0:
+            _, _, _, _, prev_theta1, prev_theta2, _, _, _ = waypoints[index - 1]
+        
+        # Calculate target angles
+        theta1, theta2 = self.calculate_target_angles((x, y, z, rotation), prev_theta1, prev_theta2)
+        
+        # Check if point is reachable
+        if theta1 is None or theta2 is None:
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Warning)
+            error_dialog.setWindowTitle("Unreachable Point")
+            error_dialog.setText("The specified point is outside the robot's reachable workspace.")
+            error_dialog.exec_()
+            return
+        
+        # Update the waypoint
+        waypoints[index] = (x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path)
+        self.update_waypoints_list()
+        
+        # Clear inputs
+        self.edit_x_input.clear()
+        self.edit_y_input.clear()
+        self.edit_z_input.clear()
+        self.edit_rotation_input.clear()
+        self.edit_stop_at_point_check.setChecked(False)
+        self.edit_linear_path_check.setChecked(False)
+        self.edit_duration_input.clear()
+        self.simulation_widget.update()
 
     def select_waypoint(self, item):
         index = self.waypoints_list.row(item)
