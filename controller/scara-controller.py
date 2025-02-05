@@ -1221,7 +1221,7 @@ class Sidebar(QWidget):
         
         # Calculate distance and adjust number of points
         distance = math.sqrt((x2-x1)**2 + (y2-y1)**2)
-        num_points = max(20, int(distance / 10))  # One point every 10mm
+        num_points = max(200, int(distance / 1))  # One point every 10mm
         
         # Store start point configuration to maintain it
         prev_theta1, prev_theta2 = self.calculate_target_angles((x1, y1, z1, r1))
