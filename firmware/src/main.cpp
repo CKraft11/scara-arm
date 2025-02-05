@@ -59,6 +59,10 @@ const float MAX_SPEED_4 = 16000;
 const float RUNNING_SPEED_4 = 14000;
 const float ACCELERATION_4 = 16000;
 
+const float HOME_BACKOFF_DEGREES = 5;      // Degrees to back off after first contact
+const float HOME_SLOW_SPEED = 200.0;         // Slower homing speed for final approach
+const float HOME_OFFSET_DEGREES = 114;     // Final position offset from home
+
 // Create stepper instances
 AccelStepper MOTOR1(AccelStepper::DRIVER, STEP_PIN_1, DIR_PIN_1);
 AccelStepper MOTOR2(AccelStepper::DRIVER, STEP_PIN_2, DIR_PIN_2);
@@ -83,3 +87,75 @@ const double waypoints[5][10] = {
     {150.000000, 50.000000, 0.000000, 0.000000, -82.381766, 127.893635, -45.511868, 0.0, 0.000000, 0.0},
     {150.000000, 150.000000, 0.000000, 0.000000, -98.895795, 107.791591, -8.895795, 0.0, 0.000000, 0.0}
 };
+
+// Global variable to track homing state
+bool isHomed = false;
+
+// Add this function after constants but before setup()
+int32_t degreesToSteps(float degrees, int stepsPerRev) {
+    return static_cast<int32_t>((degrees / 360.0) * stepsPerRev);
+}
+
+void homeMotor1() {
+   MOTOR1.setSpeed(500);
+   MOTOR1.setAcceleration(0);
+   
+   while (digitalRead(LIMIT_SWITCH_1) == HIGH) {
+       MOTOR1.runSpeed();
+   }
+   MOTOR1.stop();
+   delay(100);
+   
+   // Back off slowly until switch releases, then go extra distance
+   MOTOR1.setSpeed(-HOME_SLOW_SPEED);
+   while (digitalRead(LIMIT_SWITCH_1) == LOW) {  // Until switch releases
+       MOTOR1.runSpeed();
+   }
+   // Extra backoff distance
+   int32_t extraSteps = degreesToSteps(HOME_BACKOFF_DEGREES, STEPS_PER_REV_1);
+   for(int32_t i = 0; i < extraSteps; i++) {
+       MOTOR1.runSpeed();
+   }
+   delay(100);
+   
+   MOTOR1.setSpeed(HOME_SLOW_SPEED);
+   while (digitalRead(LIMIT_SWITCH_1) == HIGH) {
+       MOTOR1.runSpeed();
+   }
+   MOTOR1.stop();
+   delay(100);
+   
+   MOTOR1.move(-degreesToSteps(HOME_OFFSET_DEGREES, STEPS_PER_REV_1));
+   while (MOTOR1.distanceToGo() != 0) {
+       MOTOR1.run();
+   }
+   
+   isHomed = true;
+}
+
+void setup() {
+  // Configure limit switch pin as input with pullup
+  pinMode(LIMIT_SWITCH_1, INPUT_PULLUP);
+  
+  // Configure motor pins
+  pinMode(ENABLE_PIN_1, OUTPUT);
+  digitalWrite(ENABLE_PIN_1, LOW); // Enable the motor
+  
+  // Configure motor parameters
+  MOTOR1.setMaxSpeed(MAX_SPEED_1);
+  MOTOR1.setAcceleration(ACCELERATION_1);
+  
+  // Start serial for debugging (optional)
+  Serial.begin(9600);
+  
+  // Wait 5 seconds before starting homing
+  delay(5000);
+  
+  // Start homing sequence
+  homeMotor1();
+}
+
+void loop() {
+  // Your existing loop code here
+  // You might want to check isHomed before executing normal operations
+}
