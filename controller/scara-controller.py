@@ -7,15 +7,19 @@ from PyQt5.QtCore import Qt, QTimer, QRect, QPoint
 import pyqtgraph as pg
 import numpy as np
 import time
+pg.setConfigOptions(antialias=True)
 
 # SCARA robot dimensions
 L1 = 180  # Length of the first linkage (mm)
 L2 = 180  # Length of the second linkage (mm)
+THETA1_LIMIT = 110  #Angular Limit of Theta 1 angle to prevent crashing (degrees)
+THETA2_LIMIT = 160  #Angular Limit of Theta 2 angle to prevent crashing (degrees)
 Z_MIN = 0  # Minimum Z value
 Z_MAX = 80  # Maximum Z value
 
 GRAPH_WIDTH = 700 
-SIMULATION_WIDTH = 850
+SIMULATION_WIDTH = 800
+SIMULATION_OFFSET = SIMULATION_WIDTH-700
 WINDOW_WIDTH = GRAPH_WIDTH + SIMULATION_WIDTH  # Will be dynamically calculated
 WINDOW_HEIGHT = 800
 
@@ -40,7 +44,7 @@ class JointStepper:
         self.target_position = 0
         self.current_speed = 0
         self.base_max_speed = 72  # Base maximum speed (degrees per second)
-        self.base_acceleration = 144  # Base acceleration (degrees per second²)
+        self.base_acceleration = 72  # Base acceleration (degrees per second²)
         self.max_speed = self.base_max_speed
         self.acceleration = self.base_acceleration
         self.last_update_time = time.time()
@@ -176,9 +180,7 @@ class SCARAMotionController:
             self.elbow.set_target(theta2, move_duration)
             
             # Apply speed scaling to each joint
-            self.shoulder.max_speed *= shoulder_speed_scale
             self.shoulder.acceleration *= shoulder_speed_scale
-            self.elbow.max_speed *= elbow_speed_scale
             self.elbow.acceleration *= elbow_speed_scale
         else:
             move_duration = 0.1
@@ -371,8 +373,8 @@ class AngleGraphWidget(QWidget):
 class SimulationWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.theta1 = 45
-        self.theta2 = 45
+        self.theta1 = 0
+        self.theta2 = 0
         self.z = 0
         self.rotation = 0
         self.angle = 0
@@ -385,7 +387,7 @@ class SimulationWidget(QWidget):
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setRenderHint(QPainter.HighQualityAntialiasing)
 
         # Draw the background
         painter.fillRect(self.rect(), BLACK)
@@ -416,7 +418,7 @@ class SimulationWidget(QWidget):
         theta = math.atan2(y, x)
 
         # Draw the robot links
-        base = QPoint((SIMULATION_WIDTH // 2) -50, WINDOW_HEIGHT // 2)
+        base = QPoint((SIMULATION_WIDTH // 2) -100, WINDOW_HEIGHT // 2)
         joint1 = QPoint(base.x() + int(L1 * SCALE * math.cos(theta1_rad)), base.y() + int(L1 * SCALE * math.sin(theta1_rad)))
         end_effector = QPoint(base.x() + int(x * SCALE), base.y() + int(y * SCALE))
 
@@ -459,41 +461,43 @@ class SimulationWidget(QWidget):
     def draw_workspace_limits(self, painter):
         # Draw a circle representing the workspace limits
         workspace_radius = (L1 + L2) * SCALE
-        workspace_center = QPoint((SIMULATION_WIDTH // 2)-50, WINDOW_HEIGHT // 2)
+        workspace_center = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET, WINDOW_HEIGHT // 2)
         painter.setPen(QPen(GRAY, 2))
-        painter.drawArc(QRect(workspace_center.x() - (L2 + L1), workspace_center.y() - (L2 + L1), 2 * L2 + 2 * L1, 2 * L2 + 2 * L1), int(math.radians(-130) * 16 * 180 / math.pi), int(math.radians(260) * 16 * 180 / math.pi))
+        painter.drawArc(QRect(workspace_center.x() - (L2 + L1), workspace_center.y() - (L2 + L1), 2 * L2 + 2 * L1, 2 * L2 + 2 * L1), int(math.radians(-THETA1_LIMIT) * 16 * 180 / math.pi), int(math.radians(2*THETA1_LIMIT) * 16 * 180 / math.pi))
 
         # Draw two lines representing the joint1 rotation limits
-        joint1_limit_x1 = workspace_center.x() + int(L1 * SCALE * math.cos(math.radians(-130)))
-        joint1_limit_y1 = workspace_center.y() + int(L1 * SCALE * math.sin(math.radians(-130)))
-        joint1_limit_x2 = workspace_center.x() + int(L1 * SCALE * math.cos(math.radians(130)))
-        joint1_limit_y2 = workspace_center.y() + int(L1 * SCALE * math.sin(math.radians(130)))
+        joint1_limit_x1 = workspace_center.x() + int(L1 * SCALE * math.cos(math.radians(-THETA1_LIMIT)))
+        joint1_limit_y1 = workspace_center.y() + int(L1 * SCALE * math.sin(math.radians(-THETA1_LIMIT)))
+        joint1_limit_x2 = workspace_center.x() + int(L1 * SCALE * math.cos(math.radians(THETA1_LIMIT)))
+        joint1_limit_y2 = workspace_center.y() + int(L1 * SCALE * math.sin(math.radians(THETA1_LIMIT)))
         painter.drawLine(workspace_center, QPoint(joint1_limit_x1, joint1_limit_y1))
         painter.drawLine(workspace_center, QPoint(joint1_limit_x2, joint1_limit_y2))
         painter.drawLine(QPoint(joint1_limit_x1, joint1_limit_y1), QPoint(joint1_limit_x1 - L2, joint1_limit_y1))
         painter.drawLine(QPoint(joint1_limit_x2, joint1_limit_y2), QPoint(joint1_limit_x2 - L2, joint1_limit_y2))
-        painter.drawArc(QRect(workspace_center.x() - L2 + int(L2 * SCALE * math.cos(math.radians(-130))), workspace_center.y() - L2 + int(L2 * SCALE * math.sin(math.radians(-130)))-1, 2 * L2, 2 * L2), int(math.radians(130) * 16 * 180 / math.pi), int(math.radians(50) * 16 * 180 / math.pi))
-        painter.drawArc(QRect(workspace_center.x() - L2 + int(L2 * SCALE * math.cos(math.radians(130))), workspace_center.y() - L2 + int(L2 * SCALE * math.sin(math.radians(130)))+1, 2 * L2, 2 * L2), int(math.radians(-130) * 16 * 180 / math.pi), int(math.radians(-50) * 16 * 180 / math.pi))
+        painter.drawArc(QRect(workspace_center.x() - L2 + int(L2 * SCALE * math.cos(math.radians(-THETA1_LIMIT))), workspace_center.y() - L2 + int(L2 * SCALE * math.sin(math.radians(-THETA1_LIMIT)))-1, 2 * L2, 2 * L2), int(math.radians(THETA1_LIMIT) * 16 * 180 / math.pi), int(math.radians(180-THETA1_LIMIT) * 16 * 180 / math.pi))
+        painter.drawArc(QRect(workspace_center.x() - L2 + int(L2 * SCALE * math.cos(math.radians(THETA1_LIMIT))), workspace_center.y() - L2 + int(L2 * SCALE * math.sin(math.radians(THETA1_LIMIT)))+1, 2 * L2, 2 * L2), int(math.radians(-THETA1_LIMIT) * 16 * 180 / math.pi), int(math.radians(THETA1_LIMIT-180) * 16 * 180 / math.pi))
 
     def draw_waypoints(self, painter, draw_paths=True):
         for i in range(len(waypoints)):
             # Update unpacking to include linear_path
             x, y, z, rotation, Wtheta1, Wtheta2, stop_at_point, duration, linear_path = waypoints[i]
-            end_effector = QPoint((SIMULATION_WIDTH // 2)-50 + int(x), WINDOW_HEIGHT // 2 - int(y))
+            end_effector = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET + int(x), WINDOW_HEIGHT // 2 - int(y))
 
             # Draw different markers for stop points vs pass-through points
             painter.setBrush(RED)
             if stop_at_point:
                 # Draw a square for stop points
-                painter.drawRect(end_effector.x() - 5, end_effector.y() - 5, 10, 10)
+                painter.setBrush(RED)
+                painter.drawEllipse(end_effector, 5, 5)
             else:
                 # Draw a circle for pass-through points
+                painter.setBrush(GREEN)
                 painter.drawEllipse(end_effector, 5, 5)
 
             if draw_paths and i > 0:
                 # Update unpacking for previous waypoint to include linear_path
                 prev_x, prev_y, prev_z, prev_rotation, prev_theta1, prev_theta2, _, _, prev_linear = waypoints[i - 1]
-                prev_end_effector = QPoint((SIMULATION_WIDTH // 2)-50 + int(prev_x), WINDOW_HEIGHT // 2 - int(prev_y))
+                prev_end_effector = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET + int(prev_x), WINDOW_HEIGHT // 2 - int(prev_y))
                 self.draw_path_between_waypoints(painter, prev_end_effector, end_effector, 
                                                prev_theta1, prev_theta2, Wtheta1, Wtheta2, prev_linear)
 
@@ -501,6 +505,7 @@ class SimulationWidget(QWidget):
                                   end_theta1, end_theta2, is_linear_path):
         """Draw path between waypoints, either linear or curved."""
         # If it's a linear path, draw straight line
+        painter.setRenderHint(QPainter.HighQualityAntialiasing)
         if is_linear_path:
             painter.setPen(QPen(RED, 1, Qt.SolidLine))
             painter.drawLine(start_point, end_point)
@@ -515,7 +520,7 @@ class SimulationWidget(QWidget):
 
         # Function to check if a point along the path is valid
         def is_valid_position(theta1, theta2):
-            return -130 <= theta1 <= 130 and -160 <= theta2 <= 160
+            return -THETA1_LIMIT <= theta1 <= THETA1_LIMIT and -THETA2_LIMIT <= theta2 <= THETA2_LIMIT
 
         steps = 30  # Number of intermediate points to check
         points = []
@@ -543,7 +548,7 @@ class SimulationWidget(QWidget):
             y = L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad)
             
             point = QPoint(
-                int((SIMULATION_WIDTH // 2) - 50 + (x * SCALE)),
+                int((SIMULATION_WIDTH // 2) - 100 + (x * SCALE)),
                 int(WINDOW_HEIGHT // 2 + (y * SCALE))
             )
             points.append(point)
@@ -996,6 +1001,8 @@ class Sidebar(QWidget):
                 )
             self.waypoints_list.addItem(item)
 
+# INVERSE KINEMATICS
+
     def calculate_target_angles(self, waypoint, prev_theta1=None, prev_theta2=None):
         x, y, _, _ = waypoint
         # Flip the y-coordinate to match the robot's coordinate system
@@ -1024,8 +1031,8 @@ class Sidebar(QWidget):
         theta1_2 = base - math.degrees(math.atan2(k2_2, k1))  # for elbow-down
 
         # Check solutions against joint limits
-        sol1_valid = -130 <= theta1_1 <= 130 and -160 <= theta2_1 <= 160
-        sol2_valid = -130 <= theta1_2 <= 130 and -160 <= theta2_2 <= 160
+        sol1_valid = -THETA1_LIMIT <= theta1_1 <= THETA1_LIMIT and -THETA2_LIMIT <= theta2_1 <= THETA2_LIMIT
+        sol2_valid = -THETA1_LIMIT <= theta1_2 <= THETA1_LIMIT and -THETA2_LIMIT <= theta2_2 <= THETA2_LIMIT
 
         if not sol1_valid and not sol2_valid:
             return None, None
@@ -1193,7 +1200,6 @@ class Sidebar(QWidget):
             self.simulation_widget.motion_controller.reset_timing()
         self.is_animating = True
         self.is_paused = False
-        # Use a more conservative frame rate for smoother motion
         self.timer.start(20)  # 50 FPS
 
     def pause_animation(self):

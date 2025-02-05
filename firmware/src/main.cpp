@@ -63,6 +63,17 @@ const float HOME_BACKOFF_DEGREES = 5;      // Degrees to back off after first co
 const float HOME_SLOW_SPEED = 200.0;         // Slower homing speed for final approach
 const float HOME_OFFSET_DEGREES = 114;     // Final position offset from home
 
+// Add these global variables at the top with your other declarations
+float longestD2G;
+char longestMotor;
+float motor1D2G, motor2D2G;
+float motor1StepDelay, motor2StepDelay;
+float stepCounter;
+float motor1StepCounter, motor2StepCounter;
+float lastD2G;
+int motor1Dir, motor2Dir;
+const int minPulseWidth = 20;
+
 // Create stepper instances
 AccelStepper MOTOR1(AccelStepper::DRIVER, STEP_PIN_1, DIR_PIN_1);
 AccelStepper MOTOR2(AccelStepper::DRIVER, STEP_PIN_2, DIR_PIN_2);
@@ -94,6 +105,89 @@ bool isHomed = false;
 // Add this function after constants but before setup()
 int32_t degreesToSteps(float degrees, int stepsPerRev) {
     return static_cast<int32_t>((degrees / 360.0) * stepsPerRev);
+}
+
+void coordinatedMotor1Move() {
+    if (motor1StepDelay > 0) {
+        if (motor1StepCounter < stepCounter) {
+            MOTOR1.run();
+            motor1StepCounter += motor1StepDelay;
+        }
+    }
+}
+
+void coordinatedMotor2Move() {
+    if (motor2StepDelay > 0) {
+        if (motor2StepCounter < stepCounter) {
+            MOTOR2.run();
+            motor2StepCounter += motor2StepDelay;
+        }
+    }
+}
+
+void moveToAngles(float theta1, float theta2) {
+    static int stage = 0;
+
+    if (stage == 0) {
+        // Calculate distances to go in steps
+        motor1D2G = abs(degreesToSteps(theta1 - MOTOR1.currentPosition() * 360.0 / STEPS_PER_REV_1, STEPS_PER_REV_1));
+        motor2D2G = abs(degreesToSteps(theta2 - MOTOR2.currentPosition() * 360.0 / STEPS_PER_REV_2, STEPS_PER_REV_2));
+
+        // Find the motor that needs to move furthest
+        longestD2G = max(motor1D2G, motor2D2G);
+        longestMotor = (motor1D2G > motor2D2G) ? '1' : '2';
+
+        // Calculate step delays for synchronized movement
+        motor1StepDelay = (motor1D2G > 0) ? longestD2G/motor1D2G : 0;
+        motor2StepDelay = (motor2D2G > 0) ? longestD2G/motor2D2G : 0;
+
+        // Initialize step counters
+        stepCounter = 0;
+        motor1StepCounter = motor1StepDelay - 1;
+        motor2StepCounter = motor2StepDelay - 1;
+
+        // Set target positions and determine directions
+        float theta1Steps = degreesToSteps(theta1, STEPS_PER_REV_1);
+        float theta2Steps = degreesToSteps(theta2, STEPS_PER_REV_2);
+        
+        MOTOR1.moveTo(theta1Steps);
+        MOTOR2.moveTo(theta2Steps);
+        
+        lastD2G = (longestMotor == '1') ? MOTOR1.distanceToGo() : MOTOR2.distanceToGo();
+
+        // Set speeds and accelerations
+        MOTOR1.setMaxSpeed(MAX_SPEED_1);
+        MOTOR2.setMaxSpeed(MAX_SPEED_2);
+        MOTOR1.setAcceleration(ACCELERATION_1);
+        MOTOR2.setAcceleration(ACCELERATION_2);
+
+        stage = 1;
+    }
+
+    if (stage == 1) {
+        // Run the primary motor with acceleration and coordinate the slave
+        if (longestMotor == '1') {
+            if (lastD2G != MOTOR1.distanceToGo()) {
+                stepCounter += motor1StepDelay;
+                lastD2G = MOTOR1.distanceToGo();
+            }
+            MOTOR1.run();
+            coordinatedMotor2Move();
+        } else {
+            if (lastD2G != MOTOR2.distanceToGo()) {
+                stepCounter += motor2StepDelay;
+                lastD2G = MOTOR2.distanceToGo();
+            }
+            MOTOR2.run();
+            coordinatedMotor1Move();
+        }
+
+        // Check if movement is complete
+        if (MOTOR1.distanceToGo() == 0 && MOTOR2.distanceToGo() == 0) {
+            stage = 0;
+            Serial.println("Coordinated move completed");
+        }
+    }
 }
 
 void homeMotor1() {
@@ -156,6 +250,7 @@ void setup() {
 }
 
 void loop() {
-  // Your existing loop code here
-  // You might want to check isHomed before executing normal operations
+    if (isHomed) {  // Only if homing is complete
+        moveToAngles(targetTheta1, targetTheta2);
+    }
 }
