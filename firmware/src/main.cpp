@@ -27,7 +27,7 @@ const int BASE_STEPS_PER_REV = 200;
 
 // Gear Ratios for each motor
 const int GEAR_RATIO_1 = 12.25;    // Example ratio for base motor
-const int GEAR_RATIO_2 = 19/3;    // Example ratio for arm motor
+const int GEAR_RATIO_2 = 1;    // Example ratio for arm motor
 const int GEAR_RATIO_3 = 3;    // Example ratio for Z-axis linear
 const int GEAR_RATIO_4 = 3;    // Example ratio for Z-axis rotation
 
@@ -61,7 +61,8 @@ const float ACCELERATION_4 = 16000;
 
 const float HOME_BACKOFF_DEGREES = 5;      // Degrees to back off after first contact
 const float HOME_SLOW_SPEED = 200.0;         // Slower homing speed for final approach
-const float HOME_OFFSET_DEGREES = 114;     // Final position offset from home
+const float M1_HOME_OFFSET = 115;     // Final position offset from home
+const float M2_HOME_OFFSET = 155;
 
 // Add these global variables at the top with your other declarations
 float longestD2G;
@@ -107,93 +108,29 @@ int32_t degreesToSteps(float degrees, int stepsPerRev) {
     return static_cast<int32_t>((degrees / 360.0) * stepsPerRev);
 }
 
-void coordinatedMotor1Move() {
-    if (motor1StepDelay > 0) {
-        if (motor1StepCounter < stepCounter) {
-            MOTOR1.run();
-            motor1StepCounter += motor1StepDelay;
-        }
-    }
-}
-
-void coordinatedMotor2Move() {
-    if (motor2StepDelay > 0) {
-        if (motor2StepCounter < stepCounter) {
-            MOTOR2.run();
-            motor2StepCounter += motor2StepDelay;
-        }
-    }
-}
-
-void moveToAngles(float theta1, float theta2) {
-    static int stage = 0;
-
-    if (stage == 0) {
-        // Calculate distances to go in steps
-        motor1D2G = abs(degreesToSteps(theta1 - MOTOR1.currentPosition() * 360.0 / STEPS_PER_REV_1, STEPS_PER_REV_1));
-        motor2D2G = abs(degreesToSteps(theta2 - MOTOR2.currentPosition() * 360.0 / STEPS_PER_REV_2, STEPS_PER_REV_2));
-
-        // Find the motor that needs to move furthest
-        longestD2G = max(motor1D2G, motor2D2G);
-        longestMotor = (motor1D2G > motor2D2G) ? '1' : '2';
-
-        // Calculate step delays for synchronized movement
-        motor1StepDelay = (motor1D2G > 0) ? longestD2G/motor1D2G : 0;
-        motor2StepDelay = (motor2D2G > 0) ? longestD2G/motor2D2G : 0;
-
-        // Initialize step counters
-        stepCounter = 0;
-        motor1StepCounter = motor1StepDelay - 1;
-        motor2StepCounter = motor2StepDelay - 1;
-
-        // Set target positions and determine directions
-        float theta1Steps = degreesToSteps(theta1, STEPS_PER_REV_1);
-        float theta2Steps = degreesToSteps(theta2, STEPS_PER_REV_2);
-        
-        MOTOR1.moveTo(theta1Steps);
-        MOTOR2.moveTo(theta2Steps);
-        
-        lastD2G = (longestMotor == '1') ? MOTOR1.distanceToGo() : MOTOR2.distanceToGo();
-
-        // Set speeds and accelerations
-        MOTOR1.setMaxSpeed(MAX_SPEED_1);
-        MOTOR2.setMaxSpeed(MAX_SPEED_2);
-        MOTOR1.setAcceleration(ACCELERATION_1);
-        MOTOR2.setAcceleration(ACCELERATION_2);
-
-        stage = 1;
-    }
-
-    if (stage == 1) {
-        // Run the primary motor with acceleration and coordinate the slave
-        if (longestMotor == '1') {
-            if (lastD2G != MOTOR1.distanceToGo()) {
-                stepCounter += motor1StepDelay;
-                lastD2G = MOTOR1.distanceToGo();
-            }
-            MOTOR1.run();
-            coordinatedMotor2Move();
-        } else {
-            if (lastD2G != MOTOR2.distanceToGo()) {
-                stepCounter += motor2StepDelay;
-                lastD2G = MOTOR2.distanceToGo();
-            }
-            MOTOR2.run();
-            coordinatedMotor1Move();
-        }
-
-        // Check if movement is complete
-        if (MOTOR1.distanceToGo() == 0 && MOTOR2.distanceToGo() == 0) {
-            stage = 0;
-            Serial.println("Coordinated move completed");
-        }
-    }
-}
-
-void homeMotor1() {
+void home() {
    MOTOR1.setSpeed(500);
    MOTOR1.setAcceleration(0);
+   MOTOR2.setSpeed(-250);
+   MOTOR2.setAcceleration(0);
+
+   MOTOR2.move(degreesToSteps(3, STEPS_PER_REV_1));
+   while (MOTOR2.distanceToGo() != 0) {
+       MOTOR2.run();
+   }
+   MOTOR2.stop();
+   delay(1000);
    
+   MOTOR1.setSpeed(HOME_SLOW_SPEED);
+
+   MOTOR1.move(degreesToSteps(-3, STEPS_PER_REV_1));
+   while (MOTOR1.distanceToGo() != 0) {
+       MOTOR1.run();
+   }
+   MOTOR1.stop();
+   delay(1000);
+   
+   MOTOR1.setSpeed(HOME_SLOW_SPEED);
    while (digitalRead(LIMIT_SWITCH_1) == HIGH) {
        MOTOR1.runSpeed();
    }
@@ -206,23 +143,77 @@ void homeMotor1() {
        MOTOR1.runSpeed();
    }
    // Extra backoff distance
-   int32_t extraSteps = degreesToSteps(HOME_BACKOFF_DEGREES, STEPS_PER_REV_1);
-   for(int32_t i = 0; i < extraSteps; i++) {
+   int32_t extraSteps1 = degreesToSteps(HOME_BACKOFF_DEGREES, STEPS_PER_REV_1);
+   for(int32_t i = 0; i < extraSteps1; i++) {
        MOTOR1.runSpeed();
    }
+   MOTOR1.stop();
    delay(100);
-   
+
    MOTOR1.setSpeed(HOME_SLOW_SPEED);
    while (digitalRead(LIMIT_SWITCH_1) == HIGH) {
        MOTOR1.runSpeed();
    }
    MOTOR1.stop();
-   delay(100);
+   delay(1000);
    
-   MOTOR1.move(-degreesToSteps(HOME_OFFSET_DEGREES, STEPS_PER_REV_1));
+   MOTOR1.setSpeed(HOME_SLOW_SPEED);
+   MOTOR1.move(degreesToSteps(1, STEPS_PER_REV_1));
    while (MOTOR1.distanceToGo() != 0) {
        MOTOR1.run();
    }
+   MOTOR1.stop();
+   delay(1000);
+
+   MOTOR2.setSpeed(-HOME_SLOW_SPEED/10);
+   while (digitalRead(LIMIT_SWITCH_2) == HIGH) {
+       MOTOR2.runSpeed();
+   }
+   MOTOR2.stop();
+   delay(100);
+
+   // Back off slowly until switch releases, then go extra distance
+   MOTOR2.setSpeed(HOME_SLOW_SPEED/10);
+   while (digitalRead(LIMIT_SWITCH_2) == LOW) {  // Until switch releases
+       MOTOR2.runSpeed();
+   }
+   // Extra backoff distance
+   int32_t extraSteps2 = degreesToSteps(HOME_BACKOFF_DEGREES, STEPS_PER_REV_2);
+   for(int32_t i = 0; i < extraSteps2; i++) {
+       MOTOR2.runSpeed();
+   }
+   delay(100);
+   
+   MOTOR2.setSpeed(-HOME_SLOW_SPEED/10);
+   while (digitalRead(LIMIT_SWITCH_2) == HIGH) {
+       MOTOR2.runSpeed();
+   }
+   MOTOR2.stop();
+   delay(100);
+   
+   MOTOR2.setSpeed(HOME_SLOW_SPEED/10);
+   MOTOR2.move(degreesToSteps(-1, STEPS_PER_REV_2));
+   while (MOTOR2.distanceToGo() != 0) {
+       MOTOR2.run();
+   }
+   MOTOR2.stop();
+   delay(100);
+
+   MOTOR2.setSpeed(HOME_SLOW_SPEED/10);
+   MOTOR2.move(degreesToSteps(M2_HOME_OFFSET, STEPS_PER_REV_2));
+   while (MOTOR2.distanceToGo() != 0) {
+       MOTOR2.run();
+   }
+   MOTOR2.stop();
+   delay(100);
+   
+   MOTOR1.setSpeed(HOME_SLOW_SPEED);
+   MOTOR1.move(degreesToSteps(-M1_HOME_OFFSET, STEPS_PER_REV_1));
+   while (MOTOR1.distanceToGo() != 0) {
+       MOTOR1.run();
+   }
+   MOTOR1.stop();
+   delay(1000);
    
    isHomed = true;
 }
@@ -230,14 +221,19 @@ void homeMotor1() {
 void setup() {
   // Configure limit switch pin as input with pullup
   pinMode(LIMIT_SWITCH_1, INPUT_PULLUP);
+  pinMode(LIMIT_SWITCH_2, INPUT_PULLUP);
   
   // Configure motor pins
   pinMode(ENABLE_PIN_1, OUTPUT);
   digitalWrite(ENABLE_PIN_1, LOW); // Enable the motor
+  pinMode(ENABLE_PIN_2, OUTPUT);
+  digitalWrite(ENABLE_PIN_2, LOW); // Enable the motor
   
   // Configure motor parameters
   MOTOR1.setMaxSpeed(MAX_SPEED_1);
   MOTOR1.setAcceleration(ACCELERATION_1);
+  MOTOR2.setMaxSpeed(MAX_SPEED_2);
+  MOTOR2.setAcceleration(ACCELERATION_2);
   
   // Start serial for debugging (optional)
   Serial.begin(9600);
@@ -246,11 +242,9 @@ void setup() {
   delay(5000);
   
   // Start homing sequence
-  homeMotor1();
+  home();
 }
 
+
 void loop() {
-    if (isHomed) {  // Only if homing is complete
-        moveToAngles(targetTheta1, targetTheta2);
-    }
 }
