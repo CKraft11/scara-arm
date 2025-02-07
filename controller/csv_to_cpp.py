@@ -25,7 +25,7 @@ def convert_csv_to_cpp_array(csv_file):
     # Join all waypoints with line breaks and add the final formatting
     waypoints_str = ",\n".join(waypoints)
     num_waypoints = len(waypoints)
-    cpp_array = f"""const double waypoints[{num_waypoints}][10] = {{
+    cpp_array = f"""const float waypoints[][10] = {{
 {waypoints_str}
 }};"""
     
@@ -33,6 +33,6 @@ def convert_csv_to_cpp_array(csv_file):
 
 # Example usage
 if __name__ == "__main__":
-    csv_file = "spread_XY_waypoint_test.csv"  # Replace with your CSV file path
+    csv_file = "complex_XYZ_waypoint_test.csv"  # Replace with your CSV file path
     cpp_array = convert_csv_to_cpp_array(csv_file)
     print(cpp_array)
