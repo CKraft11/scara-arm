@@ -16,6 +16,7 @@ const int LIMIT_SWITCH_2 = A4;
 const int STEP_PIN_3 = 5;    
 const int DIR_PIN_3 = 6;    
 const int ENABLE_PIN_3 = 2;  
+const int HALL_EFFECT_1 = A3;
 
 // Fourth Motor Pins (Z-Axis Rotation)
 const int STEP_PIN_4 = 9;    
@@ -124,7 +125,8 @@ const float angleWaypoints[][5] = {
     {-98.895795, 107.791591, 0.0, 0.0, -8.895795},
     {-8.895795, 107.791591, 50, 0.0, -98.895795},
     {-85.045468, -71.836577, 0.0, 0.0, 156.882045},
-    {85.045468, 71.836577, 50, 0.0, -156.882045},
+    {85.045468, 71.836577, 0, 360, -156.882045},
+    {85.045468, 71.836577, 0, 0, -156.882045},
     {-98.895795, 107.791591, 0.0, 0.0, -8.895795}
 };
 
@@ -133,7 +135,7 @@ bool isHomed = false;
 bool staticDebug = true; //set to false if you want it to home and nothing else
 bool movementComplete = false;
 int currentWaypoint = 0;
-const int TOTAL_WAYPOINTS = 5;  // Total number of waypoints in the array
+const int TOTAL_WAYPOINTS = 6;  // Total number of waypoints in the array
 
 // Add this function after constants but before setup()
 int32_t degreesToSteps(float degrees, int stepsPerRev) {
@@ -375,13 +377,36 @@ void home() {
    digitalWrite(ENABLE_PIN_4, HIGH);
 
 
-   MOTOR3.setSpeed(HOME_SLOW_SPEED);
+   MOTOR3.setSpeed(-HOME_SLOW_SPEED);
    MOTOR3.setAcceleration(0);
-   MOTOR3.move(degreesToSteps(-2000, STEPS_PER_REV_3));
+   while (digitalRead(HALL_EFFECT_1) == HIGH) {
+       MOTOR3.runSpeed();
+   }
+
+   digitalWrite(ENABLE_PIN_4, LOW);
+   delay(500);
+   MOTOR4.setSpeed(HOME_SLOW_SPEED);
+   MOTOR4.setAcceleration(0);
+   MOTOR4.move(degreesToSteps(-45, STEPS_PER_REV_4));
+   while (MOTOR4.distanceToGo() != 0) {
+       MOTOR4.run();
+   }
+   MOTOR4.stop();
+   digitalWrite(ENABLE_PIN_4, HIGH);
+   delay(500);
+   MOTOR3.setSpeed(-HOME_SLOW_SPEED);
+   MOTOR3.setAcceleration(0);
+   MOTOR3.move(degreesToSteps(-120, STEPS_PER_REV_3));
    while (MOTOR3.distanceToGo() != 0) {
        MOTOR3.run();
    }
-   MOTOR3.move(degreesToSteps(90, STEPS_PER_REV_3));
+   MOTOR3.stop();
+   MOTOR3.setSpeed(-HOME_SLOW_SPEED);
+   MOTOR3.setAcceleration(0);
+   while (digitalRead(HALL_EFFECT_1) == HIGH) {
+       MOTOR3.runSpeed();
+   }
+   MOTOR3.move(degreesToSteps(10, STEPS_PER_REV_3));
    while (MOTOR3.distanceToGo() != 0) {
        MOTOR3.run();
    }
@@ -389,25 +414,6 @@ void home() {
    delay(1000);
    digitalWrite(ENABLE_PIN_4, LOW);
 
-//    EndEffectorAngles targetAngles = endEffectorMovement(15, 360);
-
-//    MOTOR4.setSpeed(HOME_SLOW_SPEED);
-//    MOTOR4.setAcceleration(0);
-//    MOTOR4.move(degreesToSteps(targetAngles.motor4_angle, STEPS_PER_REV_4));
-//    while (MOTOR4.distanceToGo() != 0) {
-//        MOTOR4.run();
-//    }
-//    MOTOR4.stop();
-//    delay(1000);
-
-//    MOTOR3.setSpeed(HOME_SLOW_SPEED);
-//    MOTOR3.setAcceleration(0);
-//    MOTOR3.move(degreesToSteps(targetAngles.motor3_angle, STEPS_PER_REV_3));
-//    while (MOTOR3.distanceToGo() != 0) {
-//        MOTOR3.run();
-//    }
-//    MOTOR3.stop();
-//    delay(1000);
    MOTOR1.setSpeed(500);
    MOTOR1.setAcceleration(0);
    
@@ -515,6 +521,7 @@ void setup() {
   // Configure limit switch pin as input with pullup
   pinMode(LIMIT_SWITCH_1, INPUT_PULLUP);
   pinMode(LIMIT_SWITCH_2, INPUT_PULLUP);
+  pinMode(HALL_EFFECT_1, INPUT_PULLUP);
   
   // Configure motor pins
   pinMode(ENABLE_PIN_1, OUTPUT);
