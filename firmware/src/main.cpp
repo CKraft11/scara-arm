@@ -27,16 +27,16 @@ const int BASE_STEPS_PER_REV = 200;
 
 // Gear Ratios for each motor
 const float GEAR_RATIO_1 = 12.45;    // Physical gear ratio is 12.25 but this is calibrated
-const float GEAR_RATIO_2 = 19.0/3.0;    // Example ratio for arm motor
+const float GEAR_RATIO_2 = 5.7;    // Example ratio for arm motor
 const int GEAR_RATIO_3 = 3;    // Example ratio for Z-axis linear
 const int GEAR_RATIO_4 = 3;    // Example ratio for Z-axis rotation
 
 // Motor 1 Configuration (XY Base)
 const int MICRO_STEPS_1 = 16;  
 const int STEPS_PER_REV_1 = BASE_STEPS_PER_REV * MICRO_STEPS_1 * GEAR_RATIO_1;
-const float MAX_SPEED_1 = 4000;
-const float RUNNING_SPEED_1 = 3500;
-const float ACCELERATION_1 = 4000;
+const float MAX_SPEED_1 = 8000;
+const float RUNNING_SPEED_1 = 7000;
+const float ACCELERATION_1 = 8000;
 
 // Motor 2 Configuration (XY Arm)
 const int MICRO_STEPS_2 = 16;  
@@ -291,26 +291,13 @@ void moveToAngles(float theta1Target, float theta2Target) {
 }
 
 void home() {
+   // First ensure MOTOR2 is disabled during MOTOR1's initial movement
+   digitalWrite(ENABLE_PIN_2, HIGH);  // Disable MOTOR2 (HIGH = disabled)
+   
    MOTOR1.setSpeed(500);
    MOTOR1.setAcceleration(0);
-   MOTOR2.setSpeed(-250);
-   MOTOR2.setAcceleration(0);
-
-   MOTOR2.move(degreesToSteps(3, STEPS_PER_REV_1));
-   while (MOTOR2.distanceToGo() != 0) {
-       MOTOR2.run();
-   }
-   MOTOR2.stop();
-   delay(1000);
    
-   MOTOR1.setSpeed(HOME_SLOW_SPEED);
-
-   MOTOR1.move(degreesToSteps(-3, STEPS_PER_REV_1));
-   while (MOTOR1.distanceToGo() != 0) {
-       MOTOR1.run();
-   }
-   MOTOR1.stop();
-   delay(1000);
+   // Original MOTOR2 pre-movement can be removed since motor is disabled
    
    MOTOR1.setSpeed(HOME_SLOW_SPEED);
    while (digitalRead(LIMIT_SWITCH_1) == HIGH) {
@@ -347,6 +334,11 @@ void home() {
    MOTOR1.stop();
    delay(1000);
 
+   // Now that MOTOR1 is at its limit switch, we can safely enable MOTOR2
+   digitalWrite(ENABLE_PIN_2, LOW);  // Enable MOTOR2
+   delay(100);  // Give a small delay for the enable to take effect
+
+   // Now continue with MOTOR2 homing sequence as before
    MOTOR2.setSpeed(-HOME_SLOW_SPEED/2);
    while (digitalRead(LIMIT_SWITCH_2) == HIGH) {
        MOTOR2.runSpeed();
@@ -455,7 +447,7 @@ void loop() {
                 currentWaypoint = 0;  // Reset to start
                 Serial.println("Completed full sequence");
             }
-            delay(250);
+            delay(50);
         }
     }
 }
