@@ -50,17 +50,17 @@ const float ACCELERATION_2 = 4000*SPEED_MULTIPLIER;
 // Motor 3 Configuration (Z Linear)
 const int MICRO_STEPS_3 = 16;  
 const int STEPS_PER_REV_3 = BASE_STEPS_PER_REV * MICRO_STEPS_3 * GEAR_RATIO_3;
-const float MAX_SPEED_3 = 16000;
-const float RUNNING_SPEED_3 = 14000;
-const float ACCELERATION_3 = 16000;
+const float MAX_SPEED_3 = 30000;
+const float RUNNING_SPEED_3 = 26250;
+const float ACCELERATION_3 = 30000;
 const float SCREW_PITCH = 15; //(mm per revolution)
 
 // Motor 4 Configuration (Z Rotation)
 const int MICRO_STEPS_4 = 16;
 const int STEPS_PER_REV_4 = BASE_STEPS_PER_REV * MICRO_STEPS_4 * GEAR_RATIO_4;
-const float MAX_SPEED_4 = 16000;
-const float RUNNING_SPEED_4 = 14000;
-const float ACCELERATION_4 = 16000;
+const float MAX_SPEED_4 = 30000;
+const float RUNNING_SPEED_4 = 26250;
+const float ACCELERATION_4 = 30000;
 
 const float HOME_BACKOFF_DEGREES = 5;      // Degrees to back off after first contact
 const float HOME_SLOW_SPEED = 1000;         // Slower homing speed for final approach
@@ -87,12 +87,12 @@ bool isAngleSafe(float theta1, float theta2) {
 // Add these global variables at the top with your other declarations
 float longestD2G;
 char longestMotor;
-float motor1D2G, motor2D2G;
-float motor1StepDelay, motor2StepDelay;
+float motor1D2G, motor2D2G, motor3D2G, motor4D2G;
+float motor1StepDelay, motor2StepDelay, motor3StepDelay, motor4StepDelay;
 float stepCounter;
-float motor1StepCounter, motor2StepCounter;
+float motor1StepCounter, motor2StepCounter, motor3StepCounter, motor4StepCounter;
 float lastD2G;
-int motor1Dir, motor2Dir;
+int motor1Dir, motor2Dir, motor3Dir, motor4Dir;
 const int minPulseWidth = 20;
 
 // Create stepper instances
@@ -119,18 +119,18 @@ const double waypoints[5][10] = {
     {-150.000000, -250.000000, 0.000000, 0.000000, 85.045468, 71.836577, -156.882045, 0.0, 0.000000, 0.0},
     {150.000000, 150.000000, 0.000000, 0.000000, -98.895795, 107.791591, -8.895795, 0.0, 0.000000, 0.0}
 };
-
-const float angleWaypoints[][2] = {
-    {-98.895795, 107.791591},
-    {-8.895795, 107.791591},
-    {-85.045468, -71.836577},
-    {85.045468, 71.836577},
-    {-98.895795, 107.791591}
+// Format: {theta1, theta2, z_height, rotation, theta3}
+const float angleWaypoints[][5] = {
+    {-98.895795, 107.791591, 0.0, 0.0, -8.895795},
+    {-8.895795, 107.791591, 50, 0.0, -98.895795},
+    {-85.045468, -71.836577, 0.0, 0.0, 156.882045},
+    {85.045468, 71.836577, 50, 0.0, -156.882045},
+    {-98.895795, 107.791591, 0.0, 0.0, -8.895795}
 };
 
 // Global variables to track movement and waypoints
 bool isHomed = false;
-bool staticDebug = false; //set to false if you want it to home and nothing else
+bool staticDebug = true; //set to false if you want it to home and nothing else
 bool movementComplete = false;
 int currentWaypoint = 0;
 const int TOTAL_WAYPOINTS = 5;  // Total number of waypoints in the array
@@ -191,37 +191,60 @@ void coordinatedMotor2Move() {
     }
 }
 
-void moveToAngles(float theta1Target, float theta2Target) {
+void coordinatedMotor3Move() {
+    if (motor3StepDelay > 0) {
+        if (motor3StepCounter < stepCounter) {
+            digitalWrite(STEP_PIN_3, HIGH);
+            delayMicroseconds(minPulseWidth);
+            digitalWrite(STEP_PIN_3, LOW);
+
+            MOTOR3.setCurrentPosition(MOTOR3.currentPosition() + motor3Dir);
+            motor3StepCounter += motor3StepDelay;
+        }
+    }
+}
+
+void coordinatedMotor4Move() {
+    if (motor4StepDelay > 0) {
+        if (motor4StepCounter < stepCounter) {
+            digitalWrite(STEP_PIN_4, HIGH);
+            delayMicroseconds(minPulseWidth);
+            digitalWrite(STEP_PIN_4, LOW);
+
+            MOTOR4.setCurrentPosition(MOTOR4.currentPosition() + motor4Dir);
+            motor4StepCounter += motor4StepDelay;
+        }
+    }
+}
+
+void moveToAngles(float theta1Target, float theta2Target, float theta3Target, float theta4Target) {
     static int stage = 0;
 
     if (stage == 0) {
         // Safety check
         if (!isAngleSafe(theta1Target, theta2Target)) {
             Serial.println("Warning: Target angles out of safe range!");
-            Serial.print("Requested: Theta1=");
-            Serial.print(theta1Target);
-            Serial.print(", Theta2=");
-            Serial.println(theta2Target);
             stage = 0;
             movementComplete = true;
             return;
         }
 
-        Serial.print("Moving to angles - Theta1: ");
-        Serial.print(theta1Target);
-        Serial.print(", Theta2: ");
-        Serial.println(theta2Target);
-
         // Step 1: Calculate who has the farthest distance to travel
         MOTOR1.setMaxSpeed(MAX_SPEED_1);
         MOTOR2.setMaxSpeed(MAX_SPEED_2);
+        MOTOR3.setMaxSpeed(MAX_SPEED_3);
+        MOTOR4.setMaxSpeed(MAX_SPEED_4);
         
         // Convert target angles to steps
         int32_t motor1TargetSteps = degreesToSteps(theta1Target, STEPS_PER_REV_1);
         int32_t motor2TargetSteps = degreesToSteps(theta2Target, STEPS_PER_REV_2);
+        int32_t motor3TargetSteps = degreesToSteps(theta3Target, STEPS_PER_REV_3);
+        int32_t motor4TargetSteps = degreesToSteps(theta4Target, STEPS_PER_REV_4);
         
         motor1D2G = abs(motor1TargetSteps - MOTOR1.currentPosition());
         motor2D2G = abs(motor2TargetSteps - MOTOR2.currentPosition());
+        motor3D2G = abs(motor3TargetSteps - MOTOR3.currentPosition());
+        motor4D2G = abs(motor4TargetSteps - MOTOR4.currentPosition());
         
         longestD2G = 0;
         
@@ -229,92 +252,119 @@ void moveToAngles(float theta1Target, float theta2Target) {
             longestD2G = motor1D2G;
             longestMotor = '1';
         }
-        
         if (motor2D2G > longestD2G) {
             longestD2G = motor2D2G;
             longestMotor = '2';
         }
+        if (motor3D2G > longestD2G) {
+            longestD2G = motor3D2G;
+            longestMotor = '3';
+        }
+        if (motor4D2G > longestD2G) {
+            longestD2G = motor4D2G;
+            longestMotor = '4';
+        }
 
         // Step 2: Calculate step delays for synchronized movement
-        if (motor1D2G > 0) {
-            motor1StepDelay = longestD2G / motor1D2G;
-        } else {
-            motor1StepDelay = 0;
-        }
-        
-        if (motor2D2G > 0) {
-            motor2StepDelay = longestD2G / motor2D2G;
-        } else {
-            motor2StepDelay = 0;
-        }
+        motor1StepDelay = (motor1D2G > 0) ? longestD2G / motor1D2G : 0;
+        motor2StepDelay = (motor2D2G > 0) ? longestD2G / motor2D2G : 0;
+        motor3StepDelay = (motor3D2G > 0) ? longestD2G / motor3D2G : 0;
+        motor4StepDelay = (motor4D2G > 0) ? longestD2G / motor4D2G : 0;
 
         // Step 3: Initialize step counters
         stepCounter = 0;
         motor1StepCounter = motor1StepDelay - 1;
         motor2StepCounter = motor2StepDelay - 1;
+        motor3StepCounter = motor3StepDelay - 1;
+        motor4StepCounter = motor4StepDelay - 1;
 
         // Step 4: Set target positions based on longest moving motor
-        if (longestMotor == '1') {
-            MOTOR1.moveTo(motor1TargetSteps);
-            lastD2G = MOTOR1.distanceToGo();
-            MOTOR2.setCurrentPosition(MOTOR2.currentPosition());
-            MOTOR2.moveTo(motor2TargetSteps);
-        } else {
-            MOTOR2.moveTo(motor2TargetSteps);
-            lastD2G = MOTOR2.distanceToGo();
-            MOTOR1.setCurrentPosition(MOTOR1.currentPosition());
-            MOTOR1.moveTo(motor1TargetSteps);
+        switch(longestMotor) {
+            case '1':
+                MOTOR1.moveTo(motor1TargetSteps);
+                lastD2G = MOTOR1.distanceToGo();
+                break;
+            case '2':
+                MOTOR2.moveTo(motor2TargetSteps);
+                lastD2G = MOTOR2.distanceToGo();
+                break;
+            case '3':
+                MOTOR3.moveTo(motor3TargetSteps);
+                lastD2G = MOTOR3.distanceToGo();
+                break;
+            case '4':
+                MOTOR4.moveTo(motor4TargetSteps);
+                lastD2G = MOTOR4.distanceToGo();
+                break;
         }
+        
+        // Set target positions for all motors
+        MOTOR1.moveTo(motor1TargetSteps);
+        MOTOR2.moveTo(motor2TargetSteps);
+        MOTOR3.moveTo(motor3TargetSteps);
+        MOTOR4.moveTo(motor4TargetSteps);
 
-        // Step 5: Set directions - positive angles should move CCW
-        if (MOTOR1.distanceToGo() < 0) {
-            digitalWrite(DIR_PIN_1, LOW);  // CW for negative angles
-            motor1Dir = -1;
-        } else {
-            digitalWrite(DIR_PIN_1, HIGH); // CCW for positive angles
-            motor1Dir = 1;
-        }
+        // Step 5: Set directions for all motors
+        motor1Dir = (MOTOR1.distanceToGo() < 0) ? -1 : 1;
+        motor2Dir = (MOTOR2.distanceToGo() < 0) ? -1 : 1;
+        motor3Dir = (MOTOR3.distanceToGo() < 0) ? -1 : 1;
+        motor4Dir = (MOTOR4.distanceToGo() < 0) ? -1 : 1;
 
-        if (MOTOR2.distanceToGo() < 0) {
-            digitalWrite(DIR_PIN_2, LOW);  // CW for negative angles
-            motor2Dir = -1;
-        } else {
-            digitalWrite(DIR_PIN_2, HIGH); // CCW for positive angles
-            motor2Dir = 1;
-        }
+        digitalWrite(DIR_PIN_1, (motor1Dir < 0) ? LOW : HIGH);
+        digitalWrite(DIR_PIN_2, (motor2Dir < 0) ? LOW : HIGH);
+        digitalWrite(DIR_PIN_3, (motor3Dir < 0) ? LOW : HIGH);
+        digitalWrite(DIR_PIN_4, (motor4Dir < 0) ? LOW : HIGH);
 
         stage = 1;
     }
 
     if (stage == 1) {
         // Run motors with synchronized movement
-        if (longestMotor == '1') {
-            if (lastD2G != MOTOR1.distanceToGo()) {
-                stepCounter += motor1StepDelay;
-                lastD2G = MOTOR1.distanceToGo();
+        if (lastD2G != 0) {  // Only update step counter if we're still moving
+            switch(longestMotor) {
+                case '1':
+                    if (lastD2G != MOTOR1.distanceToGo()) {
+                        stepCounter += motor1StepDelay;
+                        lastD2G = MOTOR1.distanceToGo();
+                    }
+                    MOTOR1.run();
+                    break;
+                case '2':
+                    if (lastD2G != MOTOR2.distanceToGo()) {
+                        stepCounter += motor2StepDelay;
+                        lastD2G = MOTOR2.distanceToGo();
+                    }
+                    MOTOR2.run();
+                    break;
+                case '3':
+                    if (lastD2G != MOTOR3.distanceToGo()) {
+                        stepCounter += motor3StepDelay;
+                        lastD2G = MOTOR3.distanceToGo();
+                    }
+                    MOTOR3.run();
+                    break;
+                case '4':
+                    if (lastD2G != MOTOR4.distanceToGo()) {
+                        stepCounter += motor4StepDelay;
+                        lastD2G = MOTOR4.distanceToGo();
+                    }
+                    MOTOR4.run();
+                    break;
             }
-            
-            MOTOR1.run();
-            coordinatedMotor2Move();
-        } else {
-            if (lastD2G != MOTOR2.distanceToGo()) {
-                stepCounter += motor2StepDelay;
-                lastD2G = MOTOR2.distanceToGo();
-            }
-            
-            MOTOR2.run();
-            coordinatedMotor1Move();
+
+            // Run coordinated moves for all other motors
+            if (longestMotor != '1') coordinatedMotor1Move();
+            if (longestMotor != '2') coordinatedMotor2Move();
+            if (longestMotor != '3') coordinatedMotor3Move();
+            if (longestMotor != '4') coordinatedMotor4Move();
         }
 
         // Check if movement is complete
-        if (MOTOR1.distanceToGo() == 0 && MOTOR2.distanceToGo() == 0) {
+        if (MOTOR1.distanceToGo() == 0 && MOTOR2.distanceToGo() == 0 && 
+            MOTOR3.distanceToGo() == 0 && MOTOR4.distanceToGo() == 0) {
             stage = 0;
             movementComplete = true;
             Serial.println("Synchronized movement completed");
-            Serial.print("Final positions - Theta1 steps: ");
-            Serial.print(MOTOR1.currentPosition());
-            Serial.print(", Theta2 steps: ");
-            Serial.println(MOTOR2.currentPosition());
         }
     }
 }
@@ -455,6 +505,8 @@ void home() {
    // After moving to the straight-out position, set this as our zero
    MOTOR1.setCurrentPosition(0);
    MOTOR2.setCurrentPosition(0);
+   MOTOR3.setCurrentPosition(0);
+   MOTOR4.setCurrentPosition(0);
    Serial.println("Homing complete - Position reset to 0,0");
    isHomed = true;
 }
@@ -507,8 +559,16 @@ void loop() {
                 moveStarted = true;
             }
             
-            moveToAngles(angleWaypoints[currentWaypoint][0], 
-                        angleWaypoints[currentWaypoint][1]);
+            // Convert z_height and rotation to motor angles using endEffectorMovement
+            EndEffectorAngles endEffectorAngles = endEffectorMovement(
+                angleWaypoints[currentWaypoint][2],  // z_height
+                -(angleWaypoints[currentWaypoint][3]+angleWaypoints[currentWaypoint][4])   // rotation
+            );
+            
+            moveToAngles(angleWaypoints[currentWaypoint][0],   // theta1
+                        angleWaypoints[currentWaypoint][1],    // theta2
+                        endEffectorAngles.motor3_angle,        // Convert z and rotation to motor3 angle
+                        endEffectorAngles.motor4_angle);       // Convert z and rotation to motor4 angle
             
             if (movementComplete) {
                 Serial.println("Waypoint reached");
