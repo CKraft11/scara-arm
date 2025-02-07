@@ -53,6 +53,7 @@ const int STEPS_PER_REV_3 = BASE_STEPS_PER_REV * MICRO_STEPS_3 * GEAR_RATIO_3;
 const float MAX_SPEED_3 = 16000;
 const float RUNNING_SPEED_3 = 14000;
 const float ACCELERATION_3 = 16000;
+const float SCREW_PITCH = 15; //(mm per revolution)
 
 // Motor 4 Configuration (Z Rotation)
 const int MICRO_STEPS_4 = 16;
@@ -129,6 +130,7 @@ const float angleWaypoints[][2] = {
 
 // Global variables to track movement and waypoints
 bool isHomed = false;
+bool staticDebug = false; //set to false if you want it to home and nothing else
 bool movementComplete = false;
 int currentWaypoint = 0;
 const int TOTAL_WAYPOINTS = 5;  // Total number of waypoints in the array
@@ -136,6 +138,31 @@ const int TOTAL_WAYPOINTS = 5;  // Total number of waypoints in the array
 // Add this function after constants but before setup()
 int32_t degreesToSteps(float degrees, int stepsPerRev) {
     return static_cast<int32_t>((degrees / 360.0) * stepsPerRev);
+}
+
+struct EndEffectorAngles {
+    float motor3_angle;
+    float motor4_angle;
+};
+
+EndEffectorAngles endEffectorMovement(float target_height_mm, float target_rotation_deg) {
+    EndEffectorAngles angles;
+    
+    // For pure height change (no rotation):
+    // Motor 3 rotates X degrees, Motor 4 stays still
+    // 3 motor revolutions (1080°) = 15mm height change
+    float height_motor4_angle = (target_height_mm / SCREW_PITCH)*360;
+    
+    // For pure rotation (no height change):
+    // Both motors need to rotate the same amount
+    // 3 motor revolutions (1080°) = 360° output rotation
+    float rotation_angle = (target_rotation_deg / 360)*360;
+    
+    // Combine the movements
+    angles.motor4_angle = -(height_motor4_angle + rotation_angle);
+    angles.motor3_angle = -rotation_angle;
+    
+    return angles;
 }
 
 void coordinatedMotor1Move() {
@@ -295,7 +322,42 @@ void moveToAngles(float theta1Target, float theta2Target) {
 void home() {
    // First ensure MOTOR2 is disabled during MOTOR1's initial movement
    digitalWrite(ENABLE_PIN_2, HIGH);  // Disable MOTOR2 (HIGH = disabled)
-   
+   digitalWrite(ENABLE_PIN_4, HIGH);
+
+
+   MOTOR3.setSpeed(HOME_SLOW_SPEED);
+   MOTOR3.setAcceleration(0);
+   MOTOR3.move(degreesToSteps(-2000, STEPS_PER_REV_3));
+   while (MOTOR3.distanceToGo() != 0) {
+       MOTOR3.run();
+   }
+   MOTOR3.move(degreesToSteps(90, STEPS_PER_REV_3));
+   while (MOTOR3.distanceToGo() != 0) {
+       MOTOR3.run();
+   }
+   MOTOR3.stop();
+   delay(1000);
+   digitalWrite(ENABLE_PIN_4, LOW);
+
+//    EndEffectorAngles targetAngles = endEffectorMovement(15, 360);
+
+//    MOTOR4.setSpeed(HOME_SLOW_SPEED);
+//    MOTOR4.setAcceleration(0);
+//    MOTOR4.move(degreesToSteps(targetAngles.motor4_angle, STEPS_PER_REV_4));
+//    while (MOTOR4.distanceToGo() != 0) {
+//        MOTOR4.run();
+//    }
+//    MOTOR4.stop();
+//    delay(1000);
+
+//    MOTOR3.setSpeed(HOME_SLOW_SPEED);
+//    MOTOR3.setAcceleration(0);
+//    MOTOR3.move(degreesToSteps(targetAngles.motor3_angle, STEPS_PER_REV_3));
+//    while (MOTOR3.distanceToGo() != 0) {
+//        MOTOR3.run();
+//    }
+//    MOTOR3.stop();
+//    delay(1000);
    MOTOR1.setSpeed(500);
    MOTOR1.setAcceleration(0);
    
@@ -404,15 +466,23 @@ void setup() {
   
   // Configure motor pins
   pinMode(ENABLE_PIN_1, OUTPUT);
-  digitalWrite(ENABLE_PIN_1, LOW); // Enable the motor
+  digitalWrite(ENABLE_PIN_1, LOW); // Enable motor 1
   pinMode(ENABLE_PIN_2, OUTPUT);
-  digitalWrite(ENABLE_PIN_2, LOW); // Enable the motor
+  digitalWrite(ENABLE_PIN_2, LOW); // Enable motor 2
+  pinMode(ENABLE_PIN_3, OUTPUT);
+  digitalWrite(ENABLE_PIN_3, LOW); // Enable motor 3
+  pinMode(ENABLE_PIN_4, OUTPUT);
+  digitalWrite(ENABLE_PIN_4, LOW); // Enable motor 4
   
   // Configure motor parameters
   MOTOR1.setMaxSpeed(MAX_SPEED_1);
   MOTOR1.setAcceleration(ACCELERATION_1);
   MOTOR2.setMaxSpeed(MAX_SPEED_2);
   MOTOR2.setAcceleration(ACCELERATION_2);
+  MOTOR3.setMaxSpeed(MAX_SPEED_3);
+  MOTOR3.setAcceleration(ACCELERATION_3);
+  MOTOR4.setMaxSpeed(MAX_SPEED_4);
+  MOTOR4.setAcceleration(ACCELERATION_4);
   
   // Start serial for debugging (optional)
   Serial.begin(9600);
@@ -428,28 +498,30 @@ void setup() {
 void loop() {
     static bool initialMovementDone = false;
     static bool moveStarted = false;
-    
-    if (isHomed && !initialMovementDone) {
-        if (!moveStarted) {
-            Serial.print("Moving to waypoint ");
-            Serial.println(currentWaypoint);
-            moveStarted = true;
-        }
-        
-        moveToAngles(angleWaypoints[currentWaypoint][0], 
-                    angleWaypoints[currentWaypoint][1]);
-        
-        if (movementComplete) {
-            Serial.println("Waypoint reached");
-            movementComplete = false;
-            moveStarted = false;
-            currentWaypoint++;
-            
-            if (currentWaypoint >= 5) {
-                currentWaypoint = 0;  // Reset to start
-                Serial.println("Completed full sequence");
+
+    if(staticDebug) {
+        if (isHomed && !initialMovementDone) {
+            if (!moveStarted) {
+                Serial.print("Moving to waypoint ");
+                Serial.println(currentWaypoint);
+                moveStarted = true;
             }
-            delay(50);
+            
+            moveToAngles(angleWaypoints[currentWaypoint][0], 
+                        angleWaypoints[currentWaypoint][1]);
+            
+            if (movementComplete) {
+                Serial.println("Waypoint reached");
+                movementComplete = false;
+                moveStarted = false;
+                currentWaypoint++;
+                
+                if (currentWaypoint >= 5) {
+                    currentWaypoint = 0;  // Reset to start
+                    Serial.println("Completed full sequence");
+                }
+                delay(50);
+            }
         }
-    }
+    }    
 }
