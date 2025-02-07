@@ -33,6 +33,6 @@ def convert_csv_to_cpp_array(csv_file):
 
 # Example usage
 if __name__ == "__main__":
-    csv_file = "simple_XY_waypoint_test.csv"  # Replace with your CSV file path
+    csv_file = "spread_XY_waypoint_test.csv"  # Replace with your CSV file path
     cpp_array = convert_csv_to_cpp_array(csv_file)
     print(cpp_array)

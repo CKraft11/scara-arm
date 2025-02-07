@@ -31,19 +31,21 @@ const float GEAR_RATIO_2 = 5.7;    // Example ratio for arm motor
 const int GEAR_RATIO_3 = 3;    // Example ratio for Z-axis linear
 const int GEAR_RATIO_4 = 3;    // Example ratio for Z-axis rotation
 
+const float SPEED_MULTIPLIER = 1.5;
+
 // Motor 1 Configuration (XY Base)
 const int MICRO_STEPS_1 = 16;  
 const int STEPS_PER_REV_1 = BASE_STEPS_PER_REV * MICRO_STEPS_1 * GEAR_RATIO_1;
-const float MAX_SPEED_1 = 8000;
-const float RUNNING_SPEED_1 = 7000;
-const float ACCELERATION_1 = 8000;
+const float MAX_SPEED_1 = 8000*SPEED_MULTIPLIER;
+const float RUNNING_SPEED_1 = 7000*SPEED_MULTIPLIER;
+const float ACCELERATION_1 = 8000*SPEED_MULTIPLIER;
 
 // Motor 2 Configuration (XY Arm)
 const int MICRO_STEPS_2 = 16;  
 const int STEPS_PER_REV_2 = BASE_STEPS_PER_REV * MICRO_STEPS_2 * GEAR_RATIO_2;
-const float MAX_SPEED_2 = 4000;
-const float RUNNING_SPEED_2 = 3500;
-const float ACCELERATION_2 = 4000;
+const float MAX_SPEED_2 = 4000*SPEED_MULTIPLIER;
+const float RUNNING_SPEED_2 = 3500*SPEED_MULTIPLIER;
+const float ACCELERATION_2 = 4000*SPEED_MULTIPLIER;
 
 // Motor 3 Configuration (Z Linear)
 const int MICRO_STEPS_3 = 16;  
@@ -109,19 +111,19 @@ AccelStepper MOTOR4(AccelStepper::DRIVER, STEP_PIN_4, DIR_PIN_4);
 // [7] = StopAtPoint (1.0 = stop, 0.0 = don't stop)
 // [8] = Duration (seconds)
 // [9] = LinearPath (1.0 = linear movement, 0.0 = curved movement)
-const float waypoints[5][10] = {
-    {150.0, 150.0, 0.0, 0.0, -98.895795, 107.791591, -8.895795, 0.0, 0.0, 0.0},
-    {250.0, 150.0, 0.0, 0.0, -66.882045, 71.836577, -4.954532, 0.0, 0.0, 0.0},
-    {250.0, 50.0, 0.0, 0.0, -56.221513, 89.823161, -33.601648, 0.0, 0.0, 0.0},
-    {150.0, 50.0, 0.0, 0.0, -82.381766, 127.893635, -45.511868, 0.0, 0.0, 0.0},
-    {150.0, 150.0, 0.0, 0.0, -98.895795, 107.791591, -8.895795, 0.0, 0.0, 0.0}
+const double waypoints[5][10] = {
+    {150.000000, 150.000000, 0.000000, 0.000000, -98.895795, 107.791591, -8.895795, 0.0, 0.000000, 0.0},
+    {150.000000, -150.000000, 0.000000, 0.000000, -8.895795, 107.791591, -98.895795, 0.0, 0.000000, 0.0},
+    {-150.000000, 250.000000, 0.000000, 0.000000, -85.045468, -71.836577, 156.882045, 0.0, 0.000000, 0.0},
+    {-150.000000, -250.000000, 0.000000, 0.000000, 85.045468, 71.836577, -156.882045, 0.0, 0.000000, 0.0},
+    {150.000000, 150.000000, 0.000000, 0.000000, -98.895795, 107.791591, -8.895795, 0.0, 0.000000, 0.0}
 };
 
 const float angleWaypoints[][2] = {
     {-98.895795, 107.791591},
-    {-66.882045, 71.836577},
-    {-56.221513, 89.823161},
-    {-82.381766, 127.893635},
+    {-8.895795, 107.791591},
+    {-85.045468, -71.836577},
+    {85.045468, 71.836577},
     {-98.895795, 107.791591}
 };
 
