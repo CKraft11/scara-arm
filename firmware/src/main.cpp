@@ -26,8 +26,8 @@ const int ENABLE_PIN_4 = 4;
 const int BASE_STEPS_PER_REV = 200;  
 
 // Gear Ratios for each motor
-const int GEAR_RATIO_1 = 12.25;    // Example ratio for base motor
-const int GEAR_RATIO_2 = 1;    // Example ratio for arm motor
+const float GEAR_RATIO_1 = 12.45;    // Physical gear ratio is 12.25 but this is calibrated
+const float GEAR_RATIO_2 = 19.0/3.0;    // Example ratio for arm motor
 const int GEAR_RATIO_3 = 3;    // Example ratio for Z-axis linear
 const int GEAR_RATIO_4 = 3;    // Example ratio for Z-axis rotation
 
@@ -60,9 +60,20 @@ const float RUNNING_SPEED_4 = 14000;
 const float ACCELERATION_4 = 16000;
 
 const float HOME_BACKOFF_DEGREES = 5;      // Degrees to back off after first contact
-const float HOME_SLOW_SPEED = 200.0;         // Slower homing speed for final approach
-const float M1_HOME_OFFSET = 115;     // Final position offset from home
-const float M2_HOME_OFFSET = 155;
+const float HOME_SLOW_SPEED = 1000;         // Slower homing speed for final approach
+const float M1_HOME_OFFSET = 112.9;     // Final position offset from home
+const float M2_HOME_OFFSET = 159;
+
+// Safety limits for angles
+const float THETA1_MIN = -110;  // Adjust these limits based on your robot's
+const float THETA1_MAX = 110;   // mechanical constraints
+const float THETA2_MIN = -155;     // Typically elbow angle has different
+const float THETA2_MAX = 155;   // constraints than shoulder
+
+bool isAngleSafe(float theta1, float theta2) {
+    return (theta1 >= THETA1_MIN && theta1 <= THETA1_MAX &&
+            theta2 >= THETA2_MIN && theta2 <= THETA2_MAX);
+}
 
 // Add these global variables at the top with your other declarations
 float longestD2G;
@@ -100,12 +111,169 @@ const double waypoints[5][10] = {
     {150.000000, 150.000000, 0.000000, 0.000000, -98.895795, 107.791591, -8.895795, 0.0, 0.000000, 0.0}
 };
 
-// Global variable to track homing state
+// Global variables to track movement and waypoints
 bool isHomed = false;
+bool movementComplete = false;
+int currentWaypoint = 0;
+const int TOTAL_WAYPOINTS = 5;  // Total number of waypoints in the array
 
 // Add this function after constants but before setup()
 int32_t degreesToSteps(float degrees, int stepsPerRev) {
     return static_cast<int32_t>((degrees / 360.0) * stepsPerRev);
+}
+
+void coordinatedMotor1Move() {
+    if (motor1StepDelay > 0) {
+        if (motor1StepCounter < stepCounter) {
+            digitalWrite(STEP_PIN_1, HIGH);
+            delayMicroseconds(minPulseWidth);
+            digitalWrite(STEP_PIN_1, LOW);
+
+            MOTOR1.setCurrentPosition(MOTOR1.currentPosition() + motor1Dir);
+            motor1StepCounter += motor1StepDelay;
+        }
+    }
+}
+
+void coordinatedMotor2Move() {
+    if (motor2StepDelay > 0) {
+        if (motor2StepCounter < stepCounter) {
+            digitalWrite(STEP_PIN_2, HIGH);
+            delayMicroseconds(minPulseWidth);
+            digitalWrite(STEP_PIN_2, LOW);
+
+            MOTOR2.setCurrentPosition(MOTOR2.currentPosition() + motor2Dir);
+            motor2StepCounter += motor2StepDelay;
+        }
+    }
+}
+
+void moveToAngles(float theta1Target, float theta2Target) {
+    static int stage = 0;
+
+    if (stage == 0) {
+        // Safety check
+        if (!isAngleSafe(theta1Target, theta2Target)) {
+            Serial.println("Warning: Target angles out of safe range!");
+            Serial.print("Requested: Theta1=");
+            Serial.print(theta1Target);
+            Serial.print(", Theta2=");
+            Serial.println(theta2Target);
+            stage = 0;
+            movementComplete = true;
+            return;
+        }
+
+        Serial.print("Moving to angles - Theta1: ");
+        Serial.print(theta1Target);
+        Serial.print(", Theta2: ");
+        Serial.println(theta2Target);
+
+        // Step 1: Calculate who has the farthest distance to travel
+        MOTOR1.setMaxSpeed(MAX_SPEED_1);
+        MOTOR2.setMaxSpeed(MAX_SPEED_2);
+        
+        // Convert target angles to steps
+        int32_t motor1TargetSteps = degreesToSteps(theta1Target, STEPS_PER_REV_1);
+        int32_t motor2TargetSteps = degreesToSteps(theta2Target, STEPS_PER_REV_2);
+        
+        motor1D2G = abs(motor1TargetSteps - MOTOR1.currentPosition());
+        motor2D2G = abs(motor2TargetSteps - MOTOR2.currentPosition());
+        
+        longestD2G = 0;
+        
+        if (motor1D2G > longestD2G) {
+            longestD2G = motor1D2G;
+            longestMotor = '1';
+        }
+        
+        if (motor2D2G > longestD2G) {
+            longestD2G = motor2D2G;
+            longestMotor = '2';
+        }
+
+        // Step 2: Calculate step delays for synchronized movement
+        if (motor1D2G > 0) {
+            motor1StepDelay = longestD2G / motor1D2G;
+        } else {
+            motor1StepDelay = 0;
+        }
+        
+        if (motor2D2G > 0) {
+            motor2StepDelay = longestD2G / motor2D2G;
+        } else {
+            motor2StepDelay = 0;
+        }
+
+        // Step 3: Initialize step counters
+        stepCounter = 0;
+        motor1StepCounter = motor1StepDelay - 1;
+        motor2StepCounter = motor2StepDelay - 1;
+
+        // Step 4: Set target positions based on longest moving motor
+        if (longestMotor == '1') {
+            MOTOR1.moveTo(motor1TargetSteps);
+            lastD2G = MOTOR1.distanceToGo();
+            MOTOR2.setCurrentPosition(MOTOR2.currentPosition());
+            MOTOR2.moveTo(motor2TargetSteps);
+        } else {
+            MOTOR2.moveTo(motor2TargetSteps);
+            lastD2G = MOTOR2.distanceToGo();
+            MOTOR1.setCurrentPosition(MOTOR1.currentPosition());
+            MOTOR1.moveTo(motor1TargetSteps);
+        }
+
+        // Step 5: Set directions - positive angles should move CCW
+        if (MOTOR1.distanceToGo() < 0) {
+            digitalWrite(DIR_PIN_1, LOW);  // CW for negative angles
+            motor1Dir = -1;
+        } else {
+            digitalWrite(DIR_PIN_1, HIGH); // CCW for positive angles
+            motor1Dir = 1;
+        }
+
+        if (MOTOR2.distanceToGo() < 0) {
+            digitalWrite(DIR_PIN_2, LOW);  // CW for negative angles
+            motor2Dir = -1;
+        } else {
+            digitalWrite(DIR_PIN_2, HIGH); // CCW for positive angles
+            motor2Dir = 1;
+        }
+
+        stage = 1;
+    }
+
+    if (stage == 1) {
+        // Run motors with synchronized movement
+        if (longestMotor == '1') {
+            if (lastD2G != MOTOR1.distanceToGo()) {
+                stepCounter += motor1StepDelay;
+                lastD2G = MOTOR1.distanceToGo();
+            }
+            
+            MOTOR1.run();
+            coordinatedMotor2Move();
+        } else {
+            if (lastD2G != MOTOR2.distanceToGo()) {
+                stepCounter += motor2StepDelay;
+                lastD2G = MOTOR2.distanceToGo();
+            }
+            
+            MOTOR2.run();
+            coordinatedMotor1Move();
+        }
+
+        // Check if movement is complete
+        if (MOTOR1.distanceToGo() == 0 && MOTOR2.distanceToGo() == 0) {
+            stage = 0;
+            movementComplete = true;
+            Serial.println("Synchronized movement completed");
+            Serial.print("Final positions - Theta1 steps: ");
+            Serial.print(MOTOR1.currentPosition());
+            Serial.print(", Theta2 steps: ");
+            Serial.println(MOTOR2.currentPosition());
+        }
+    }
 }
 
 void home() {
@@ -165,7 +333,7 @@ void home() {
    MOTOR1.stop();
    delay(1000);
 
-   MOTOR2.setSpeed(-HOME_SLOW_SPEED/10);
+   MOTOR2.setSpeed(-HOME_SLOW_SPEED/2);
    while (digitalRead(LIMIT_SWITCH_2) == HIGH) {
        MOTOR2.runSpeed();
    }
@@ -173,7 +341,7 @@ void home() {
    delay(100);
 
    // Back off slowly until switch releases, then go extra distance
-   MOTOR2.setSpeed(HOME_SLOW_SPEED/10);
+   MOTOR2.setSpeed(HOME_SLOW_SPEED/2);
    while (digitalRead(LIMIT_SWITCH_2) == LOW) {  // Until switch releases
        MOTOR2.runSpeed();
    }
@@ -184,14 +352,14 @@ void home() {
    }
    delay(100);
    
-   MOTOR2.setSpeed(-HOME_SLOW_SPEED/10);
+   MOTOR2.setSpeed(-HOME_SLOW_SPEED/2);
    while (digitalRead(LIMIT_SWITCH_2) == HIGH) {
        MOTOR2.runSpeed();
    }
    MOTOR2.stop();
    delay(100);
    
-   MOTOR2.setSpeed(HOME_SLOW_SPEED/10);
+   MOTOR2.setSpeed(HOME_SLOW_SPEED/2);
    MOTOR2.move(degreesToSteps(-1, STEPS_PER_REV_2));
    while (MOTOR2.distanceToGo() != 0) {
        MOTOR2.run();
@@ -199,7 +367,7 @@ void home() {
    MOTOR2.stop();
    delay(100);
 
-   MOTOR2.setSpeed(HOME_SLOW_SPEED/10);
+   MOTOR2.setSpeed(HOME_SLOW_SPEED/2);
    MOTOR2.move(degreesToSteps(M2_HOME_OFFSET, STEPS_PER_REV_2));
    while (MOTOR2.distanceToGo() != 0) {
        MOTOR2.run();
@@ -214,7 +382,10 @@ void home() {
    }
    MOTOR1.stop();
    delay(1000);
-   
+   // After moving to the straight-out position, set this as our zero
+   MOTOR1.setCurrentPosition(0);
+   MOTOR2.setCurrentPosition(0);
+   Serial.println("Homing complete - Position reset to 0,0");
    isHomed = true;
 }
 
@@ -247,4 +418,20 @@ void setup() {
 
 
 void loop() {
+    static bool initialMovementDone = false;
+    
+    // If homed but initial movement not done yet
+    if (isHomed && !initialMovementDone) {
+        moveToAngles(90, 90);
+        
+        // Once movement is complete, mark initial movement as done
+        if (movementComplete) {
+            initialMovementDone = true;
+            Serial.println("Movement to 90,90 complete");
+            Serial.print("Final Motor1 steps: ");
+            Serial.println(MOTOR1.currentPosition());
+            Serial.print("Final Motor2 steps: ");
+            Serial.println(MOTOR2.currentPosition());
+        }
+    }
 }
