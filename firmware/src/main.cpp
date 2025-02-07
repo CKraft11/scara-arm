@@ -70,6 +70,12 @@ const float THETA1_MAX = 110;   // mechanical constraints
 const float THETA2_MIN = -155;     // Typically elbow angle has different
 const float THETA2_MAX = 155;   // constraints than shoulder
 
+// At the top with other constants
+const float testAngles[2][2] = {
+    {-98.895795, 107.791591},  // First position
+    {-66.882045, 71.836577}   // Second position
+};
+
 bool isAngleSafe(float theta1, float theta2) {
     return (theta1 >= THETA1_MIN && theta1 <= THETA1_MAX &&
             theta2 >= THETA2_MIN && theta2 <= THETA2_MAX);
@@ -103,12 +109,20 @@ AccelStepper MOTOR4(AccelStepper::DRIVER, STEP_PIN_4, DIR_PIN_4);
 // [7] = StopAtPoint (1.0 = stop, 0.0 = don't stop)
 // [8] = Duration (seconds)
 // [9] = LinearPath (1.0 = linear movement, 0.0 = curved movement)
-const double waypoints[5][10] = {
-    {150.000000, 150.000000, 0.000000, 0.000000, -98.895795, 107.791591, -8.895795, 0.0, 0.000000, 0.0},
-    {250.000000, 150.000000, 0.000000, 0.000000, -66.882045, 71.836577, -4.954532, 0.0, 0.000000, 0.0},
-    {250.000000, 50.000000, 0.000000, 0.000000, -56.221513, 89.823161, -33.601648, 0.0, 0.000000, 0.0},
-    {150.000000, 50.000000, 0.000000, 0.000000, -82.381766, 127.893635, -45.511868, 0.0, 0.000000, 0.0},
-    {150.000000, 150.000000, 0.000000, 0.000000, -98.895795, 107.791591, -8.895795, 0.0, 0.000000, 0.0}
+const float waypoints[5][10] = {
+    {150.0, 150.0, 0.0, 0.0, -98.895795, 107.791591, -8.895795, 0.0, 0.0, 0.0},
+    {250.0, 150.0, 0.0, 0.0, -66.882045, 71.836577, -4.954532, 0.0, 0.0, 0.0},
+    {250.0, 50.0, 0.0, 0.0, -56.221513, 89.823161, -33.601648, 0.0, 0.0, 0.0},
+    {150.0, 50.0, 0.0, 0.0, -82.381766, 127.893635, -45.511868, 0.0, 0.0, 0.0},
+    {150.0, 150.0, 0.0, 0.0, -98.895795, 107.791591, -8.895795, 0.0, 0.0, 0.0}
+};
+
+const float angleWaypoints[][2] = {
+    {-98.895795, 107.791591},
+    {-66.882045, 71.836577},
+    {-56.221513, 89.823161},
+    {-82.381766, 127.893635},
+    {-98.895795, 107.791591}
 };
 
 // Global variables to track movement and waypoints
@@ -419,19 +433,29 @@ void setup() {
 
 void loop() {
     static bool initialMovementDone = false;
+    static bool moveStarted = false;
     
-    // If homed but initial movement not done yet
     if (isHomed && !initialMovementDone) {
-        moveToAngles(90, 90);
+        if (!moveStarted) {
+            Serial.print("Moving to waypoint ");
+            Serial.println(currentWaypoint);
+            moveStarted = true;
+        }
         
-        // Once movement is complete, mark initial movement as done
+        moveToAngles(angleWaypoints[currentWaypoint][0], 
+                    angleWaypoints[currentWaypoint][1]);
+        
         if (movementComplete) {
-            initialMovementDone = true;
-            Serial.println("Movement to 90,90 complete");
-            Serial.print("Final Motor1 steps: ");
-            Serial.println(MOTOR1.currentPosition());
-            Serial.print("Final Motor2 steps: ");
-            Serial.println(MOTOR2.currentPosition());
+            Serial.println("Waypoint reached");
+            movementComplete = false;
+            moveStarted = false;
+            currentWaypoint++;
+            
+            if (currentWaypoint >= 5) {
+                currentWaypoint = 0;  // Reset to start
+                Serial.println("Completed full sequence");
+            }
+            delay(250);
         }
     }
 }
