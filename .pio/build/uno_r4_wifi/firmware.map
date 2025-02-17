@@ -1519,7 +1519,7 @@ LOAD c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../l
 LOAD c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a
 END GROUP
 
-.text           0x00004000     0xa448
+.text           0x00004000     0xa4b8
                 0x00000000                __tz_FLASH_S = ABSOLUTE (FLASH_START)
                 0x00004000                __ROM_Start = .
  *(.sketch_boot)
@@ -1558,900 +1558,900 @@ END GROUP
                 0x00004368      0x63c .pio\build\uno_r4_wifi\src\main.cpp.o
                 0x00004368                moveToAngles(float, float, float, float)
  .text._Z4homev
-                0x000049a4      0x39c .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x000049a4      0x3ec .pio\build\uno_r4_wifi\src\main.cpp.o
                 0x000049a4                home()
- .text.loop     0x00004d40       0xd0 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x00004d40                loop
+ .text.loop     0x00004d90       0xf0 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x00004d90                loop
  .text.startup._GLOBAL__sub_I__Z11isAngleSafeff
-                0x00004e10       0x64 .pio\build\uno_r4_wifi\src\main.cpp.o
- .text.setup    0x00004e74      0x100 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x00004e74                setup
+                0x00004e80       0x64 .pio\build\uno_r4_wifi\src\main.cpp.o
+ .text.setup    0x00004ee4      0x100 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x00004ee4                setup
  .text._ZN12AccelStepperD2Ev
-                0x00004f74        0x2 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00004f74                AccelStepper::~AccelStepper()
-                0x00004f74                AccelStepper::~AccelStepper()
- *fill*         0x00004f76        0x2 ff
+                0x00004fe4        0x2 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00004fe4                AccelStepper::~AccelStepper()
+                0x00004fe4                AccelStepper::~AccelStepper()
+ *fill*         0x00004fe6        0x2 ff
  .text._ZN12AccelStepper15computeNewSpeedEv
-                0x00004f78      0x158 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00004f78                AccelStepper::computeNewSpeed()
+                0x00004fe8      0x158 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00004fe8                AccelStepper::computeNewSpeed()
  .text._ZN12AccelStepper4stepEl
-                0x000050d0       0x40 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x000050d0                AccelStepper::step(long)
+                0x00005140       0x40 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00005140                AccelStepper::step(long)
  .text._ZN12AccelStepper5step6El
-                0x00005110       0x4a .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005110                AccelStepper::step6(long)
+                0x00005180       0x4a .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00005180                AccelStepper::step6(long)
  .text._ZN12AccelStepper5step8El
-                0x0000515a       0x3a .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x0000515a                AccelStepper::step8(long)
+                0x000051ca       0x3a .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x000051ca                AccelStepper::step8(long)
  .text._ZN12AccelStepper13setOutputPinsEh
-                0x00005194       0x44 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005194                AccelStepper::setOutputPins(unsigned char)
+                0x00005204       0x44 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00005204                AccelStepper::setOutputPins(unsigned char)
  .text._ZN12AccelStepper5step1El
-                0x000051d8       0x42 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x000051d8                AccelStepper::step1(long)
+                0x00005248       0x42 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00005248                AccelStepper::step1(long)
  .text._ZN12AccelStepperD0Ev
-                0x0000521a        0xe .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x0000521a                AccelStepper::~AccelStepper()
+                0x0000528a        0xe .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x0000528a                AccelStepper::~AccelStepper()
  .text._ZN12AccelStepper5step0El
-                0x00005228       0x14 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005228                AccelStepper::step0(long)
+                0x00005298       0x14 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00005298                AccelStepper::step0(long)
  .text._ZN12AccelStepper5step2El
-                0x0000523c       0x22 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x0000523c                AccelStepper::step2(long)
+                0x000052ac       0x22 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x000052ac                AccelStepper::step2(long)
  .text._ZN12AccelStepper5step3El
-                0x0000525e       0x28 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x0000525e                AccelStepper::step3(long)
+                0x000052ce       0x28 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x000052ce                AccelStepper::step3(long)
  .text._ZN12AccelStepper5step4El
-                0x00005286       0x22 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005286                AccelStepper::step4(long)
+                0x000052f6       0x22 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x000052f6                AccelStepper::step4(long)
  .text._ZN12AccelStepper14disableOutputsEv
-                0x000052a8       0x30 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x000052a8                AccelStepper::disableOutputs()
+                0x00005318       0x30 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00005318                AccelStepper::disableOutputs()
  .text._ZN12AccelStepper13enableOutputsEv
-                0x000052d8       0x64 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x000052d8                AccelStepper::enableOutputs()
- *fill*         0x0000533c        0x4 ff
+                0x00005348       0x64 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00005348                AccelStepper::enableOutputs()
+ *fill*         0x000053ac        0x4 ff
  .text._ZN12AccelStepper15setAccelerationEf.part.10
-                0x00005340       0xa8 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x000053b0       0xa8 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
  .text._ZN12AccelStepper6moveToEl
-                0x000053e8       0x10 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x000053e8                AccelStepper::moveTo(long)
+                0x00005458       0x10 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00005458                AccelStepper::moveTo(long)
  .text._ZN12AccelStepper4moveEl
-                0x000053f8        0x8 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x000053f8                AccelStepper::move(long)
+                0x00005468        0x8 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00005468                AccelStepper::move(long)
  .text._ZN12AccelStepper8runSpeedEv
-                0x00005400       0x3a .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005400                AccelStepper::runSpeed()
+                0x00005470       0x3a .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00005470                AccelStepper::runSpeed()
  .text._ZN12AccelStepper12distanceToGoEv
-                0x0000543a        0x8 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x0000543a                AccelStepper::distanceToGo()
+                0x000054aa        0x8 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x000054aa                AccelStepper::distanceToGo()
  .text._ZN12AccelStepper15currentPositionEv
-                0x00005442        0x4 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005442                AccelStepper::currentPosition()
+                0x000054b2        0x4 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x000054b2                AccelStepper::currentPosition()
  .text._ZN12AccelStepper18setCurrentPositionEl
-                0x00005446       0x10 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005446                AccelStepper::setCurrentPosition(long)
+                0x000054b6       0x10 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x000054b6                AccelStepper::setCurrentPosition(long)
  .text._ZN12AccelStepper3runEv
-                0x00005456       0x30 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005456                AccelStepper::run()
- *fill*         0x00005486        0x2 ff
+                0x000054c6       0x30 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x000054c6                AccelStepper::run()
+ *fill*         0x000054f6        0x2 ff
  .text._ZN12AccelStepper11setMaxSpeedEf
-                0x00005488       0x7c .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005488                AccelStepper::setMaxSpeed(float)
+                0x000054f8       0x7c .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x000054f8                AccelStepper::setMaxSpeed(float)
  .text._ZN12AccelStepperC2Ehhhhhb
-                0x00005504       0x80 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005504                AccelStepper::AccelStepper(unsigned char, unsigned char, unsigned char, unsigned char, unsigned char, bool)
-                0x00005504                AccelStepper::AccelStepper(unsigned char, unsigned char, unsigned char, unsigned char, unsigned char, bool)
+                0x00005574       0x80 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00005574                AccelStepper::AccelStepper(unsigned char, unsigned char, unsigned char, unsigned char, unsigned char, bool)
+                0x00005574                AccelStepper::AccelStepper(unsigned char, unsigned char, unsigned char, unsigned char, unsigned char, bool)
  .text._ZN12AccelStepper15setAccelerationEf
-                0x00005584       0x10 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005584                AccelStepper::setAcceleration(float)
- *fill*         0x00005594        0x4 ff
+                0x000055f4       0x10 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x000055f4                AccelStepper::setAcceleration(float)
+ *fill*         0x00005604        0x4 ff
  .text._ZN12AccelStepper8setSpeedEf
-                0x00005598       0x98 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005598                AccelStepper::setSpeed(float)
+                0x00005608       0x98 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x00005608                AccelStepper::setSpeed(float)
  .text._ZN12AccelStepper4stopEv
-                0x00005630       0x66 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x00005630                AccelStepper::stop()
+                0x000056a0       0x66 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x000056a0                AccelStepper::stop()
  .text.startup.main
-                0x00005696        0xa .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(main.c.o)
-                0x00005696                main
+                0x00005706        0xa .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(main.c.o)
+                0x00005706                main
  .text._ZN7arduino5Print17availableForWriteEv
-                0x000056a0        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x000056a0                arduino::Print::availableForWrite()
+                0x00005710        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x00005710                arduino::Print::availableForWrite()
  .text._ZN4UARTcvbEv
-                0x000056a4        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x000056a4                UART::operator bool()
+                0x00005714        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x00005714                UART::operator bool()
  .text._ZN4UART5beginEm
-                0x000056a8        0xa .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x000056a8                UART::begin(unsigned long)
+                0x00005718        0xa .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x00005718                UART::begin(unsigned long)
  .text._ZN4UART5flushEv
-                0x000056b2        0xa .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x000056b2                UART::flush()
+                0x00005722        0xa .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x00005722                UART::flush()
  .text._ZN4UART4peekEv
-                0x000056bc       0x18 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x000056bc                UART::peek()
+                0x0000572c       0x18 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x0000572c                UART::peek()
  .text._ZN4UART5writeEh
-                0x000056d4       0x34 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x000056d4                UART::write(unsigned char)
+                0x00005744       0x34 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x00005744                UART::write(unsigned char)
  .text._ZN4UART3endEv
-                0x00005708       0x22 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x00005708                UART::end()
+                0x00005778       0x22 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x00005778                UART::end()
  .text._ZN7__GuardD2Ev
-                0x0000572a        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x0000572a                __Guard::~__Guard()
-                0x0000572a                __Guard::~__Guard()
+                0x0000579a        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x0000579a                __Guard::~__Guard()
+                0x0000579a                __Guard::~__Guard()
  .text._ZN4UART9availableEv
-                0x00005736       0x32 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x00005736                UART::available()
+                0x000057a6       0x32 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x000057a6                UART::available()
  .text._ZN4UART15WrapperCallbackEP20st_uart_callback_arg
-                0x00005768       0x90 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x00005768                UART::WrapperCallback(st_uart_callback_arg*)
+                0x000057d8       0x90 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x000057d8                UART::WrapperCallback(st_uart_callback_arg*)
  .text._ZN4UART4readEv
-                0x000057f8       0x5c .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x000057f8                UART::read()
+                0x00005868       0x5c .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x00005868                UART::read()
  .text._ZN4UARTC2Eiiii
-                0x00005854       0x78 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x00005854                UART::UART(int, int, int, int)
-                0x00005854                UART::UART(int, int, int, int)
+                0x000058c4       0x78 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x000058c4                UART::UART(int, int, int, int)
+                0x000058c4                UART::UART(int, int, int, int)
  .text._ZN4UART13setUpUartIrqsER11st_uart_cfg
-                0x000058cc       0x14 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x000058cc                UART::setUpUartIrqs(st_uart_cfg&)
+                0x0000593c       0x14 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x0000593c                UART::setUpUartIrqs(st_uart_cfg&)
  .text._ZN4UART8cfg_pinsEi
-                0x000058e0       0xe8 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x000058e0                UART::cfg_pins(int)
+                0x00005950       0xe8 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x00005950                UART::cfg_pins(int)
  .text._ZN4UART5beginEmt
-                0x000059c8      0x1a8 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x000059c8                UART::begin(unsigned long, unsigned short)
+                0x00005a38      0x1a8 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x00005a38                UART::begin(unsigned long, unsigned short)
  .text._ZN4UART9write_rawEPhj
-                0x00005b70       0x1e .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x00005b70                UART::write_raw(unsigned char*, unsigned int)
- *fill*         0x00005b8e        0x2 ff
+                0x00005be0       0x1e .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x00005be0                UART::write_raw(unsigned char*, unsigned int)
+ *fill*         0x00005bfe        0x2 ff
  .text.startup._GLOBAL__sub_I__UART1_
-                0x00005b90       0x1c .pio\build\uno_r4_wifi\libFrameworkArduino.a(SerialObj1.cpp.o)
+                0x00005c00       0x1c .pio\build\uno_r4_wifi\libFrameworkArduino.a(SerialObj1.cpp.o)
  .text._ZN7arduino5Print5writeEPKhj
-                0x00005bac       0x2c .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
-                0x00005bac                arduino::Print::write(unsigned char const*, unsigned int)
+                0x00005c1c       0x2c .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
+                0x00005c1c                arduino::Print::write(unsigned char const*, unsigned int)
  .text._ZN7arduino5Print5writeEPKc.part.2
-                0x00005bd8       0x1e .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
+                0x00005c48       0x1e .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
  .text._ZN7arduino5Print5writeEPKc
-                0x00005bf6        0xa .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
-                0x00005bf6                arduino::Print::write(char const*)
+                0x00005c66        0xa .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
+                0x00005c66                arduino::Print::write(char const*)
  .text._ZN7arduino5Print5printEPKc
-                0x00005c00        0x8 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
-                0x00005c00                arduino::Print::print(char const*)
+                0x00005c70        0x8 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
+                0x00005c70                arduino::Print::print(char const*)
  .text._ZN7arduino5Print5printEc
-                0x00005c08        0x8 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
-                0x00005c08                arduino::Print::print(char)
+                0x00005c78        0x8 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
+                0x00005c78                arduino::Print::print(char)
  .text._ZN7arduino5Print7printlnEv
-                0x00005c10        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
-                0x00005c10                arduino::Print::println()
+                0x00005c80        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
+                0x00005c80                arduino::Print::println()
  .text._ZN7arduino5Print7printlnEPKc
-                0x00005c1c       0x14 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
-                0x00005c1c                arduino::Print::println(char const*)
+                0x00005c8c       0x14 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
+                0x00005c8c                arduino::Print::println(char const*)
  .text._ZN7arduino5Print11printNumberEmh
-                0x00005c30       0x3c .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
-                0x00005c30                arduino::Print::printNumber(unsigned long, unsigned char)
+                0x00005ca0       0x3c .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
+                0x00005ca0                arduino::Print::printNumber(unsigned long, unsigned char)
  .text._ZN7arduino5Print5printEli
-                0x00005c6c       0x44 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
-                0x00005c6c                arduino::Print::print(long, int)
+                0x00005cdc       0x44 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
+                0x00005cdc                arduino::Print::print(long, int)
  .text._ZN7arduino5Print7printlnEii
-                0x00005cb0       0x14 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
-                0x00005cb0                arduino::Print::println(int, int)
- .text.pinMode  0x00005cc4       0x30 .pio\build\uno_r4_wifi\libFrameworkArduino.a(digital.cpp.o)
-                0x00005cc4                pinMode
+                0x00005d20       0x14 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
+                0x00005d20                arduino::Print::println(int, int)
+ .text.pinMode  0x00005d34       0x30 .pio\build\uno_r4_wifi\libFrameworkArduino.a(digital.cpp.o)
+                0x00005d34                pinMode
  .text.digitalWrite
-                0x00005cf4       0x18 .pio\build\uno_r4_wifi\libFrameworkArduino.a(digital.cpp.o)
-                0x00005cf4                digitalWrite
+                0x00005d64       0x18 .pio\build\uno_r4_wifi\libFrameworkArduino.a(digital.cpp.o)
+                0x00005d64                digitalWrite
  .text.digitalRead
-                0x00005d0c       0x28 .pio\build\uno_r4_wifi\libFrameworkArduino.a(digital.cpp.o)
-                0x00005d0c                digitalRead
+                0x00005d7c       0x28 .pio\build\uno_r4_wifi\libFrameworkArduino.a(digital.cpp.o)
+                0x00005d7c                digitalRead
  .text.R_BSP_PinAccessEnable
-                0x00005d34       0x2c .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
+                0x00005da4       0x2c .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
  .text._Z12arduino_mainv
-                0x00005d60       0x8c .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
-                0x00005d60                arduino_main()
- .text._write   0x00005dec        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
-                0x00005dec                _write
+                0x00005dd0       0x8c .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
+                0x00005dd0                arduino_main()
+ .text._write   0x00005e5c        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
+                0x00005e5c                _write
  .text.hal_entry
-                0x00005df8        0x6 .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
-                0x00005df8                hal_entry
- .text.atexit   0x00005dfe        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
-                0x00005dfe                atexit
- *fill*         0x00005e02        0x2 ff
+                0x00005e68        0x6 .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
+                0x00005e68                hal_entry
+ .text.atexit   0x00005e6e        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
+                0x00005e6e                atexit
+ *fill*         0x00005e72        0x2 ff
  .text._ZL21timer_micros_callbackP22st_timer_callback_args
-                0x00005e04       0x10 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
+                0x00005e74       0x10 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
  .text.delayMicroseconds
-                0x00005e14        0x6 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
-                0x00005e14                delayMicroseconds
- .text.yield    0x00005e1a        0x2 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
-                0x00005e1a                yield
- .text.delay    0x00005e1c       0x1c .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
-                0x00005e1c                delay
+                0x00005e84        0x6 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
+                0x00005e84                delayMicroseconds
+ .text.yield    0x00005e8a        0x2 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
+                0x00005e8a                yield
+ .text.delay    0x00005e8c       0x1c .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
+                0x00005e8c                delay
  .text._Z8startAgtv
-                0x00005e38       0x6c .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
-                0x00005e38                startAgt()
- .text.micros   0x00005ea4       0x84 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
-                0x00005ea4                micros
+                0x00005ea8       0x6c .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
+                0x00005ea8                startAgt()
+ .text.micros   0x00005f14       0x84 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
+                0x00005f14                micros
  .text.startup._GLOBAL__sub_I_delayMicroseconds
-                0x00005f28        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
+                0x00005f98        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
  .text.exit._GLOBAL__sub_D_delayMicroseconds
-                0x00005f34        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
+                0x00005fa4        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
  .text._Z10getPinCfgsh11PinCfgReq_t
-                0x00005f40       0xe0 .pio\build\uno_r4_wifi\libFrameworkArduino.a(variant_helper.cpp.o)
-                0x00005f40                getPinCfgs(unsigned char, PinCfgReq_t)
+                0x00005fb0       0xe0 .pio\build\uno_r4_wifi\libFrameworkArduino.a(variant_helper.cpp.o)
+                0x00005fb0                getPinCfgs(unsigned char, PinCfgReq_t)
  .text._ZN8FspTimerC2Ev
-                0x00006020       0x18 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x00006020                FspTimer::FspTimer()
-                0x00006020                FspTimer::FspTimer()
+                0x00006090       0x18 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x00006090                FspTimer::FspTimer()
+                0x00006090                FspTimer::FspTimer()
  .text._ZN8FspTimer5beginE12e_timer_modehhmm18e_timer_source_divPFvP22st_timer_callback_argsEPv
-                0x00006038      0x16c .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x00006038                FspTimer::begin(e_timer_mode, unsigned char, unsigned char, unsigned long, unsigned long, e_timer_source_div, void (*)(st_timer_callback_args*), void*)
+                0x000060a8      0x16c .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x000060a8                FspTimer::begin(e_timer_mode, unsigned char, unsigned char, unsigned long, unsigned long, e_timer_source_div, void (*)(st_timer_callback_args*), void*)
  .text._ZN8FspTimer4openEv
-                0x000061a4       0x4e .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x000061a4                FspTimer::open()
+                0x00006214       0x4e .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x00006214                FspTimer::open()
  .text._ZN8FspTimer5startEv
-                0x000061f2       0x2e .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x000061f2                FspTimer::start()
+                0x00006262       0x2e .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x00006262                FspTimer::start()
  .text._ZN8FspTimer5closeEv
-                0x00006220       0x2e .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x00006220                FspTimer::close()
- *fill*         0x0000624e        0x2 ff
+                0x00006290       0x2e .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x00006290                FspTimer::close()
+ *fill*         0x000062be        0x2 ff
  .text._ZN8FspTimer3endEv
-                0x00006250       0x48 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x00006250                FspTimer::end()
+                0x000062c0       0x48 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x000062c0                FspTimer::end()
  .text._ZN8FspTimerD2Ev
-                0x00006298        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x00006298                FspTimer::~FspTimer()
-                0x00006298                FspTimer::~FspTimer()
+                0x00006308        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x00006308                FspTimer::~FspTimer()
+                0x00006308                FspTimer::~FspTimer()
  .text._ZN8FspTimer15get_cfg_for_irqEv
-                0x000062a4       0x14 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x000062a4                FspTimer::get_cfg_for_irq()
+                0x00006314       0x14 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x00006314                FspTimer::get_cfg_for_irq()
  .text._ZN8FspTimer9is_openedEv
-                0x000062b8       0x18 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x000062b8                FspTimer::is_opened()
+                0x00006328       0x18 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x00006328                FspTimer::is_opened()
  .text._ZN8FspTimer18setup_overflow_irqEhPFvvE
-                0x000062d0       0x4e .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x000062d0                FspTimer::setup_overflow_irq(unsigned char, void (*)())
- *fill*         0x0000631e        0x2 ff
+                0x00006340       0x4e .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x00006340                FspTimer::setup_overflow_irq(unsigned char, void (*)())
+ *fill*         0x0000638e        0x2 ff
  .text.__NVIC_SetPriority
-                0x00006320       0x28 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x00006390       0x28 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
  .text.R_BSP_IrqEnable
-                0x00006348       0x34 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x000063b8       0x34 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
  .text.R_BSP_IrqDisable
-                0x0000637c       0x24 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
- .text.__tcf_0  0x000063a0        0x2 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
- *fill*         0x000063a2        0x2 ff
+                0x000063ec       0x24 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+ .text.__tcf_0  0x00006410        0x2 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+ *fill*         0x00006412        0x2 ff
  .text._ZN10IRQManager11getInstanceEv
-                0x000063a4       0x38 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x000063a4                IRQManager::getInstance()
+                0x00006414       0x38 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x00006414                IRQManager::getInstance()
  .text._ZN10IRQManager18set_ext_link_eventEii
-                0x000063dc       0xc8 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x000063dc                IRQManager::set_ext_link_event(int, int)
+                0x0000644c       0xc8 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x0000644c                IRQManager::set_ext_link_event(int, int)
  .text._ZN10IRQManager23set_gpt_over_link_eventEii
-                0x000064a4       0x70 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x000064a4                IRQManager::set_gpt_over_link_event(int, int)
+                0x00006514       0x70 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x00006514                IRQManager::set_gpt_over_link_event(int, int)
  .text._ZN10IRQManager18set_agt_link_eventEii
-                0x00006514       0x28 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x00006514                IRQManager::set_agt_link_event(int, int)
+                0x00006584       0x28 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x00006584                IRQManager::set_agt_link_event(int, int)
  .text._ZN10IRQManager16addTimerOverflowER5timerPFvvE
-                0x0000653c       0x80 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x0000653c                IRQManager::addTimerOverflow(timer&, void (*)())
+                0x000065ac       0x80 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x000065ac                IRQManager::addTimerOverflow(timer&, void (*)())
  .text._ZN10IRQManager21set_iic_tx_link_eventEii
-                0x000065bc       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x000065bc                IRQManager::set_iic_tx_link_event(int, int)
+                0x0000662c       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x0000662c                IRQManager::set_iic_tx_link_event(int, int)
  .text._ZN10IRQManager21set_iic_rx_link_eventEii
-                0x000065dc       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x000065dc                IRQManager::set_iic_rx_link_event(int, int)
+                0x0000664c       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x0000664c                IRQManager::set_iic_rx_link_event(int, int)
  .text._ZN10IRQManager22set_iic_tei_link_eventEii
-                0x000065fc       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x000065fc                IRQManager::set_iic_tei_link_event(int, int)
+                0x0000666c       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x0000666c                IRQManager::set_iic_tei_link_event(int, int)
  .text._ZN10IRQManager22set_iic_eri_link_eventEii
-                0x0000661c       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x0000661c                IRQManager::set_iic_eri_link_event(int, int)
+                0x0000668c       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x0000668c                IRQManager::set_iic_eri_link_event(int, int)
  .text._ZN10IRQManager21set_sci_tx_link_eventEii
-                0x0000663c       0x38 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x0000663c                IRQManager::set_sci_tx_link_event(int, int)
- .text._ZN10IRQManager21set_sci_rx_link_eventEii
-                0x00006674       0x38 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x00006674                IRQManager::set_sci_rx_link_event(int, int)
- .text._ZN10IRQManager22set_sci_tei_link_eventEii
                 0x000066ac       0x38 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x000066ac                IRQManager::set_sci_tei_link_event(int, int)
- .text._ZN10IRQManager22set_sci_eri_link_eventEii
+                0x000066ac                IRQManager::set_sci_tx_link_event(int, int)
+ .text._ZN10IRQManager21set_sci_rx_link_eventEii
                 0x000066e4       0x38 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x000066e4                IRQManager::set_sci_eri_link_event(int, int)
+                0x000066e4                IRQManager::set_sci_rx_link_event(int, int)
+ .text._ZN10IRQManager22set_sci_tei_link_eventEii
+                0x0000671c       0x38 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x0000671c                IRQManager::set_sci_tei_link_event(int, int)
+ .text._ZN10IRQManager22set_sci_eri_link_eventEii
+                0x00006754       0x38 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x00006754                IRQManager::set_sci_eri_link_event(int, int)
  .text._ZN10IRQManager21set_spi_tx_link_eventEii
-                0x0000671c       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x0000671c                IRQManager::set_spi_tx_link_event(int, int)
+                0x0000678c       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x0000678c                IRQManager::set_spi_tx_link_event(int, int)
  .text._ZN10IRQManager21set_spi_rx_link_eventEii
-                0x0000673c       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x0000673c                IRQManager::set_spi_rx_link_event(int, int)
+                0x000067ac       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x000067ac                IRQManager::set_spi_rx_link_event(int, int)
  .text._ZN10IRQManager22set_spi_tei_link_eventEii
-                0x0000675c       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x0000675c                IRQManager::set_spi_tei_link_event(int, int)
+                0x000067cc       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x000067cc                IRQManager::set_spi_tei_link_event(int, int)
  .text._ZN10IRQManager22set_spi_eri_link_eventEii
-                0x0000677c       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x0000677c                IRQManager::set_spi_eri_link_event(int, int)
+                0x000067ec       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x000067ec                IRQManager::set_spi_eri_link_event(int, int)
  .text._ZN10IRQManager13addPeripheralE12Peripheral_tPv
-                0x0000679c      0x904 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
-                0x0000679c                IRQManager::addPeripheral(Peripheral_t, void*)
+                0x0000680c      0x904 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x0000680c                IRQManager::addPeripheral(Peripheral_t, void*)
  .text._ZL13readAllGroupAP13ADC_Container
-                0x000070a0       0x2c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x00007110       0x2c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .text._ZL11ADC_irq_cbkP20st_adc_callback_args
-                0x000070cc       0x58 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x0000713c       0x58 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .text._ZL10adcConvertP13ADC_Containert
-                0x00007124       0xa4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x00007194       0xa4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .text._ZL21get_ADC_container_ptrlRt.constprop.4
-                0x000071c8       0x38 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x00007238       0x38 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .text._ZN13ADC_ContainerC2EhPFvP20st_adc_callback_argsEPv
-                0x00007200       0x6e .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
-                0x00007200                ADC_Container::ADC_Container(unsigned char, void (*)(st_adc_callback_args*), void*)
-                0x00007200                ADC_Container::ADC_Container(unsigned char, void (*)(st_adc_callback_args*), void*)
+                0x00007270       0x6e .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x00007270                ADC_Container::ADC_Container(unsigned char, void (*)(st_adc_callback_args*), void*)
+                0x00007270                ADC_Container::ADC_Container(unsigned char, void (*)(st_adc_callback_args*), void*)
  .text._ZN13ADC_ContainerD2Ev
-                0x0000726e       0x12 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
-                0x0000726e                ADC_Container::~ADC_Container()
-                0x0000726e                ADC_Container::~ADC_Container()
+                0x000072de       0x12 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x000072de                ADC_Container::~ADC_Container()
+                0x000072de                ADC_Container::~ADC_Container()
  .text.analogRead
-                0x00007280       0x3c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
-                0x00007280                analogRead
+                0x000072f0       0x3c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x000072f0                analogRead
  .text.analogReference
-                0x000072bc       0x5c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
-                0x000072bc                analogReference
+                0x0000732c       0x5c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x0000732c                analogReference
  .text._Z15analogReferencev
-                0x00007318      0x10c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
-                0x00007318                analogReference()
+                0x00007388      0x10c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x00007388                analogReference()
  .text._Z23__get_timer_for_channeli
-                0x00007424       0x2c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
-                0x00007424                __get_timer_for_channel(int)
+                0x00007494       0x2c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x00007494                __get_timer_for_channel(int)
  .text.startup._GLOBAL__sub_I__ZN13ADC_ContainerC2EhPFvP20st_adc_callback_argsEPv
-                0x00007450       0x4c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x000074c0       0x4c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .text.exit._GLOBAL__sub_D__ZN13ADC_ContainerC2EhPFvP20st_adc_callback_argsEPv
-                0x0000749c       0x1c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x0000750c       0x1c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .text._Z3maplllll
-                0x000074b8       0x14 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Common.cpp.o)
-                0x000074b8                map(long, long, long, long, long)
+                0x00007528       0x14 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Common.cpp.o)
+                0x00007528                map(long, long, long, long, long)
  .text.dump_stack
-                0x000074cc       0x7c .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x0000753c       0x7c .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
  .text.cm_backtrace_init
-                0x00007548       0x74 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
-                0x00007548                cm_backtrace_init
+                0x000075b8       0x74 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x000075b8                cm_backtrace_init
  .text.cm_backtrace_firmware_info
-                0x000075bc       0x2c .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
-                0x000075bc                cm_backtrace_firmware_info
+                0x0000762c       0x2c .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x0000762c                cm_backtrace_firmware_info
  .text.cm_backtrace_call_stack
-                0x000075e8       0xe4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
-                0x000075e8                cm_backtrace_call_stack
+                0x00007658       0xe4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x00007658                cm_backtrace_call_stack
  .text.print_call_stack
-                0x000076cc       0x94 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x0000773c       0x94 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
  .text.cm_backtrace_fault
-                0x00007760      0x470 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
-                0x00007760                cm_backtrace_fault
+                0x000077d0      0x470 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x000077d0                cm_backtrace_fault
  .text.Stacktrace_Handler
-                0x00007bd0        0xa .pio\build\uno_r4_wifi\libFrameworkArduino.a(cortex_handlers.c.o)
-                0x00007bd0                Stacktrace_Handler
- *fill*         0x00007bda        0x2 ff
+                0x00007c40        0xa .pio\build\uno_r4_wifi\libFrameworkArduino.a(cortex_handlers.c.o)
+                0x00007c40                Stacktrace_Handler
+ *fill*         0x00007c4a        0x2 ff
  .text._ZN4CDacC2Eh
-                0x00007bdc       0x6c .pio\build\uno_r4_wifi\libFrameworkArduino.a(dac.cpp.o)
-                0x00007bdc                CDac::CDac(unsigned char)
-                0x00007bdc                CDac::CDac(unsigned char)
+                0x00007c4c       0x6c .pio\build\uno_r4_wifi\libFrameworkArduino.a(dac.cpp.o)
+                0x00007c4c                CDac::CDac(unsigned char)
+                0x00007c4c                CDac::CDac(unsigned char)
  .text.startup._GLOBAL__sub_I__ZN4CDacC2Eh
-                0x00007c48        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(dac.cpp.o)
+                0x00007cb8        0xc .pio\build\uno_r4_wifi\libFrameworkArduino.a(dac.cpp.o)
  .text._Z13pinPeripheral19e_bsp_io_port_pin_tm
-                0x00007c54       0x10 .pio\build\uno_r4_wifi\libFrameworkArduino.a(pinDefinitions.cpp.o)
-                0x00007c54                pinPeripheral(e_bsp_io_port_pin_t, unsigned long)
+                0x00007cc4       0x10 .pio\build\uno_r4_wifi\libFrameworkArduino.a(pinDefinitions.cpp.o)
+                0x00007cc4                pinPeripheral(e_bsp_io_port_pin_t, unsigned long)
  .text.r_spi_call_callback
-                0x00007c64       0x40 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_spi.o)
+                0x00007cd4       0x40 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_spi.o)
  .text.spi_rxi_isr
-                0x00007ca4       0x9c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_spi.o)
-                0x00007ca4                spi_rxi_isr
+                0x00007d14       0x9c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_spi.o)
+                0x00007d14                spi_rxi_isr
  .text.spi_txi_isr
-                0x00007d40       0xd8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_spi.o)
-                0x00007d40                spi_txi_isr
+                0x00007db0       0xd8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_spi.o)
+                0x00007db0                spi_txi_isr
  .text.spi_tei_isr
-                0x00007e18       0xe0 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_spi.o)
-                0x00007e18                spi_tei_isr
+                0x00007e88       0xe0 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_spi.o)
+                0x00007e88                spi_tei_isr
  .text.spi_eri_isr
-                0x00007ef8       0xdc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_spi.o)
-                0x00007ef8                spi_eri_isr
+                0x00007f68       0xdc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_spi.o)
+                0x00007f68                spi_eri_isr
  .text.R_SCI_UART_Write
-                0x00007fd4       0xb0 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
-                0x00007fd4                R_SCI_UART_Write
+                0x00008044       0xb0 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+                0x00008044                R_SCI_UART_Write
  .text.R_SCI_UART_BaudSet
-                0x00008084       0x44 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
-                0x00008084                R_SCI_UART_BaudSet
+                0x000080f4       0x44 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+                0x000080f4                R_SCI_UART_BaudSet
  .text.R_SCI_UART_Close
-                0x000080c8       0xd8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
-                0x000080c8                R_SCI_UART_Close
+                0x00008138       0xd8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+                0x00008138                R_SCI_UART_Close
  .text.r_sci_uart_call_callback
-                0x000081a0       0x44 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+                0x00008210       0x44 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
  .text.r_sci_uart_transfer_configure.isra.0
-                0x000081e4       0x38 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+                0x00008254       0x38 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
  .text.R_SCI_UART_Open
-                0x0000821c      0x448 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
-                0x0000821c                R_SCI_UART_Open
+                0x0000828c      0x448 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+                0x0000828c                R_SCI_UART_Open
  .text.R_SCI_UART_BaudCalculate
-                0x00008664      0x184 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
-                0x00008664                R_SCI_UART_BaudCalculate
+                0x000086d4      0x184 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+                0x000086d4                R_SCI_UART_BaudCalculate
  .text.sci_uart_txi_isr
-                0x000087e8       0xec C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
-                0x000087e8                sci_uart_txi_isr
+                0x00008858       0xec C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+                0x00008858                sci_uart_txi_isr
  .text.sci_uart_rxi_isr
-                0x000088d4      0x184 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
-                0x000088d4                sci_uart_rxi_isr
+                0x00008944      0x184 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+                0x00008944                sci_uart_rxi_isr
  .text.sci_uart_tei_isr
-                0x00008a58       0x40 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
-                0x00008a58                sci_uart_tei_isr
+                0x00008ac8       0x40 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+                0x00008ac8                sci_uart_tei_isr
  .text.sci_uart_eri_isr
-                0x00008a98       0x78 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
-                0x00008a98                sci_uart_eri_isr
+                0x00008b08       0x78 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+                0x00008b08                sci_uart_eri_isr
  .text.r_sci_spi_call_callback
-                0x00008b10       0x40 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_spi.o)
+                0x00008b80       0x40 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_spi.o)
  .text.sci_spi_txi_isr
-                0x00008b50       0x68 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_spi.o)
-                0x00008b50                sci_spi_txi_isr
+                0x00008bc0       0x68 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_spi.o)
+                0x00008bc0                sci_spi_txi_isr
  .text.sci_spi_rxi_isr
-                0x00008bb8       0x74 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_spi.o)
-                0x00008bb8                sci_spi_rxi_isr
+                0x00008c28       0x74 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_spi.o)
+                0x00008c28                sci_spi_rxi_isr
  .text.sci_spi_tei_isr
-                0x00008c2c       0x3c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_spi.o)
-                0x00008c2c                sci_spi_tei_isr
+                0x00008c9c       0x3c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_spi.o)
+                0x00008c9c                sci_spi_tei_isr
  .text.sci_spi_eri_isr
-                0x00008c68       0x44 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_spi.o)
-                0x00008c68                sci_spi_eri_isr
+                0x00008cd8       0x44 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_spi.o)
+                0x00008cd8                sci_spi_eri_isr
  .text.sci_i2c_enable_transfer_support_tx
-                0x00008cac       0x34 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_i2c.o)
+                0x00008d1c       0x34 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_i2c.o)
  .text.sci_i2c_notify
-                0x00008ce0       0x64 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_i2c.o)
-                0x00008ce0                sci_i2c_notify
+                0x00008d50       0x64 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_i2c.o)
+                0x00008d50                sci_i2c_notify
  .text.sci_i2c_rxi_isr
-                0x00008d44       0x20 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_i2c.o)
-                0x00008d44                sci_i2c_rxi_isr
+                0x00008db4       0x20 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_i2c.o)
+                0x00008db4                sci_i2c_rxi_isr
  .text.sci_i2c_txi_isr
-                0x00008d64      0x198 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_i2c.o)
-                0x00008d64                sci_i2c_txi_isr
+                0x00008dd4      0x198 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_i2c.o)
+                0x00008dd4                sci_i2c_txi_isr
  .text.sci_i2c_tei_isr
-                0x00008efc       0xf0 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_i2c.o)
-                0x00008efc                sci_i2c_tei_isr
+                0x00008f6c       0xf0 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_i2c.o)
+                0x00008f6c                sci_i2c_tei_isr
  .text.rtc_alarm_periodic_isr
-                0x00008fec       0x68 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_rtc.o)
-                0x00008fec                rtc_alarm_periodic_isr
+                0x0000905c       0x68 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_rtc.o)
+                0x0000905c                rtc_alarm_periodic_isr
  .text.rtc_carry_isr
-                0x00009054       0x2c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_rtc.o)
-                0x00009054                rtc_carry_isr
+                0x000090c4       0x2c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_rtc.o)
+                0x000090c4                rtc_carry_isr
  .text.R_IOPORT_PinRead
-                0x00009080       0x1c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_ioport.o)
-                0x00009080                R_IOPORT_PinRead
+                0x000090f0       0x1c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_ioport.o)
+                0x000090f0                R_IOPORT_PinRead
  .text.R_IOPORT_PinWrite
-                0x0000909c       0x20 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_ioport.o)
-                0x0000909c                R_IOPORT_PinWrite
+                0x0000910c       0x20 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_ioport.o)
+                0x0000910c                R_IOPORT_PinWrite
  .text.bsp_vbatt_init
-                0x000090bc       0xac C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_ioport.o)
+                0x0000912c       0xac C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_ioport.o)
  .text.R_IOPORT_PinCfg
-                0x00009168       0xa8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_ioport.o)
-                0x00009168                R_IOPORT_PinCfg
+                0x000091d8       0xa8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_ioport.o)
+                0x000091d8                R_IOPORT_PinCfg
  .text.r_iic_slave_call_callback
-                0x00009210       0x3c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_slave.o)
+                0x00009280       0x3c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_slave.o)
  .text.iic_slave_initiate_transaction
-                0x0000924c       0x74 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_slave.o)
+                0x000092bc       0x74 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_slave.o)
  .text.iic_slave_rxi_isr
-                0x000092c0      0x12c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_slave.o)
-                0x000092c0                iic_slave_rxi_isr
+                0x00009330      0x12c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_slave.o)
+                0x00009330                iic_slave_rxi_isr
  .text.iic_slave_txi_isr
-                0x000093ec       0xa8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_slave.o)
-                0x000093ec                iic_slave_txi_isr
+                0x0000945c       0xa8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_slave.o)
+                0x0000945c                iic_slave_txi_isr
  .text.iic_slave_tei_isr
-                0x00009494       0x94 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_slave.o)
-                0x00009494                iic_slave_tei_isr
+                0x00009504       0x94 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_slave.o)
+                0x00009504                iic_slave_tei_isr
  .text.iic_slave_eri_isr
-                0x00009528      0x10c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_slave.o)
-                0x00009528                iic_slave_eri_isr
+                0x00009598      0x10c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_slave.o)
+                0x00009598                iic_slave_eri_isr
  .text.iic_master_notify
-                0x00009634       0x3c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_master.o)
+                0x000096a4       0x3c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_master.o)
  .text.iic_master_open_hw_master
-                0x00009670      0x184 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_master.o)
+                0x000096e0      0x184 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_master.o)
  .text.iic_master_rxi_isr
-                0x000097f4      0x13c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_master.o)
-                0x000097f4                iic_master_rxi_isr
+                0x00009864      0x13c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_master.o)
+                0x00009864                iic_master_rxi_isr
  .text.iic_master_txi_isr
-                0x00009930       0xec C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_master.o)
-                0x00009930                iic_master_txi_isr
+                0x000099a0       0xec C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_master.o)
+                0x000099a0                iic_master_txi_isr
  .text.iic_master_tei_isr
-                0x00009a1c       0xc4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_master.o)
-                0x00009a1c                iic_master_tei_isr
+                0x00009a8c       0xc4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_master.o)
+                0x00009a8c                iic_master_tei_isr
  .text.iic_master_eri_isr
-                0x00009ae0      0x140 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_master.o)
-                0x00009ae0                iic_master_eri_isr
+                0x00009b50      0x140 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_iic_master.o)
+                0x00009b50                iic_master_eri_isr
  .text.r_icu_isr
-                0x00009c20       0x6c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_icu.o)
-                0x00009c20                r_icu_isr
+                0x00009c90       0x6c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_icu.o)
+                0x00009c90                r_icu_isr
  .text.R_GPT_Start
-                0x00009c8c        0xc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
-                0x00009c8c                R_GPT_Start
+                0x00009cfc        0xc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
+                0x00009cfc                R_GPT_Start
  .text.R_GPT_Enable
-                0x00009c98       0x30 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
-                0x00009c98                R_GPT_Enable
+                0x00009d08       0x30 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
+                0x00009d08                R_GPT_Enable
  .text.r_gpt_enable_irq
-                0x00009cc8       0x5c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
+                0x00009d38       0x5c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
  .text.r_gpt_call_callback
-                0x00009d24       0x3c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
+                0x00009d94       0x3c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
  .text.gpt_calculate_duty_cycle.isra.0
-                0x00009d60       0x78 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
+                0x00009dd0       0x78 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
  .text.R_GPT_Open
-                0x00009dd8      0x264 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
-                0x00009dd8                R_GPT_Open
+                0x00009e48      0x264 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
+                0x00009e48                R_GPT_Open
  .text.R_GPT_Close
-                0x0000a03c       0xd4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
-                0x0000a03c                R_GPT_Close
+                0x0000a0ac       0xd4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
+                0x0000a0ac                R_GPT_Close
  .text.gpt_counter_overflow_isr
-                0x0000a110       0x78 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
-                0x0000a110                gpt_counter_overflow_isr
+                0x0000a180       0x78 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_gpt.o)
+                0x0000a180                gpt_counter_overflow_isr
  .text.R_DAC_Open
-                0x0000a188       0x88 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_dac.o)
-                0x0000a188                R_DAC_Open
+                0x0000a1f8       0x88 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_dac.o)
+                0x0000a1f8                R_DAC_Open
  .text.R_DAC_Write
-                0x0000a210        0xc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_dac.o)
-                0x0000a210                R_DAC_Write
+                0x0000a280        0xc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_dac.o)
+                0x0000a280                R_DAC_Write
  .text.R_DAC_Start
-                0x0000a21c       0x30 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_dac.o)
-                0x0000a21c                R_DAC_Start
+                0x0000a28c       0x30 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_dac.o)
+                0x0000a28c                R_DAC_Start
  .text.R_DAC_Stop
-                0x0000a24c       0x34 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_dac.o)
-                0x0000a24c                R_DAC_Stop
+                0x0000a2bc       0x34 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_dac.o)
+                0x0000a2bc                R_DAC_Stop
  .text.R_DAC_Close
-                0x0000a280       0x40 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_dac.o)
-                0x0000a280                R_DAC_Close
+                0x0000a2f0       0x40 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_dac.o)
+                0x0000a2f0                R_DAC_Close
  .text.r_can_call_callback
-                0x0000a2c0       0x68 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_can.o)
+                0x0000a330       0x68 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_can.o)
  .text.can_error_isr
-                0x0000a328       0xd4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_can.o)
-                0x0000a328                can_error_isr
+                0x0000a398       0xd4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_can.o)
+                0x0000a398                can_error_isr
  .text.can_rx_isr
-                0x0000a3fc      0x118 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_can.o)
-                0x0000a3fc                can_rx_isr
+                0x0000a46c      0x118 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_can.o)
+                0x0000a46c                can_rx_isr
  .text.can_tx_isr
-                0x0000a514       0xa0 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_can.o)
-                0x0000a514                can_tx_isr
+                0x0000a584       0xa0 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_can.o)
+                0x0000a584                can_tx_isr
  .text.R_AGT_Start
-                0x0000a5b4       0x38 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_agt.o)
-                0x0000a5b4                R_AGT_Start
+                0x0000a624       0x38 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_agt.o)
+                0x0000a624                R_AGT_Start
  .text.R_AGT_Enable
-                0x0000a5ec       0x14 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_agt.o)
-                0x0000a5ec                R_AGT_Enable
+                0x0000a65c       0x14 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_agt.o)
+                0x0000a65c                R_AGT_Enable
  .text.R_AGT_Close
-                0x0000a600       0x84 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_agt.o)
-                0x0000a600                R_AGT_Close
+                0x0000a670       0x84 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_agt.o)
+                0x0000a670                R_AGT_Close
  .text.R_AGT_Open
-                0x0000a684      0x118 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_agt.o)
-                0x0000a684                R_AGT_Open
+                0x0000a6f4      0x118 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_agt.o)
+                0x0000a6f4                R_AGT_Open
  .text.agt_int_isr
-                0x0000a79c       0x88 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_agt.o)
-                0x0000a79c                agt_int_isr
+                0x0000a80c       0x88 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_agt.o)
+                0x0000a80c                agt_int_isr
  .text.R_ADC_ScanStart
-                0x0000a824        0xc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
-                0x0000a824                R_ADC_ScanStart
+                0x0000a894        0xc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
+                0x0000a894                R_ADC_ScanStart
  .text.R_ADC_StatusGet
-                0x0000a830       0x10 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
-                0x0000a830                R_ADC_StatusGet
+                0x0000a8a0       0x10 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
+                0x0000a8a0                R_ADC_StatusGet
  .text.R_ADC_Read
-                0x0000a840       0x10 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
-                0x0000a840                R_ADC_Read
+                0x0000a8b0       0x10 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
+                0x0000a8b0                R_ADC_Read
  .text.R_ADC_ScanCfg
-                0x0000a850      0x1a0 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
-                0x0000a850                R_ADC_ScanCfg
+                0x0000a8c0      0x1a0 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
+                0x0000a8c0                R_ADC_ScanCfg
  .text.R_ADC_Open
-                0x0000a9f0      0x240 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
-                0x0000a9f0                R_ADC_Open
+                0x0000aa60      0x240 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
+                0x0000aa60                R_ADC_Open
  .text.R_ADC_Close
-                0x0000ac30       0xfc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
-                0x0000ac30                R_ADC_Close
+                0x0000aca0       0xfc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
+                0x0000aca0                R_ADC_Close
  .text.bsp_prv_software_delay_loop
-                0x0000ad2c        0xc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_delay.o)
-                0x0000ad2c                bsp_prv_software_delay_loop
+                0x0000ad9c        0xc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_delay.o)
+                0x0000ad9c                bsp_prv_software_delay_loop
  .text.R_BSP_SoftwareDelay
-                0x0000ad38       0x5c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_delay.o)
-                0x0000ad38                R_BSP_SoftwareDelay
+                0x0000ada8       0x5c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_delay.o)
+                0x0000ada8                R_BSP_SoftwareDelay
  .text.bsp_irq_cfg
-                0x0000ad94       0x2c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_irq.o)
-                0x0000ad94                bsp_irq_cfg
+                0x0000ae04       0x2c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_irq.o)
+                0x0000ae04                bsp_irq_cfg
  .text.R_BSP_RegisterProtectEnable
-                0x0000adc0       0x60 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_register_protection.o)
-                0x0000adc0                R_BSP_RegisterProtectEnable
+                0x0000ae30       0x60 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_register_protection.o)
+                0x0000ae30                R_BSP_RegisterProtectEnable
  .text.R_BSP_RegisterProtectDisable
-                0x0000ae20       0x54 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_register_protection.o)
-                0x0000ae20                R_BSP_RegisterProtectDisable
+                0x0000ae90       0x54 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_register_protection.o)
+                0x0000ae90                R_BSP_RegisterProtectDisable
  .text.Default_Handler
-                0x0000ae74        0x4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(startup.o)
-                0x0000ae74                DebugMon_Handler
-                0x0000ae74                HardFault_Handler
-                0x0000ae74                SysTick_Handler
-                0x0000ae74                PendSV_Handler
-                0x0000ae74                UsageFault_Handler
-                0x0000ae74                SecureFault_Handler
-                0x0000ae74                Default_Handler
-                0x0000ae74                MemManage_Handler
-                0x0000ae74                SVC_Handler
-                0x0000ae74                BusFault_Handler
+                0x0000aee4        0x4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(startup.o)
+                0x0000aee4                DebugMon_Handler
+                0x0000aee4                HardFault_Handler
+                0x0000aee4                SysTick_Handler
+                0x0000aee4                PendSV_Handler
+                0x0000aee4                UsageFault_Handler
+                0x0000aee4                SecureFault_Handler
+                0x0000aee4                Default_Handler
+                0x0000aee4                MemManage_Handler
+                0x0000aee4                SVC_Handler
+                0x0000aee4                BusFault_Handler
  .text.Reset_Handler
-                0x0000ae78        0xc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(startup.o)
-                0x0000ae78                Reset_Handler
+                0x0000aee8        0xc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(startup.o)
+                0x0000aee8                Reset_Handler
  .text.R_BSP_WarmStart
-                0x0000ae84        0x4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(system.o)
-                0x0000ae84                R_BSP_WarmStart
+                0x0000aef4        0x4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(system.o)
+                0x0000aef4                R_BSP_WarmStart
  .text.SystemInit
-                0x0000ae88      0x15c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(system.o)
-                0x0000ae88                SystemInit
+                0x0000aef8      0x15c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(system.o)
+                0x0000aef8                SystemInit
  .text.SystemCoreClockUpdate
-                0x0000afe4       0x28 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_clocks.o)
-                0x0000afe4                SystemCoreClockUpdate
+                0x0000b054       0x28 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_clocks.o)
+                0x0000b054                SystemCoreClockUpdate
  .text.bsp_clock_init
-                0x0000b00c      0x12c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_clocks.o)
-                0x0000b00c                bsp_clock_init
+                0x0000b07c      0x12c C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_clocks.o)
+                0x0000b07c                bsp_clock_init
  .text.bsp_init_internal
-                0x0000b138        0x4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_common.o)
-                0x0000b138                bsp_init_internal
-                0x0000b138                bsp_init
+                0x0000b1a8        0x4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_common.o)
+                0x0000b1a8                bsp_init_internal
+                0x0000b1a8                bsp_init
  .text.NMI_Handler
-                0x0000b13c       0x38 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_group_irq.o)
-                0x0000b13c                NMI_Handler
- .text._Znwj    0x0000b174       0x22 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(new_op.o)
-                0x0000b174                operator new(unsigned int)
+                0x0000b1ac       0x38 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_group_irq.o)
+                0x0000b1ac                NMI_Handler
+ .text._Znwj    0x0000b1e4       0x22 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(new_op.o)
+                0x0000b1e4                operator new(unsigned int)
  .text.__cxa_guard_acquire
-                0x0000b196       0x18 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(guard.o)
-                0x0000b196                __cxa_guard_acquire
+                0x0000b206       0x18 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(guard.o)
+                0x0000b206                __cxa_guard_acquire
  .text.__cxa_guard_release
-                0x0000b1ae        0x6 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(guard.o)
-                0x0000b1ae                __cxa_guard_release
+                0x0000b21e        0x6 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(guard.o)
+                0x0000b21e                __cxa_guard_release
  .text._ZSt15get_new_handlerv
-                0x0000b1b4       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(new_handler.o)
-                0x0000b1b4                std::get_new_handler()
- .text._ZdlPvj  0x0000b1c4        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(del_ops.o)
-                0x0000b1c4                operator delete(void*, unsigned int)
- .text._ZdlPv   0x0000b1c8        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(del_op.o)
-                0x0000b1c8                operator delete(void*)
- .text          0x0000b1cc      0x378 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_addsubdf3.o)
-                0x0000b1cc                __aeabi_drsub
-                0x0000b1d4                __aeabi_dsub
-                0x0000b1d4                __subdf3
-                0x0000b1d8                __aeabi_dadd
-                0x0000b1d8                __adddf3
-                0x0000b450                __floatunsidf
-                0x0000b450                __aeabi_ui2d
-                0x0000b470                __floatsidf
-                0x0000b470                __aeabi_i2d
-                0x0000b494                __aeabi_f2d
-                0x0000b494                __extendsfdf2
-                0x0000b4d8                __floatundidf
-                0x0000b4d8                __aeabi_ul2d
-                0x0000b4e8                __floatdidf
-                0x0000b4e8                __aeabi_l2d
- .text          0x0000b544      0x424 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_muldivdf3.o)
-                0x0000b544                __aeabi_dmul
-                0x0000b544                __muldf3
-                0x0000b798                __divdf3
-                0x0000b798                __aeabi_ddiv
- .text          0x0000b968      0x110 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_cmpdf2.o)
-                0x0000b968                __gtdf2
-                0x0000b968                __gedf2
-                0x0000b970                __ltdf2
-                0x0000b970                __ledf2
-                0x0000b978                __nedf2
-                0x0000b978                __eqdf2
-                0x0000b978                __cmpdf2
-                0x0000b9f4                __aeabi_cdrcmple
-                0x0000ba04                __aeabi_cdcmpeq
-                0x0000ba04                __aeabi_cdcmple
-                0x0000ba14                __aeabi_dcmpeq
-                0x0000ba28                __aeabi_dcmplt
-                0x0000ba3c                __aeabi_dcmple
-                0x0000ba50                __aeabi_dcmpge
-                0x0000ba64                __aeabi_dcmpgt
- .text          0x0000ba78       0x2c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_unorddf2.o)
-                0x0000ba78                __unorddf2
-                0x0000ba78                __aeabi_dcmpun
- .text          0x0000baa4       0x50 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_fixdfsi.o)
-                0x0000baa4                __aeabi_d2iz
-                0x0000baa4                __fixdfsi
- .text          0x0000baf4       0x40 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_fixunsdfsi.o)
-                0x0000baf4                __aeabi_d2uiz
-                0x0000baf4                __fixunsdfsi
- .text          0x0000bb34       0xa0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_truncdfsf2.o)
-                0x0000bb34                __truncdfsf2
-                0x0000bb34                __aeabi_d2f
- .text          0x0000bbd4       0xa0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_aeabi_ldivmod.o)
-                0x0000bbd4                __aeabi_ldivmod
- .text          0x0000bc74      0x2cc c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_udivmoddi4.o)
-                0x0000bc74                __udivmoddi4
- .text          0x0000bf40        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_dvmd_tls.o)
-                0x0000bf40                __aeabi_idiv0
-                0x0000bf40                __aeabi_ldiv0
+                0x0000b224       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(new_handler.o)
+                0x0000b224                std::get_new_handler()
+ .text._ZdlPvj  0x0000b234        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(del_ops.o)
+                0x0000b234                operator delete(void*, unsigned int)
+ .text._ZdlPv   0x0000b238        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(del_op.o)
+                0x0000b238                operator delete(void*)
+ .text          0x0000b23c      0x378 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_addsubdf3.o)
+                0x0000b23c                __aeabi_drsub
+                0x0000b244                __aeabi_dsub
+                0x0000b244                __subdf3
+                0x0000b248                __aeabi_dadd
+                0x0000b248                __adddf3
+                0x0000b4c0                __floatunsidf
+                0x0000b4c0                __aeabi_ui2d
+                0x0000b4e0                __floatsidf
+                0x0000b4e0                __aeabi_i2d
+                0x0000b504                __aeabi_f2d
+                0x0000b504                __extendsfdf2
+                0x0000b548                __floatundidf
+                0x0000b548                __aeabi_ul2d
+                0x0000b558                __floatdidf
+                0x0000b558                __aeabi_l2d
+ .text          0x0000b5b4      0x424 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_muldivdf3.o)
+                0x0000b5b4                __aeabi_dmul
+                0x0000b5b4                __muldf3
+                0x0000b808                __divdf3
+                0x0000b808                __aeabi_ddiv
+ .text          0x0000b9d8      0x110 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_cmpdf2.o)
+                0x0000b9d8                __gtdf2
+                0x0000b9d8                __gedf2
+                0x0000b9e0                __ltdf2
+                0x0000b9e0                __ledf2
+                0x0000b9e8                __nedf2
+                0x0000b9e8                __eqdf2
+                0x0000b9e8                __cmpdf2
+                0x0000ba64                __aeabi_cdrcmple
+                0x0000ba74                __aeabi_cdcmpeq
+                0x0000ba74                __aeabi_cdcmple
+                0x0000ba84                __aeabi_dcmpeq
+                0x0000ba98                __aeabi_dcmplt
+                0x0000baac                __aeabi_dcmple
+                0x0000bac0                __aeabi_dcmpge
+                0x0000bad4                __aeabi_dcmpgt
+ .text          0x0000bae8       0x2c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_unorddf2.o)
+                0x0000bae8                __unorddf2
+                0x0000bae8                __aeabi_dcmpun
+ .text          0x0000bb14       0x50 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_fixdfsi.o)
+                0x0000bb14                __aeabi_d2iz
+                0x0000bb14                __fixdfsi
+ .text          0x0000bb64       0x40 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_fixunsdfsi.o)
+                0x0000bb64                __aeabi_d2uiz
+                0x0000bb64                __fixunsdfsi
+ .text          0x0000bba4       0xa0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_arm_truncdfsf2.o)
+                0x0000bba4                __truncdfsf2
+                0x0000bba4                __aeabi_d2f
+ .text          0x0000bc44       0xa0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_aeabi_ldivmod.o)
+                0x0000bc44                __aeabi_ldivmod
+ .text          0x0000bce4      0x2cc c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_udivmoddi4.o)
+                0x0000bce4                __udivmoddi4
+ .text          0x0000bfb0        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_dvmd_tls.o)
+                0x0000bfb0                __aeabi_idiv0
+                0x0000bfb0                __aeabi_ldiv0
  .text.PINCOUNT_fn
-                0x0000bf44        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
-                0x0000bf44                PINCOUNT_fn
+                0x0000bfb4        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000bfb4                PINCOUNT_fn
  .text._Z17__maybe_start_usbv
-                0x0000bf48        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
-                0x0000bf48                __maybe_start_usb()
- *fill*         0x0000bf4a        0x2 ff
+                0x0000bfb8        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000bfb8                __maybe_start_usb()
+ *fill*         0x0000bfba        0x2 ff
  .text.initVariant
-                0x0000bf4c       0x9c .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
-                0x0000bf4c                initVariant
- .text.fabs     0x0000bfe8       0x14 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libm.a(lib_a-s_fabs.o)
-                0x0000bfe8                fabs
- .text.sqrt     0x0000bffc       0xb8 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libm.a(lib_a-w_sqrt.o)
-                0x0000bffc                sqrt
+                0x0000bfbc       0x9c .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000bfbc                initVariant
+ .text.fabs     0x0000c058       0x14 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libm.a(lib_a-s_fabs.o)
+                0x0000c058                fabs
+ .text.sqrt     0x0000c06c       0xb8 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libm.a(lib_a-w_sqrt.o)
+                0x0000c06c                sqrt
  .text.__ieee754_sqrt
-                0x0000c0b4      0x194 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libm.a(lib_a-e_sqrt.o)
-                0x0000c0b4                __ieee754_sqrt
- .text.matherr  0x0000c248        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libm.a(lib_a-s_matherr.o)
-                0x0000c248                matherr
- .text.abort    0x0000c24c        0xe c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-abort.o)
-                0x0000c24c                abort
- *fill*         0x0000c25a        0x2 ff
- .text.__errno  0x0000c25c        0xc c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-errno.o)
-                0x0000c25c                __errno
- .text.malloc   0x0000c268       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-malloc.o)
-                0x0000c268                malloc
- .text.free     0x0000c278       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-malloc.o)
-                0x0000c278                free
- .text.memcpy   0x0000c288       0x16 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-memcpy-stub.o)
-                0x0000c288                memcpy
- .text.memset   0x0000c29e       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-memset.o)
-                0x0000c29e                memset
- *fill*         0x0000c2ae        0x2 ff
- .text._free_r  0x0000c2b0       0x9c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-freer.o)
-                0x0000c2b0                _free_r
+                0x0000c124      0x194 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libm.a(lib_a-e_sqrt.o)
+                0x0000c124                __ieee754_sqrt
+ .text.matherr  0x0000c2b8        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libm.a(lib_a-s_matherr.o)
+                0x0000c2b8                matherr
+ .text.abort    0x0000c2bc        0xe c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-abort.o)
+                0x0000c2bc                abort
+ *fill*         0x0000c2ca        0x2 ff
+ .text.__errno  0x0000c2cc        0xc c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-errno.o)
+                0x0000c2cc                __errno
+ .text.malloc   0x0000c2d8       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-malloc.o)
+                0x0000c2d8                malloc
+ .text.free     0x0000c2e8       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-malloc.o)
+                0x0000c2e8                free
+ .text.memcpy   0x0000c2f8       0x16 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-memcpy-stub.o)
+                0x0000c2f8                memcpy
+ .text.memset   0x0000c30e       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-memset.o)
+                0x0000c30e                memset
+ *fill*         0x0000c31e        0x2 ff
+ .text._free_r  0x0000c320       0x9c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-freer.o)
+                0x0000c320                _free_r
  .text._malloc_r
-                0x0000c34c       0xb4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-mallocr.o)
-                0x0000c34c                _malloc_r
- .text.printf   0x0000c400       0x30 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-printf.o)
-                0x0000c400                iprintf
-                0x0000c400                printf
- .text._sbrk_r  0x0000c430       0x20 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-sbrkr.o)
-                0x0000c430                _sbrk_r
+                0x0000c3bc       0xb4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-mallocr.o)
+                0x0000c3bc                _malloc_r
+ .text.printf   0x0000c470       0x30 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-printf.o)
+                0x0000c470                iprintf
+                0x0000c470                printf
+ .text._sbrk_r  0x0000c4a0       0x20 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-sbrkr.o)
+                0x0000c4a0                _sbrk_r
  .text._raise_r
-                0x0000c450       0x50 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-signal.o)
-                0x0000c450                _raise_r
- .text.raise    0x0000c4a0       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-signal.o)
-                0x0000c4a0                raise
- .text._kill_r  0x0000c4b0       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-signalr.o)
-                0x0000c4b0                _kill_r
+                0x0000c4c0       0x50 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-signal.o)
+                0x0000c4c0                _raise_r
+ .text.raise    0x0000c510       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-signal.o)
+                0x0000c510                raise
+ .text._kill_r  0x0000c520       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-signalr.o)
+                0x0000c520                _kill_r
  .text._getpid_r
-                0x0000c4d4        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-signalr.o)
-                0x0000c4d4                _getpid_r
- .text.sprintf  0x0000c4d8       0x40 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-sprintf.o)
-                0x0000c4d8                siprintf
-                0x0000c4d8                sprintf
- .text          0x0000c518       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-strlen.o)
-                0x0000c518                strlen
- .text.std      0x0000c528       0x48 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
+                0x0000c544        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-signalr.o)
+                0x0000c544                _getpid_r
+ .text.sprintf  0x0000c548       0x40 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-sprintf.o)
+                0x0000c548                siprintf
+                0x0000c548                sprintf
+ .text          0x0000c588       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-strlen.o)
+                0x0000c588                strlen
+ .text.std      0x0000c598       0x48 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
  .text._cleanup_r
-                0x0000c570        0xc c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
-                0x0000c570                _cleanup_r
+                0x0000c5e0        0xc c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
+                0x0000c5e0                _cleanup_r
  .text.__sfmoreglue
-                0x0000c57c       0x2c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
-                0x0000c57c                __sfmoreglue
- .text.__sinit  0x0000c5a8       0x60 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
-                0x0000c5a8                __sinit
- .text.__sfp    0x0000c608       0x78 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
-                0x0000c608                __sfp
+                0x0000c5ec       0x2c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
+                0x0000c5ec                __sfmoreglue
+ .text.__sinit  0x0000c618       0x60 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
+                0x0000c618                __sinit
+ .text.__sfp    0x0000c678       0x78 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
+                0x0000c678                __sfp
  .text._fwalk_reent
-                0x0000c680       0x3c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-fwalk.o)
-                0x0000c680                _fwalk_reent
+                0x0000c6f0       0x3c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-fwalk.o)
+                0x0000c6f0                _fwalk_reent
  .text.__malloc_lock
-                0x0000c6bc        0x2 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-mlock.o)
-                0x0000c6bc                __malloc_lock
+                0x0000c72c        0x2 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-mlock.o)
+                0x0000c72c                __malloc_lock
  .text.__malloc_unlock
-                0x0000c6be        0x2 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-mlock.o)
-                0x0000c6be                __malloc_unlock
+                0x0000c72e        0x2 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-mlock.o)
+                0x0000c72e                __malloc_unlock
  .text.__ssputs_r
-                0x0000c6c0       0xb4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-svfprintf.o)
-                0x0000c6c0                __ssputs_r
+                0x0000c730       0xb4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-svfprintf.o)
+                0x0000c730                __ssputs_r
  .text._svfprintf_r
-                0x0000c774      0x1ec c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-svfprintf.o)
-                0x0000c774                _svfiprintf_r
-                0x0000c774                _svfprintf_r
+                0x0000c7e4      0x1ec c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-svfprintf.o)
+                0x0000c7e4                _svfiprintf_r
+                0x0000c7e4                _svfprintf_r
  .text.__sfputc_r
-                0x0000c960       0x2e c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf.o)
+                0x0000c9d0       0x2e c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf.o)
  .text.__sfputs_r
-                0x0000c98e       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf.o)
-                0x0000c98e                __sfputs_r
- *fill*         0x0000c9b2        0x2 ff
+                0x0000c9fe       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf.o)
+                0x0000c9fe                __sfputs_r
+ *fill*         0x0000ca22        0x2 ff
  .text._vfprintf_r
-                0x0000c9b4      0x228 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf.o)
-                0x0000c9b4                _vfprintf_r
-                0x0000c9b4                _vfiprintf_r
+                0x0000ca24      0x228 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf.o)
+                0x0000ca24                _vfprintf_r
+                0x0000ca24                _vfiprintf_r
  .text._printf_common
-                0x0000cbdc       0xea c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf_i.o)
-                0x0000cbdc                _printf_common
- *fill*         0x0000ccc6        0x2 ff
+                0x0000cc4c       0xea c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf_i.o)
+                0x0000cc4c                _printf_common
+ *fill*         0x0000cd36        0x2 ff
  .text._printf_i
-                0x0000ccc8      0x224 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf_i.o)
-                0x0000ccc8                _printf_i
- .text.__sread  0x0000ceec       0x22 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-stdio.o)
-                0x0000ceec                __sread
+                0x0000cd38      0x224 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf_i.o)
+                0x0000cd38                _printf_i
+ .text.__sread  0x0000cf5c       0x22 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-stdio.o)
+                0x0000cf5c                __sread
  .text.__swrite
-                0x0000cf0e       0x38 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-stdio.o)
-                0x0000cf0e                __swrite
- .text.__sseek  0x0000cf46       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-stdio.o)
-                0x0000cf46                __sseek
+                0x0000cf7e       0x38 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-stdio.o)
+                0x0000cf7e                __swrite
+ .text.__sseek  0x0000cfb6       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-stdio.o)
+                0x0000cfb6                __sseek
  .text.__sclose
-                0x0000cf6a        0x8 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-stdio.o)
-                0x0000cf6a                __sclose
- *fill*         0x0000cf72        0x2 ff
+                0x0000cfda        0x8 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-stdio.o)
+                0x0000cfda                __sclose
+ *fill*         0x0000cfe2        0x2 ff
  .text.__swbuf_r
-                0x0000cf74       0xa4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-wbuf.o)
-                0x0000cf74                __swbuf_r
+                0x0000cfe4       0xa4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-wbuf.o)
+                0x0000cfe4                __swbuf_r
  .text._write_r
-                0x0000d018       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-writer.o)
-                0x0000d018                _write_r
+                0x0000d088       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-writer.o)
+                0x0000d088                _write_r
  .text.__swsetup_r
-                0x0000d03c       0xdc c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-wsetup.o)
-                0x0000d03c                __swsetup_r
+                0x0000d0ac       0xdc c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-wsetup.o)
+                0x0000d0ac                __swsetup_r
  .text._close_r
-                0x0000d118       0x20 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-closer.o)
-                0x0000d118                _close_r
+                0x0000d188       0x20 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-closer.o)
+                0x0000d188                _close_r
  .text.__sflush_r
-                0x0000d138      0x10c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-fflush.o)
-                0x0000d138                __sflush_r
+                0x0000d1a8      0x10c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-fflush.o)
+                0x0000d1a8                __sflush_r
  .text._fflush_r
-                0x0000d244       0x54 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-fflush.o)
-                0x0000d244                _fflush_r
+                0x0000d2b4       0x54 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-fflush.o)
+                0x0000d2b4                _fflush_r
  .text._lseek_r
-                0x0000d298       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-lseekr.o)
-                0x0000d298                _lseek_r
+                0x0000d308       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-lseekr.o)
+                0x0000d308                _lseek_r
  .text.__swhatbuf_r
-                0x0000d2bc       0x48 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-makebuf.o)
-                0x0000d2bc                __swhatbuf_r
+                0x0000d32c       0x48 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-makebuf.o)
+                0x0000d32c                __swhatbuf_r
  .text.__smakebuf_r
-                0x0000d304       0x80 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-makebuf.o)
-                0x0000d304                __smakebuf_r
- *fill*         0x0000d384        0xc ff
- .text          0x0000d390       0xa0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-memchr.o)
-                0x0000d390                memchr
- .text.memmove  0x0000d430       0x32 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-memmove.o)
-                0x0000d430                memmove
+                0x0000d374       0x80 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-makebuf.o)
+                0x0000d374                __smakebuf_r
+ *fill*         0x0000d3f4        0xc ff
+ .text          0x0000d400       0xa0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-memchr.o)
+                0x0000d400                memchr
+ .text.memmove  0x0000d4a0       0x32 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-memmove.o)
+                0x0000d4a0                memmove
  .text._realloc_r
-                0x0000d462       0x4c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-reallocr.o)
-                0x0000d462                _realloc_r
- *fill*         0x0000d4ae        0x2 ff
- .text._read_r  0x0000d4b0       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-readr.o)
-                0x0000d4b0                _read_r
+                0x0000d4d2       0x4c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-reallocr.o)
+                0x0000d4d2                _realloc_r
+ *fill*         0x0000d51e        0x2 ff
+ .text._read_r  0x0000d520       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-readr.o)
+                0x0000d520                _read_r
  .text._fstat_r
-                0x0000d4d4       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-fstatr.o)
-                0x0000d4d4                _fstat_r
+                0x0000d544       0x24 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-fstatr.o)
+                0x0000d544                _fstat_r
  .text._isatty_r
-                0x0000d4f8       0x20 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-isattyr.o)
-                0x0000d4f8                _isatty_r
+                0x0000d568       0x20 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-isattyr.o)
+                0x0000d568                _isatty_r
  .text._malloc_usable_size_r
-                0x0000d518       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-msizer.o)
-                0x0000d518                _malloc_usable_size_r
- .text._close   0x0000d528       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(close.o)
-                0x0000d528                _close
- .text._fstat   0x0000d538       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(fstat.o)
-                0x0000d538                _fstat
- .text._getpid  0x0000d548       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(getpid.o)
-                0x0000d548                _getpid
- .text._isatty  0x0000d558       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(isatty.o)
-                0x0000d558                _isatty
- .text._kill    0x0000d568       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(kill.o)
-                0x0000d568                _kill
- .text._lseek   0x0000d578       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(lseek.o)
-                0x0000d578                _lseek
- .text._read    0x0000d588       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(read.o)
-                0x0000d588                _read
- .text._sbrk    0x0000d598       0x1c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(sbrk.o)
-                0x0000d598                _sbrk
- .text._exit    0x0000d5b4        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(_exit.o)
-                0x0000d5b4                _exit
+                0x0000d588       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-msizer.o)
+                0x0000d588                _malloc_usable_size_r
+ .text._close   0x0000d598       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(close.o)
+                0x0000d598                _close
+ .text._fstat   0x0000d5a8       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(fstat.o)
+                0x0000d5a8                _fstat
+ .text._getpid  0x0000d5b8       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(getpid.o)
+                0x0000d5b8                _getpid
+ .text._isatty  0x0000d5c8       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(isatty.o)
+                0x0000d5c8                _isatty
+ .text._kill    0x0000d5d8       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(kill.o)
+                0x0000d5d8                _kill
+ .text._lseek   0x0000d5e8       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(lseek.o)
+                0x0000d5e8                _lseek
+ .text._read    0x0000d5f8       0x10 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(read.o)
+                0x0000d5f8                _read
+ .text._sbrk    0x0000d608       0x1c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(sbrk.o)
+                0x0000d608                _sbrk
+ .text._exit    0x0000d624        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(_exit.o)
+                0x0000d624                _exit
  *(.version)
- .version       0x0000d5b8       0x50 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_common.o)
+ .version       0x0000d628       0x50 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_common.o)
  *(.init)
- .init          0x0000d608        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crti.o
-                0x0000d608                _init
- .init          0x0000d60c        0x8 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtn.o
+ .init          0x0000d678        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crti.o
+                0x0000d678                _init
+ .init          0x0000d67c        0x8 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtn.o
  *(.fini)
- .fini          0x0000d614        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crti.o
-                0x0000d614                _fini
- .fini          0x0000d618        0x8 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtn.o
+ .fini          0x0000d684        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crti.o
+                0x0000d684                _fini
+ .fini          0x0000d688        0x8 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtn.o
  *crtbegin.o(.ctors)
  *crtbegin?.o(.ctors)
  *(EXCLUDE_FILE(*crtend.o *crtend?.o) .ctors)
@@ -2464,207 +2464,207 @@ END GROUP
  *(.dtors)
  *(.rodata*)
  .rodata._Z12moveToAnglesffff.str1.1
-                0x0000d620       0x4a .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x0000d690       0x4a .pio\build\uno_r4_wifi\src\main.cpp.o
  .rodata._Z4homev.str1.1
-                0x0000d66a       0x28 .pio\build\uno_r4_wifi\src\main.cpp.o
- *fill*         0x0000d692        0x2 ff
+                0x0000d6da       0x28 .pio\build\uno_r4_wifi\src\main.cpp.o
+ *fill*         0x0000d702        0x2 ff
  .rodata._ZL9waypoints
-                0x0000d694      0x140 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x0000d704      0x140 .pio\build\uno_r4_wifi\src\main.cpp.o
  .rodata.loop.str1.1
-                0x0000d7d4       0x3d .pio\build\uno_r4_wifi\src\main.cpp.o
- *fill*         0x0000d811        0x3 ff
+                0x0000d844       0x3d .pio\build\uno_r4_wifi\src\main.cpp.o
+ *fill*         0x0000d881        0x3 ff
  .rodata._ZTV12AccelStepper
-                0x0000d814       0x40 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
-                0x0000d814                vtable for AccelStepper
+                0x0000d884       0x40 .pio\build\uno_r4_wifi\lib1ab\libAccelStepper.a(AccelStepper.cpp.o)
+                0x0000d884                vtable for AccelStepper
  .rodata._ZTV4UART
-                0x0000d854       0x34 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x0000d854                vtable for UART
+                0x0000d8c4       0x34 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x0000d8c4                vtable for UART
  .rodata._ZN7arduino5Print7printlnEv.str1.1
-                0x0000d888        0x3 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
- .rodata        0x0000d88b        0xd .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
+                0x0000d8f8        0x3 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Print.cpp.o)
+ .rodata        0x0000d8fb        0xd .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
  .rodata._Z12arduino_mainv.str1.1
-                0x0000d898       0x10 .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
+                0x0000d908       0x10 .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
  .rodata.g_interrupt_event_link_select
-                0x0000d8a8       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(vector_table.c.o)
-                0x0000d8a8                g_interrupt_event_link_select
+                0x0000d918       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(vector_table.c.o)
+                0x0000d918                g_interrupt_event_link_select
  .rodata.CSWTCH.44
-                0x0000d8c8        0x6 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x0000d938        0x6 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .rodata.CSWTCH.72
-                0x0000d8ce        0x5 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x0000d93e        0x5 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .rodata.__FUNCTION__.6535
-                0x0000d8d3       0x13 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x0000d943       0x13 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
  .rodata.cm_backtrace_assert.str1.1
-                0x0000d8e6       0x26 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x0000d956       0x26 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
                                  0x28 (size before relaxing)
  .rodata.cm_backtrace_fault.str1.1
-                0x0000d90c      0x6ae .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x0000d97c      0x6ae .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
  .rodata.cm_backtrace_firmware_info.str1.1
-                0x0000dfba       0x23 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x0000e02a       0x23 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
  .rodata.cm_backtrace_init.str1.1
-                0x0000dfdd       0x62 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x0000e04d       0x62 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
  .rodata.dump_stack.str1.1
-                0x0000e03f       0x65 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x0000e0af       0x65 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
                                  0x8d (size before relaxing)
  .rodata.print_call_stack.str1.1
-                0x0000e0a4       0x65 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x0000e114       0x65 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
  .rodata.str1.1
-                0x0000e109       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
- *fill*         0x0000e129        0x3 ff
+                0x0000e179       0x20 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+ *fill*         0x0000e199        0x3 ff
  .rodata.g_async_baud
-                0x0000e12c        0xd C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
- *fill*         0x0000e139        0x3 ff
+                0x0000e19c        0xd C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+ *fill*         0x0000e1a9        0x3 ff
  .rodata.g_div_coefficient
-                0x0000e13c       0x1a C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
- *fill*         0x0000e156        0x2 ff
+                0x0000e1ac       0x1a C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_sci_uart.o)
+ *fill*         0x0000e1c6        0x2 ff
  .rodata.adc_elc_trigger_lut
-                0x0000e158        0xc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
+                0x0000e1c8        0xc C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_adc.o)
  .rodata.g_prcr_masks
-                0x0000e164        0x8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_register_protection.o)
+                0x0000e1d4        0x8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_register_protection.o)
  .rodata._ZL4P000
-                0x0000e16c        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e1dc        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P001
-                0x0000e170        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e1e0        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P002
-                0x0000e174        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e1e4        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P003
-                0x0000e178        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e1e8        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P004
-                0x0000e17a        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e1ea        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P011
-                0x0000e17e        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e1ee        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P012
-                0x0000e182        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e1f2        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P013
-                0x0000e184        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e1f4        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P015
-                0x0000e186        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e1f6        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P100
-                0x0000e18a        0xe .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e1fa        0xe .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P101
-                0x0000e198        0xe .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e208        0xe .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P102
-                0x0000e1a6        0xc .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e216        0xc .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P103
-                0x0000e1b2        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e222        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P104
-                0x0000e1ba        0x6 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e22a        0x6 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P105
-                0x0000e1c0        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e230        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P106
-                0x0000e1c4        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e234        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P107
-                0x0000e1c6        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e236        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P109
-                0x0000e1c8        0xa .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e238        0xa .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P110
-                0x0000e1d2        0xc .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e242        0xc .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P111
-                0x0000e1de        0xa .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e24e        0xa .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P112
-                0x0000e1e8        0x6 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e258        0x6 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P204
-                0x0000e1ee        0xa .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e25e        0xa .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P205
-                0x0000e1f8        0xa .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e268        0xa .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P206
-                0x0000e202        0x6 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e272        0x6 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P212
-                0x0000e208        0x6 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e278        0x6 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P213
-                0x0000e20e        0x6 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e27e        0x6 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P301
-                0x0000e214        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e284        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P302
-                0x0000e21c        0x6 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e28c        0x6 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P303
-                0x0000e222        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e292        0x2 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P304
-                0x0000e224        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e294        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P401
-                0x0000e228        0xa .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e298        0xa .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P410
-                0x0000e232        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e2a2        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P411
-                0x0000e23a        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e2aa        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P500
-                0x0000e242        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e2b2        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P501
-                0x0000e246        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e2b6        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL4P502
-                0x0000e24e        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e2be        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL6P014_b
-                0x0000e256        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e2c6        0x4 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL6P400_b
-                0x0000e25a        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e2ca        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
  .rodata._ZL6P408_b
-                0x0000e262        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
- *fill*         0x0000e26a        0x2 ff
+                0x0000e2d2        0x8 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+ *fill*         0x0000e2da        0x2 ff
  .rodata.g_pin_cfg
-                0x0000e26c      0x138 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
-                0x0000e26c                g_pin_cfg
+                0x0000e2dc      0x138 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(variant.cpp.o)
+                0x0000e2dc                g_pin_cfg
  .rodata.sqrt.str1.4
-                0x0000e3a4        0x8 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libm.a(lib_a-w_sqrt.o)
+                0x0000e414        0x8 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libm.a(lib_a-w_sqrt.o)
                                   0x5 (size before relaxing)
  .rodata._global_impure_ptr
-                0x0000e3ac        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-impure.o)
-                0x0000e3ac                _global_impure_ptr
+                0x0000e41c        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-impure.o)
+                0x0000e41c                _global_impure_ptr
  .rodata.__sf_fake_stderr
-                0x0000e3b0       0x20 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
-                0x0000e3b0                __sf_fake_stderr
+                0x0000e420       0x20 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
+                0x0000e420                __sf_fake_stderr
  .rodata.__sf_fake_stdin
-                0x0000e3d0       0x20 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
-                0x0000e3d0                __sf_fake_stdin
+                0x0000e440       0x20 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
+                0x0000e440                __sf_fake_stdin
  .rodata.__sf_fake_stdout
-                0x0000e3f0       0x20 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
-                0x0000e3f0                __sf_fake_stdout
+                0x0000e460       0x20 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-findfp.o)
+                0x0000e460                __sf_fake_stdout
  .rodata._svfprintf_r.str1.1
-                0x0000e410       0x11 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-svfprintf.o)
+                0x0000e480       0x11 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-svfprintf.o)
  .rodata._vfprintf_r.str1.1
-                0x0000e421       0x11 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf.o)
+                0x0000e491       0x11 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf.o)
  .rodata._printf_i.str1.1
-                0x0000e421       0x22 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf_i.o)
+                0x0000e491       0x22 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-vfprintf_i.o)
  *(.eh_frame*)
- *fill*         0x0000e443        0x1 ff
- .eh_frame      0x0000e444        0x0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
- .eh_frame      0x0000e444        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtend.o
-                0x0000e448                __ROM_End = .
+ *fill*         0x0000e4b3        0x1 ff
+ .eh_frame      0x0000e4b4        0x0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+ .eh_frame      0x0000e4b4        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtend.o
+                0x0000e4b8                __ROM_End = .
                 0x000000c0                __Vectors_Size = (__Vectors_End - __Vectors)
 
-.glue_7         0x0000e448        0x0
- .glue_7        0x0000e448        0x0 linker stubs
+.glue_7         0x0000e4b8        0x0
+ .glue_7        0x0000e4b8        0x0 linker stubs
 
-.glue_7t        0x0000e448        0x0
- .glue_7t       0x0000e448        0x0 linker stubs
+.glue_7t        0x0000e4b8        0x0
+ .glue_7t       0x0000e4b8        0x0 linker stubs
 
-.vfp11_veneer   0x0000e448        0x0
- .vfp11_veneer  0x0000e448        0x0 linker stubs
+.vfp11_veneer   0x0000e4b8        0x0
+ .vfp11_veneer  0x0000e4b8        0x0 linker stubs
 
-.v4_bx          0x0000e448        0x0
- .v4_bx         0x0000e448        0x0 linker stubs
+.v4_bx          0x0000e4b8        0x0
+ .v4_bx         0x0000e4b8        0x0 linker stubs
 
-.iplt           0x0000e448        0x0
- .iplt          0x0000e448        0x0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+.iplt           0x0000e4b8        0x0
+ .iplt          0x0000e4b8        0x0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
 
 .ARM.extab
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x0000e448                __exidx_start = .
+                0x0000e4b8                __exidx_start = .
 
-.ARM.exidx      0x0000e448        0x8
+.ARM.exidx      0x0000e4b8        0x8
  *(.ARM.exidx* .gnu.linkonce.armexidx.*)
- .ARM.exidx     0x0000e448        0x8 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_udivmoddi4.o)
-                0x0000e450                __exidx_end = .
-                0x0000e450                __etext = .
+ .ARM.exidx     0x0000e4b8        0x8 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard\libgcc.a(_udivmoddi4.o)
+                0x0000e4c0                __exidx_end = .
+                0x0000e4c0                __etext = .
                 0x20000000                __tz_RAM_S = ORIGIN (RAM)
 
-.rel.dyn        0x0000e450        0x0
- .rel.iplt      0x0000e450        0x0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+.rel.dyn        0x0000e4c0        0x0
+ .rel.iplt      0x0000e4c0        0x0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
 
 .fsp_dtc_vector_table
                 0x20000000        0x0
                 0x20000000                . = ORIGIN (RAM)
  *(.fsp_dtc_vector_table)
 
-.data           0x20000000       0x94 load address 0x0000e450
+.data           0x20000000       0x90 load address 0x0000e4c0
                 0x20000000                __data_start__ = .
                 0x20000000                . = ALIGN (0x4)
                 0x20000000                __Code_In_RAM_Start = .
@@ -2672,257 +2672,255 @@ END GROUP
                 0x20000000                __Code_In_RAM_End = .
  *(vtable)
  *(.data.*)
- .data.staticDebug
-                0x20000000        0x1 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000000                staticDebug
- *fill*         0x20000001        0x3 
  .data._ZL30_analogRequestedReadResolution
-                0x20000004        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x20000000        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .data.__fdlib_version
-                0x20000008        0x1 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libm.a(lib_a-s_lib_ver.o)
-                0x20000008                __fdlib_version
- *fill*         0x20000009        0x3 
+                0x20000004        0x1 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libm.a(lib_a-s_lib_ver.o)
+                0x20000004                __fdlib_version
+ *fill*         0x20000005        0x3 
  .data._impure_ptr
-                0x2000000c        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-impure.o)
-                0x2000000c                _impure_ptr
+                0x20000008        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-impure.o)
+                0x20000008                _impure_ptr
  .data.impure_data
-                0x20000010       0x60 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-impure.o)
+                0x2000000c       0x60 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-impure.o)
  *(.data)
-                0x20000070                . = ALIGN (0x4)
-                0x20000070                PROVIDE (__preinit_array_start, .)
+                0x2000006c                . = ALIGN (0x4)
+                0x2000006c                PROVIDE (__preinit_array_start, .)
  *(.preinit_array)
-                0x20000070                PROVIDE (__preinit_array_end, .)
-                0x20000070                . = ALIGN (0x4)
-                0x20000070                PROVIDE (__init_array_start, .)
+                0x2000006c                PROVIDE (__preinit_array_end, .)
+                0x2000006c                . = ALIGN (0x4)
+                0x2000006c                PROVIDE (__init_array_start, .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array)
- .init_array    0x20000070        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
- .init_array    0x20000074        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
- .init_array    0x20000078        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(SerialObj1.cpp.o)
- .init_array    0x2000007c        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
- .init_array    0x20000080        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
- .init_array    0x20000084        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(dac.cpp.o)
-                0x20000088                PROVIDE (__init_array_end, .)
-                0x20000088                . = ALIGN (0x4)
+ .init_array    0x2000006c        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+ .init_array    0x20000070        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+ .init_array    0x20000074        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(SerialObj1.cpp.o)
+ .init_array    0x20000078        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
+ .init_array    0x2000007c        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+ .init_array    0x20000080        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(dac.cpp.o)
+                0x20000084                PROVIDE (__init_array_end, .)
+                0x20000084                . = ALIGN (0x4)
                 [!provide]                PROVIDE (__fini_array_start, .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array)
- .fini_array    0x20000088        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
- .fini_array    0x2000008c        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
- .fini_array    0x20000090        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+ .fini_array    0x20000084        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+ .fini_array    0x20000088        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
+ .fini_array    0x2000008c        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
                 [!provide]                PROVIDE (__fini_array_end, .)
  *(.jcr*)
-                0x20000094                . = ALIGN (0x4)
-                0x20000094                __data_end__ = .
+                0x20000090                . = ALIGN (0x4)
+                0x20000090                __data_end__ = .
 
-.igot.plt       0x20000094        0x0 load address 0x0000e4e4
- .igot.plt      0x20000094        0x0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+.igot.plt       0x20000090        0x0 load address 0x0000e550
+ .igot.plt      0x20000090        0x0 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
 
-.noinit         0x20000094       0x1c load address 0x0000e4e4
-                0x20000094                . = ALIGN (0x4)
-                0x20000094                __noinit_start = .
+.noinit         0x20000090       0x18 load address 0x0000e550
+                0x20000090                . = ALIGN (0x4)
+                0x20000090                __noinit_start = .
  *(.noinit*)
- .noinit        0x20000094       0x18 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_clocks.o)
-                0x200000b0                . = ALIGN (0x8)
- *fill*         0x200000ac        0x4 
+ .noinit        0x20000090       0x18 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_clocks.o)
+                0x200000a8                . = ALIGN (0x8)
  *(.heap.*)
-                0x200000b0                __noinit_end = .
+                0x200000a8                __noinit_end = .
 
-.bss            0x200000b0      0xac4 load address 0x0000e4e4
-                0x200000b0                . = ALIGN (0x4)
-                0x200000b0                __bss_start__ = .
+.bss            0x200000a8      0xac4 load address 0x0000e550
+                0x200000a8                . = ALIGN (0x4)
+                0x200000a8                __bss_start__ = .
  *(.bss*)
- .bss           0x200000b0       0x1c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
- .bss.MOTOR1    0x200000cc       0x54 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x200000cc                MOTOR1
- .bss.MOTOR2    0x20000120       0x54 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000120                MOTOR2
- .bss.MOTOR3    0x20000174       0x54 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000174                MOTOR3
- .bss.MOTOR4    0x200001c8       0x54 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x200001c8                MOTOR4
+ .bss           0x200000a8       0x1c c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/thumb/v7e-m/fpv4-sp/hard/crtbegin.o
+ .bss.MOTOR1    0x200000c4       0x54 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x200000c4                MOTOR1
+ .bss.MOTOR2    0x20000118       0x54 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000118                MOTOR2
+ .bss.MOTOR3    0x2000016c       0x54 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x2000016c                MOTOR3
+ .bss.MOTOR4    0x200001c0       0x54 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x200001c0                MOTOR4
  .bss._ZZ12moveToAnglesffffE5stage
-                0x2000021c        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000214        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
  .bss._ZZ4loopE11moveStarted
-                0x20000220        0x1 .pio\build\uno_r4_wifi\src\main.cpp.o
- *fill*         0x20000221        0x3 
+                0x20000218        0x1 .pio\build\uno_r4_wifi\src\main.cpp.o
+ *fill*         0x20000219        0x3 
  .bss.currentWaypoint
-                0x20000224        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000224                currentWaypoint
- .bss.isHomed   0x20000228        0x1 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000228                isHomed
- *fill*         0x20000229        0x3 
- .bss.lastD2G   0x2000022c        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x2000022c                lastD2G
+                0x2000021c        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x2000021c                currentWaypoint
+ .bss.isHomed   0x20000220        0x1 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000220                isHomed
+ *fill*         0x20000221        0x3 
+ .bss.lastD2G   0x20000224        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000224                lastD2G
  .bss.longestD2G
-                0x20000230        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000230                longestD2G
+                0x20000228        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000228                longestD2G
  .bss.longestMotor
-                0x20000234        0x1 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000234                longestMotor
- *fill*         0x20000235        0x3 
+                0x2000022c        0x1 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x2000022c                longestMotor
+ *fill*         0x2000022d        0x3 
  .bss.motor1D2G
-                0x20000238        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000238                motor1D2G
+                0x20000230        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000230                motor1D2G
  .bss.motor1Dir
-                0x2000023c        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x2000023c                motor1Dir
+                0x20000234        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000234                motor1Dir
  .bss.motor1StepCounter
-                0x20000240        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000240                motor1StepCounter
+                0x20000238        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000238                motor1StepCounter
  .bss.motor1StepDelay
-                0x20000244        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000244                motor1StepDelay
+                0x2000023c        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x2000023c                motor1StepDelay
  .bss.motor2D2G
-                0x20000248        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000248                motor2D2G
+                0x20000240        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000240                motor2D2G
  .bss.motor2Dir
-                0x2000024c        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x2000024c                motor2Dir
+                0x20000244        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000244                motor2Dir
  .bss.motor2StepCounter
-                0x20000250        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000250                motor2StepCounter
+                0x20000248        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000248                motor2StepCounter
  .bss.motor2StepDelay
-                0x20000254        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000254                motor2StepDelay
+                0x2000024c        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x2000024c                motor2StepDelay
  .bss.motor3D2G
-                0x20000258        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000258                motor3D2G
+                0x20000250        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000250                motor3D2G
  .bss.motor3Dir
-                0x2000025c        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x2000025c                motor3Dir
+                0x20000254        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000254                motor3Dir
  .bss.motor3StepCounter
-                0x20000260        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000260                motor3StepCounter
+                0x20000258        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000258                motor3StepCounter
  .bss.motor3StepDelay
-                0x20000264        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000264                motor3StepDelay
+                0x2000025c        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x2000025c                motor3StepDelay
  .bss.motor4D2G
-                0x20000268        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000268                motor4D2G
+                0x20000260        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000260                motor4D2G
  .bss.motor4Dir
-                0x2000026c        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x2000026c                motor4Dir
+                0x20000264        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000264                motor4Dir
  .bss.motor4StepCounter
-                0x20000270        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000270                motor4StepCounter
+                0x20000268        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000268                motor4StepCounter
  .bss.motor4StepDelay
-                0x20000274        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000274                motor4StepDelay
+                0x2000026c        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x2000026c                motor4StepDelay
  .bss.movementComplete
-                0x20000278        0x1 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x20000278                movementComplete
- *fill*         0x20000279        0x3 
+                0x20000270        0x1 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000270                movementComplete
+ .bss.staticDebug
+                0x20000271        0x1 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000271                staticDebug
+ *fill*         0x20000272        0x2 
  .bss.stepCounter
-                0x2000027c        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
-                0x2000027c                stepCounter
+                0x20000274        0x4 .pio\build\uno_r4_wifi\src\main.cpp.o
+                0x20000274                stepCounter
  .bss._ZN4UART7g_uartsE
-                0x20000280       0x28 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
-                0x20000280                UART::g_uarts
- .bss._UART1_   0x200002a8      0x4ac .pio\build\uno_r4_wifi\libFrameworkArduino.a(SerialObj1.cpp.o)
-                0x200002a8                _UART1_
+                0x20000278       0x28 .pio\build\uno_r4_wifi\libFrameworkArduino.a(Serial.cpp.o)
+                0x20000278                UART::g_uarts
+ .bss._UART1_   0x200002a0      0x4ac .pio\build\uno_r4_wifi\libFrameworkArduino.a(SerialObj1.cpp.o)
+                0x200002a0                _UART1_
  .bss.irq_vector_table
-                0x20000754        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
-                0x20000754                irq_vector_table
+                0x2000074c        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(main.cpp.o)
+                0x2000074c                irq_vector_table
  .bss._ZL9agt_timer
-                0x20000758       0x38 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
+                0x20000750       0x38 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
  .bss.agt_time_ms
-                0x20000790        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
-                0x20000790                agt_time_ms
+                0x20000788        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(time.cpp.o)
+                0x20000788                agt_time_ms
  .bss._ZN8FspTimer16agt_used_channelE
-                0x20000794        0x2 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x20000794                FspTimer::agt_used_channel
+                0x2000078c        0x2 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x2000078c                FspTimer::agt_used_channel
  .bss._ZN8FspTimer16gpt_used_channelE
-                0x20000796        0x8 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x20000796                FspTimer::gpt_used_channel
+                0x2000078e        0x8 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x2000078e                FspTimer::gpt_used_channel
  .bss._ZN8FspTimer18force_pwm_reservedE
-                0x2000079e        0x1 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
-                0x2000079e                FspTimer::force_pwm_reserved
- *fill*         0x2000079f        0x1 
+                0x20000796        0x1 .pio\build\uno_r4_wifi\libFrameworkArduino.a(FspTimer.cpp.o)
+                0x20000796                FspTimer::force_pwm_reserved
+ *fill*         0x20000797        0x1 
  .bss._ZGVZN10IRQManager11getInstanceEvE8instance
-                0x200007a0        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x20000798        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
  .bss._ZZN10IRQManager11getInstanceEvE8instance
-                0x200007a4        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
+                0x2000079c        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(IRQManager.cpp.o)
  .bss._ZL17scan_complete_cbk
-                0x200007a8        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x200007a0        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .bss._ZL20window_compare_a_cbk
-                0x200007ac        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x200007a4        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .bss._ZL20window_compare_b_cbk
-                0x200007b0        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x200007a8        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .bss._ZL25analog_values_by_channels
-                0x200007b4       0x3a .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
- *fill*         0x200007ee        0x2 
- .bss._ZL3adc   0x200007f0       0x5c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
- .bss._ZL4adc1  0x2000084c       0x5c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
- .bss._ZL4aref  0x200008a8        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
- .bss._ZL4pwms  0x200008ac       0x68 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+                0x200007ac       0x3a .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+ *fill*         0x200007e6        0x2 
+ .bss._ZL3adc   0x200007e8       0x5c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+ .bss._ZL4adc1  0x20000844       0x5c .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+ .bss._ZL4aref  0x200008a0        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
+ .bss._ZL4pwms  0x200008a4       0x68 .pio\build\uno_r4_wifi\libFrameworkArduino.a(analog.cpp.o)
  .bss.call_stack_info
-                0x20000914       0x90 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x2000090c       0x90 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
  .bss.code_size
-                0x200009a4        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x2000099c        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
  .bss.code_start_addr
-                0x200009a8        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
- .bss.fw_name   0x200009ac        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
- .bss.init_ok   0x200009b0        0x1 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
- *fill*         0x200009b1        0x3 
+                0x200009a0        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+ .bss.fw_name   0x200009a4        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+ .bss.init_ok   0x200009a8        0x1 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+ *fill*         0x200009a9        0x3 
  .bss.main_stack_size
-                0x200009b4        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x200009ac        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
  .bss.main_stack_start_addr
-                0x200009b8        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
- .bss.on_fault  0x200009bc        0x1 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
- *fill*         0x200009bd        0x3 
- .bss.regs      0x200009c0       0x44 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+                0x200009b0        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+ .bss.on_fault  0x200009b4        0x1 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+ *fill*         0x200009b5        0x3 
+ .bss.regs      0x200009b8       0x44 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
  .bss.stack_is_overflow
-                0x20000a04        0x1 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
- *fill*         0x20000a05        0x3 
- .bss.sw_ver    0x20000a08        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
- .bss._dac12    0x20000a0c       0x3c .pio\build\uno_r4_wifi\libFrameworkArduino.a(dac.cpp.o)
-                0x20000a0c                _dac12
+                0x200009fc        0x1 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+ *fill*         0x200009fd        0x3 
+ .bss.sw_ver    0x20000a00        0x4 .pio\build\uno_r4_wifi\libFrameworkArduino.a(cm_backtrace.c.o)
+ .bss._dac12    0x20000a04       0x3c .pio\build\uno_r4_wifi\libFrameworkArduino.a(dac.cpp.o)
+                0x20000a04                _dac12
  .bss.gp_prv_agt_periods
-                0x20000a48        0x8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_agt.o)
+                0x20000a40        0x8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(r_agt.o)
  .bss.g_protect_pfswe_counter
-                0x20000a50        0x4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_io.o)
-                0x20000a50                g_protect_pfswe_counter
+                0x20000a48        0x4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_io.o)
+                0x20000a48                g_protect_pfswe_counter
  .bss.gp_renesas_isr_context
-                0x20000a54       0x80 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_irq.o)
-                0x20000a54                gp_renesas_isr_context
+                0x20000a4c       0x80 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_irq.o)
+                0x20000a4c                gp_renesas_isr_context
  .bss.g_protect_counters
-                0x20000ad4        0x8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_register_protection.o)
-                0x20000ad4                g_protect_counters
+                0x20000acc        0x8 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_register_protection.o)
+                0x20000acc                g_protect_counters
  .bss.SystemCoreClock
-                0x20000adc        0x4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(system.o)
-                0x20000adc                SystemCoreClock
+                0x20000ad4        0x4 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(system.o)
+                0x20000ad4                SystemCoreClock
  .bss.g_bsp_group_irq_sources
-                0x20000ae0       0x40 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_group_irq.o)
-                0x20000ae0                g_bsp_group_irq_sources
+                0x20000ad8       0x40 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(bsp_group_irq.o)
+                0x20000ad8                g_bsp_group_irq_sources
  .bss._ZN12_GLOBAL__N_113__new_handlerE
-                0x20000b20        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(new_handler.o)
+                0x20000b18        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libstdc++_nano.a(new_handler.o)
  .bss.__malloc_free_list
-                0x20000b24        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-mallocr.o)
-                0x20000b24                __malloc_free_list
+                0x20000b1c        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-mallocr.o)
+                0x20000b1c                __malloc_free_list
  .bss.__malloc_sbrk_start
-                0x20000b28        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-mallocr.o)
-                0x20000b28                __malloc_sbrk_start
+                0x20000b20        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-nano-mallocr.o)
+                0x20000b20                __malloc_sbrk_start
  .bss.heap_end.5377
-                0x20000b2c        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(sbrk.o)
+                0x20000b24        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libnosys.a(sbrk.o)
  *(COMMON)
- COMMON         0x20000b30       0x40 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(common_data.c.o)
-                0x20000b30                g_ioport_ctrl
-                0x20000b38                g_cgc0_ctrl
-                0x20000b48                g_elc_ctrl
-                0x20000b50                g_external_irq1_ctrl
-                0x20000b60                g_external_irq0_ctrl
- COMMON         0x20000b70        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-reent.o)
-                0x20000b70                errno
-                0x20000b74                . = ALIGN (0x4)
-                0x20000b74                __bss_end__ = .
+ COMMON         0x20000b28       0x40 .pio\build\uno_r4_wifi\libFrameworkArduinoVariant.a(common_data.c.o)
+                0x20000b28                g_ioport_ctrl
+                0x20000b30                g_cgc0_ctrl
+                0x20000b40                g_elc_ctrl
+                0x20000b48                g_external_irq1_ctrl
+                0x20000b58                g_external_irq0_ctrl
+ COMMON         0x20000b68        0x4 c:/users/caden kraft/.platformio/packages/toolchain-gccarmnoneeabi/bin/../lib/gcc/arm-none-eabi/7.2.1/../../../../arm-none-eabi/lib/thumb/v7e-m/fpv4-sp/hard\libc_nano.a(lib_a-reent.o)
+                0x20000b68                errno
+                0x20000b6c                . = ALIGN (0x4)
+                0x20000b6c                __bss_end__ = .
 
-.heap           0x20000b78     0x2000 load address 0x0000e4e4
-                0x20000b78                . = ALIGN (0x8)
-                0x20000b78                __HeapBase = .
-                0x20000b78                end = .
+.heap           0x20000b70     0x2000 load address 0x0000e550
+                0x20000b70                . = ALIGN (0x8)
+                0x20000b70                __HeapBase = .
+                0x20000b70                end = .
  *(.heap)
- .heap          0x20000b78     0x2000 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(startup.o)
+ .heap          0x20000b70     0x2000 C:\Users\Caden Kraft\.platformio\packages\framework-arduinorenesas-uno\variants\UNOWIFIR4\libs\libfsp.a(startup.o)
                 0x20007f00                __StackTop = ((ORIGIN (RAM) + LENGTH (RAM)) - VECTOR_TABLE_LENGTH)
 
 .stack_dummy    0x20007b00      0x400

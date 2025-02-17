@@ -27,19 +27,19 @@ const int ENABLE_PIN_4 = 4;
 const int BASE_STEPS_PER_REV = 200;  
 
 // Gear Ratios for each motor
-const float GEAR_RATIO_1 = 12.45;    // Physical gear ratio is 12.25 but this is calibrated
-const float GEAR_RATIO_2 = 5.7;    // Example ratio for arm motor
+const float GEAR_RATIO_1 = 9;    // Physical gear ratio is 9 but this is calibrated
+const float GEAR_RATIO_2 = 5.625;    // Physical gear ratio is 5.7 but this is calibrated
 const int GEAR_RATIO_3 = 3;    // Example ratio for Z-axis linear
 const int GEAR_RATIO_4 = 3;    // Example ratio for Z-axis rotation
 
-const float SPEED_MULTIPLIER = 1.5;
+const float SPEED_MULTIPLIER = 1.0;
 
 // Motor 1 Configuration (XY Base)
 const int MICRO_STEPS_1 = 16;  
 const int STEPS_PER_REV_1 = BASE_STEPS_PER_REV * MICRO_STEPS_1 * GEAR_RATIO_1;
-const float MAX_SPEED_1 = 8000*SPEED_MULTIPLIER;
-const float RUNNING_SPEED_1 = 7000*SPEED_MULTIPLIER;
-const float ACCELERATION_1 = 8000*SPEED_MULTIPLIER;
+const float MAX_SPEED_1 = 6000*SPEED_MULTIPLIER;
+const float RUNNING_SPEED_1 = 5250*SPEED_MULTIPLIER;
+const float ACCELERATION_1 = 6000*SPEED_MULTIPLIER;
 
 // Motor 2 Configuration (XY Arm)
 const int MICRO_STEPS_2 = 16;  
@@ -65,7 +65,7 @@ const float ACCELERATION_4 = 30000;
 
 const float HOME_BACKOFF_DEGREES = 5;      // Degrees to back off after first contact
 const float HOME_SLOW_SPEED = 1000;         // Slower homing speed for final approach
-const float M1_HOME_OFFSET = 112.9;     // Final position offset from home
+const float M1_HOME_OFFSET = 114.5;     // Final position offset from home
 const float M2_HOME_OFFSET = 159;
 
 // Safety limits for angles
@@ -120,7 +120,7 @@ const float waypoints[][10] = {
 
 // Global variables to track movement and waypoints
 bool isHomed = false;
-bool staticDebug = true; //set to false if you want it to home and nothing else
+bool staticDebug = false; //homes and rotates theta1 and 2 90 degrees for calibration
 bool movementComplete = false;
 int currentWaypoint = 0;
 const int TOTAL_WAYPOINTS = 8;  // Total number of waypoints in the array
@@ -401,6 +401,14 @@ void home() {
    MOTOR3.stop();
    delay(1000);
    digitalWrite(ENABLE_PIN_4, LOW);
+   
+   MOTOR4.setSpeed(HOME_SLOW_SPEED);
+   MOTOR4.setAcceleration(0);
+   MOTOR4.move(degreesToSteps(-45, STEPS_PER_REV_4));
+   while (MOTOR4.distanceToGo() != 0) {
+       MOTOR4.run();
+   }
+   MOTOR4.stop();
 
    MOTOR1.setSpeed(500);
    MOTOR1.setAcceleration(0);
@@ -481,7 +489,8 @@ void home() {
    MOTOR2.stop();
    delay(100);
 
-   MOTOR2.setSpeed(HOME_SLOW_SPEED/2);
+   MOTOR2.setSpeed(HOME_SLOW_SPEED);
+   MOTOR2.setAcceleration(0);
    MOTOR2.move(degreesToSteps(M2_HOME_OFFSET, STEPS_PER_REV_2));
    while (MOTOR2.distanceToGo() != 0) {
        MOTOR2.run();
@@ -489,7 +498,8 @@ void home() {
    MOTOR2.stop();
    delay(100);
    
-   MOTOR1.setSpeed(HOME_SLOW_SPEED);
+   MOTOR1.setSpeed(HOME_SLOW_SPEED*2);
+   MOTOR1.setAcceleration(0);
    MOTOR1.move(degreesToSteps(-M1_HOME_OFFSET, STEPS_PER_REV_1));
    while (MOTOR1.distanceToGo() != 0) {
        MOTOR1.run();
@@ -546,7 +556,7 @@ void loop() {
     static bool initialMovementDone = false;
     static bool moveStarted = false;
 
-    if(staticDebug) {
+    if(!staticDebug) {
         if (isHomed && !initialMovementDone) {
             if (!moveStarted) {
                 Serial.print("Moving to waypoint ");
@@ -577,5 +587,9 @@ void loop() {
                 delay(50);
             }
         }
+    }
+    else {
+        
+        moveToAngles(90,90,0,0);
     }    
 }
