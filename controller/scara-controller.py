@@ -7,6 +7,7 @@ from PyQt5.QtCore import Qt, QTimer, QRect, QPoint
 import pyqtgraph as pg
 import numpy as np
 import time
+import pybullet as p
 pg.setConfigOptions(antialias=True)
 
 # SCARA robot dimensions
@@ -379,13 +380,71 @@ class SimulationWidget(QWidget):
         self.rotation = 0
         self.angle = 0
         self.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
+        
         # Initialize stepper drive system
         self.motion_controller = SCARAMotionController()
+
+        # Initialize PyBullet
+        p.connect(p.GUI)
+        p.resetSimulation()
+        
+        # Configure view and gravity
+        p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)  # Disable default GUI
+        p.setGravity(0, 0, 0)  # Zero gravity
+        
+        # Load URDF
+        self.robot = p.loadURDF("scara.urdf", [0, 0, 0], useFixedBase=1)  # Fix the base
+        
+        # Print joint info for debugging
+        self.num_joints = p.getNumJoints(self.robot)
+        print(f"Number of joints: {self.num_joints}")
+        for i in range(self.num_joints):
+            info = p.getJointInfo(self.robot, i)
+            print(f"Joint {i}: {info[1].decode('utf-8')}, Type: {info[2]}")
+        
+        # Configure camera view
+        target_pos = [0, 0, 0]  # Look at robot center
+        camera_distance = 0.6    # Distance from target (in meters)
+        camera_yaw = 45         # Rotation around Z axis in degrees
+        camera_pitch = -30      # Rotation around Y axis in degrees
+        
+        # Set initial camera view
+        p.resetDebugVisualizerCamera(
+            cameraDistance=camera_distance,
+            cameraYaw=camera_yaw,
+            cameraPitch=camera_pitch,
+            cameraTargetPosition=target_pos
+        )
 
         self.setAttribute(Qt.WA_OpaquePaintEvent)
         self.setAttribute(Qt.WA_NoSystemBackground)
 
+    def update_pybullet(self):
+        """Update PyBullet joint positions"""
+        try:
+            # Convert angles to radians for PyBullet
+            theta1_rad = math.radians(self.theta1)
+            theta2_rad = math.radians(self.theta2)
+            end_rotation = -(theta1_rad + theta2_rad + math.radians(self.rotation))
+            
+            # Reset the base position and orientation
+            p.resetBasePositionAndOrientation(self.robot, [0, 0, 0], [0, 0, 0, 1])
+            
+            # Update joint positions
+            p.resetJointState(self.robot, 1, theta1_rad)  # base_link_to_shoulder
+            p.resetJointState(self.robot, 2, theta2_rad)  # shoulder_to_elbow
+            p.resetJointState(self.robot, 3, self.z / 1000.0)  # elbow_to_endZ (convert mm to m)
+            p.resetJointState(self.robot, 4, end_rotation)  # endZ_to_endR
+            
+            # Step simulation
+            p.stepSimulation()
+            
+        except Exception as e:
+            print(f"Error updating PyBullet: {e}")
+
     def paintEvent(self, event):
+        # Update PyBullet before painting Qt widget
+        self.update_pybullet()
         painter = QPainter(self)
         painter.setRenderHint(QPainter.HighQualityAntialiasing)
 
@@ -407,6 +466,14 @@ class SimulationWidget(QWidget):
         # Draw end-effector rotation last
         self.draw_end_effector_rotation(painter, end_effector)
 
+    def closeEvent(self, event):
+        """Handle PyBullet cleanup when closing"""
+        try:
+            p.disconnect()
+        except:
+            pass
+        super().closeEvent(event)
+    
     def draw_robot(self, painter):
         # Convert angles to radians
         theta1_rad = math.radians(self.theta1)
