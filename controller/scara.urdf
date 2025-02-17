@@ -1,0 +1,142 @@
+<robot name="robot">
+  <link name="base_footprint"></link>
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint" />
+    <child link="base_link" />
+    <origin xyz="0 0 0.06" rpy="0 0 0" />
+  </joint>
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.12" />
+      </geometry>
+      <material name="base_link-material">
+        <color rgba="0.09758734713304495 0.17788841597328695 0.9646862478936612 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.04" length="0.12" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="0.3333333333333333" ixy="0" ixz="0" iyy="0.5" iyz="0" izz="0.3333333333333333" />
+    </inertial>
+  </link>
+  <joint name="base_link_to_shoulder" type="revolute">
+    <parent link="base_link" />
+    <child link="shoulder" />
+    <origin xyz="0 0 0.06" rpy="0 0 0" />
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-1.91" upper="1.91" velocity="0.5"/>  </joint>
+  <link name="shoulder">
+    <visual>
+      <origin xyz="0.09 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.07 0.012" />
+      </geometry>
+      <material name="shoulder-material">
+        <color rgba="0.6038273388475408 0.0027317428517647058 0.026241221889696346 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.09 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.07 0.012" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.09 0 0" rpy="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="0.16666666666666666" ixy="0" ixz="0" iyy="0.16666666666666666" iyz="0" izz="0.16666666666666666" />
+    </inertial>
+  </link>
+  <joint name="shoulder_to_elbow" type="revolute">
+    <parent link="shoulder" />
+    <child link="elbow" />
+    <origin xyz="0.18 0 0.012" rpy="0 0 0" />
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-2.79" upper="2.79" velocity="0.5"/>  </joint>
+  <link name="elbow">
+    <visual>
+      <origin xyz="0.09 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.07 0.012" />
+      </geometry>
+      <material name="elbow-material">
+        <color rgba="0.5711248294565854 0.08650046202808521 0.6038273388475408 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.09 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="0.18 0.07 0.012" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.09 0 0" rpy="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="0.16666666666666666" ixy="0" ixz="0" iyy="0.16666666666666666" iyz="0" izz="0.16666666666666666" />
+    </inertial>
+  </link>
+  <joint name="elbow_to_endZ" type="prismatic">
+    <parent link="elbow" />
+    <child link="endZ" />
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <axis xyz="0 0 1"/>
+    <limit effort="1000.0" lower="-0.06" upper="0.06" velocity="0.5"/>  </joint>
+  <link name="endZ">
+    <visual>
+      <origin xyz="0.18 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.01" />
+      </geometry>
+      <material name="endZ-material">
+        <color rgba="0.2917706498067337 0.407240211891531 0.8468732315065057 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder radius="0.01" length="0.01" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="0.3333333333333333" ixy="0" ixz="0" iyy="0.5" iyz="0" izz="0.3333333333333333" />
+    </inertial>
+  </link>
+  <joint name="endZ_to_endR" type="continuous">
+    <parent link="endZ" />
+    <child link="endR" />
+    <origin xyz="0.18 0 0" rpy="0 0 0" />
+    <axis xyz="0 0 1"/>
+  </joint>
+  <link name="endR">
+    <visual>
+      <origin xyz="0 0 -0.055" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.01 0.15" />
+      </geometry>
+      <material name="endR-material">
+        <color rgba="0.019382360952473074 0.9646862478936612 0.04373502925049377 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <box size="1 1 1" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <mass value="1" />
+      <inertia ixx="0.16666666666666666" ixy="0" ixz="0" iyy="0.16666666666666666" iyz="0" izz="0.16666666666666666" />
+    </inertial>
+  </link>
+</robot>
