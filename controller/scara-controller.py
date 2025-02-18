@@ -3,6 +3,7 @@ import math
 import csv 
 import win32gui
 import win32con
+import win32api
 import win32process
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
                            QLabel, QLineEdit, QPushButton, QListWidget, 
@@ -408,13 +409,13 @@ class PyBulletProcess(Process):
         # Load URDF
         robot = p.loadURDF("scara_urdf/urdf/scara_urdf.urdf", [0, 0, 0], useFixedBase=1)
         
-        # Configure camera view
-        p.resetDebugVisualizerCamera(
-            cameraDistance=0.6,
-            cameraYaw=45,
-            cameraPitch=-30,
-            cameraTargetPosition=[0, 0, 0]
-        )
+        # # Configure camera view
+        # p.resetDebugVisualizerCamera(
+        #     cameraDistance=0.6,
+        #     cameraYaw=45,
+        #     cameraPitch=-30,
+        #     cameraTargetPosition=[0, 0, 0]
+        # )
         
         # Main loop
         while self.running.value:
@@ -640,22 +641,25 @@ class SimulationWidget2D(QWidget):
                     prev_x, prev_y, prev_z, prev_rotation, prev_theta1, prev_theta2, _, _, prev_linear = waypoints[i - 1]
                     prev_end_effector = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET + int(prev_x), WINDOW_HEIGHT // 2 - int(prev_y))
                     self.draw_path_between_waypoints(painter, prev_end_effector, end_effector,
-                                                prev_theta1, prev_theta2, Wtheta1, Wtheta2, prev_linear, prev_z, z)
+                                                prev_theta1, prev_theta2, Wtheta1, Wtheta2, prev_linear, prev_x, x, prev_y, y, prev_z, z)
         
         except Exception as e:
             print(f"Error drawing waypoints: {e}")
 
     def draw_path_between_waypoints(self, painter, start_point, end_point, start_theta1, start_theta2, 
-                                  end_theta1, end_theta2, is_linear_path, start_z, end_z):
+                                  end_theta1, end_theta2, is_linear_path, start_x, end_x, start_y, end_y, start_z, end_z):
         """Draw path between waypoints, either linear or curved."""
         # If it's a linear path, draw straight line
+        # bring z coords from the ground to the tip of the end effector
+        start_z = start_z + 105
+        end_z = end_z + 105
         painter.setRenderHint(QPainter.HighQualityAntialiasing)
         if is_linear_path:
             painter.setPen(QPen(RED, 1, Qt.SolidLine))
             painter.drawLine(start_point, end_point)
             p.addUserDebugLine(
-                [start_point.x/1000, start_point.y/1000, start_z/1000],  # Start point
-                [end_point.x/1000, end_point.y/1000, end_z/1000],      # End point
+                [start_x/1000, start_y/1000, start_z/1000],  # Start point
+                [end_x/1000, end_y/1000, end_z/1000],      # End point
                 [1, 0, 0],                  # Red color
                 2,                          # Line width
                 0                           # Lifetime (0 = permanent)
@@ -708,7 +712,7 @@ class SimulationWidget2D(QWidget):
             )
             bullet_pointx.append(x)
             bullet_pointy.append(-y)
-            bullet_pointz.append(curr_z+105)
+            bullet_pointz.append(curr_z)
             points.append(point)
 
         # Draw the path
@@ -799,23 +803,35 @@ class SimulationWidget3D(QWidget):
         # Initialize PyBullet with direct OpenGL
         self.physics_client = p.connect(p.GUI)
         
-        # Configure debug visualizer
-        p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
-        p.configureDebugVisualizer(p.COV_ENABLE_KEYBOARD_SHORTCUTS, 1)
+        # Modify camera orbit mode to not require CTRL
         p.configureDebugVisualizer(p.COV_ENABLE_MOUSE_PICKING, 0)
-        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 1)
-        p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
-        p.configureDebugVisualizer(p.COV_ENABLE_TINY_RENDERER, 1)
+        p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
         
-        # Disable VR and buffer previews
-        p.configureDebugVisualizer(p.COV_ENABLE_VR_PICKING, 0)
-        p.configureDebugVisualizer(p.COV_ENABLE_VR_RENDER_CONTROLLERS, 0)
+        # Set custom mouse control parameters
+        # These allow orbiting without CTRL key
+        p.configureDebugVisualizer(p.COV_ENABLE_KEYBOARD_SHORTCUTS, 0)
         p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)
         p.configureDebugVisualizer(p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, 0)
         p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)
         
-        p.setGravity(0, 0, 0)
-        p.setRealTimeSimulation(1)
+        # Important: Configure mouse movement parameters
+        p.configureDebugVisualizer(p.COV_ENABLE_MOUSE_PICKING, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 1)
+        p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
+        p.configureDebugVisualizer(p.COV_ENABLE_TINY_RENDERER, 1)
+        p.configureDebugVisualizer(p.COV_ENABLE_VR_PICKING, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_VR_RENDER_CONTROLLERS, 0)
+        
+        # Configure camera view
+        p.resetDebugVisualizerCamera(
+            cameraDistance=0.6,
+            cameraYaw=45,
+            cameraPitch=-30,
+            cameraTargetPosition=[0, 0, 0]
+        )
+
+        # Disable shadows and keep rest of visualization settings
+        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 0)
         
         # Add ground plane with grid
         gridSize = 20  # Your preferred grid size
@@ -837,6 +853,7 @@ class SimulationWidget3D(QWidget):
         # Load URDF
         self.robot = p.loadURDF("scara_urdf/urdf/scara_urdf.urdf", [0, 0, 0], useFixedBase=1)
         
+        # Configure robot appearance
         p.changeVisualShape(self.robot, -1, rgbaColor=[0.75, 0.75, 0.75, 1])  # base_link
         p.changeVisualShape(self.robot, 0, rgbaColor=[0.75, 0.75, 0.75, 1])   # link1
         p.changeVisualShape(self.robot, 1, rgbaColor=[0.75, 0.75, 0.75, 1])   # link2
@@ -846,14 +863,6 @@ class SimulationWidget3D(QWidget):
         p.changeVisualShape(self.robot, 5, rgbaColor=[0, 1, 0, 1])            # coordy
         p.changeVisualShape(self.robot, 6, rgbaColor=[0, 0, 1, 1])            # coordz
         p.changeVisualShape(self.robot, 7, rgbaColor=[1, 0, 0, 0.5])          # perimeter
-        
-        # Configure camera view
-        p.resetDebugVisualizerCamera(
-            cameraDistance=0.6,
-            cameraYaw=45,
-            cameraPitch=-30,
-            cameraTargetPosition=[0.1, 0, 0]
-        )
         
         # Start window embedding timer
         self.embed_timer = QTimer(self)
@@ -867,7 +876,7 @@ class SimulationWidget3D(QWidget):
         self.update_timer.start(16)  # 60 FPS
 
     def try_embed_window(self):
-        """Try to find and embed the PyBullet window"""
+        """Try to find and embed the PyBullet window and simulate Ctrl key press"""
         if self.pybullet_hwnd is None:
             def callback(hwnd, results):
                 if win32gui.IsWindowVisible(hwnd):
@@ -885,19 +894,24 @@ class SimulationWidget3D(QWidget):
                 self.pybullet_hwnd = results[0]
                 parent_hwnd = int(self.winId())
                 
-                # Minimal window style modifications
+                # Standard window embedding
                 style = win32gui.GetWindowLong(self.pybullet_hwnd, win32con.GWL_STYLE)
                 style = style & ~(win32con.WS_CAPTION | win32con.WS_THICKFRAME)
                 style = style | win32con.WS_CHILD
                 win32gui.SetWindowLong(self.pybullet_hwnd, win32con.GWL_STYLE, style)
                 
-                # Set parent and position
                 win32gui.SetParent(self.pybullet_hwnd, parent_hwnd)
                 win32gui.MoveWindow(self.pybullet_hwnd, 0, 0, self.width(), self.height(), True)
                 win32gui.ShowWindow(self.pybullet_hwnd, win32con.SW_SHOW)
                 
-                # Ensure input focus
-                win32gui.SetFocus(self.pybullet_hwnd)
+                # Get the thread ID of the PyBullet window
+                threadId = win32process.GetWindowThreadProcessId(self.pybullet_hwnd)[0]
+                
+                # Import the Windows constants for virtual key codes
+                VK_CONTROL = 0x11  # Virtual key code for Ctrl
+                
+                # Simulate Ctrl key press using PostMessage
+                win32api.PostMessage(self.pybullet_hwnd, win32con.WM_KEYDOWN, VK_CONTROL, 0)
                 
                 self.embed_timer.stop()
                 print("Successfully embedded PyBullet window")
