@@ -426,7 +426,7 @@ class PyBulletProcess(Process):
             # Update joint positions
             p.resetJointState(robot, 0, theta1_rad)
             p.resetJointState(robot, 1, theta2_rad)
-            p.resetJointState(robot, 2, -self.z.value / 1000.0)
+            p.resetJointState(robot, 2, self.z.value / 1000.0)
             p.resetJointState(robot, 3, end_rotation)
             
             # Step simulation
@@ -587,37 +587,79 @@ class SimulationWidget2D(QWidget):
         painter.drawArc(QRect(workspace_center.x() - L2 + int(L2 * SCALE * math.cos(math.radians(THETA1_LIMIT))), workspace_center.y() - L2 + int(L2 * SCALE * math.sin(math.radians(THETA1_LIMIT)))+1, 2 * L2, 2 * L2), int(math.radians(-THETA1_LIMIT) * 16 * 180 / math.pi), int(math.radians(THETA1_LIMIT-180) * 16 * 180 / math.pi))
 
     def draw_waypoints(self, painter, draw_paths=True):
-        for i in range(len(waypoints)):
-            # Update unpacking to include linear_path
-            x, y, z, rotation, Wtheta1, Wtheta2, stop_at_point, duration, linear_path = waypoints[i]
-            end_effector = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET + int(x), WINDOW_HEIGHT // 2 - int(y))
-
-            # Draw different markers for stop points vs pass-through points
-            painter.setBrush(RED)
-            if stop_at_point:
-                # Draw a square for stop points
-                painter.setBrush(RED)
-                painter.drawEllipse(end_effector, 5, 5)
-            else:
-                # Draw a circle for pass-through points
-                painter.setBrush(GREEN)
-                painter.drawEllipse(end_effector, 5, 5)
-
-            if draw_paths and i > 0:
-                # Update unpacking for previous waypoint to include linear_path
-                prev_x, prev_y, prev_z, prev_rotation, prev_theta1, prev_theta2, _, _, prev_linear = waypoints[i - 1]
-                prev_end_effector = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET + int(prev_x), WINDOW_HEIGHT // 2 - int(prev_y))
-                self.draw_path_between_waypoints(painter, prev_end_effector, end_effector, 
-                                               prev_theta1, prev_theta2, Wtheta1, Wtheta2, prev_linear)
+        # First remove any existing debug points
+        try:
+            # Clear any existing debug points (store their IDs as a class attribute)
+            if not hasattr(self, 'debug_point_ids'):
+                self.debug_point_ids = []
+            
+            # # Remove old points
+            for point_id in self.debug_point_ids:
+                p.removeUserDebugItem(point_id)
+            self.debug_point_ids = []
+            
+            for i in range(len(waypoints)):
+                x, y, z, rotation, Wtheta1, Wtheta2, stop_at_point, duration, linear_path = waypoints[i]
+                
+                # Draw 2D visualization
+                end_effector = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET + int(x), WINDOW_HEIGHT // 2 - int(y))
+                
+                # Convert coordinates to meters for PyBullet
+                pb_x = x / 1000.0  # Convert mm to meters
+                pb_y = y / 1000.0
+                pb_z = (z+105) / 1000.0
+                
+                if stop_at_point:
+                    # Draw 2D
+                    painter.setBrush(RED)
+                    painter.drawEllipse(end_effector, 5, 5)
+                    
+                    # Draw 3D - red point
+                    point_id = p.addUserDebugPoints(
+                        [[pb_x, pb_y, pb_z]],  # Point position
+                        [[1, 0, 0]],           # Red color
+                        pointSize=6            # Make points more visible
+                    )
+                else:
+                    # Draw 2D
+                    painter.setBrush(GREEN)
+                    painter.drawEllipse(end_effector, 5, 5)
+                    
+                    # Draw 3D - green point
+                    point_id = p.addUserDebugPoints(
+                        [[pb_x, pb_y, pb_z]],  # Point position
+                        [[0, 1, 0]],           # Green color
+                        pointSize=6            # Make points more visible
+                    )
+                
+                # Store the debug point ID
+                if isinstance(point_id, int):
+                    self.debug_point_ids.append(point_id)
+                
+                if draw_paths and i > 0:
+                    prev_x, prev_y, prev_z, prev_rotation, prev_theta1, prev_theta2, _, _, prev_linear = waypoints[i - 1]
+                    prev_end_effector = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET + int(prev_x), WINDOW_HEIGHT // 2 - int(prev_y))
+                    self.draw_path_between_waypoints(painter, prev_end_effector, end_effector,
+                                                prev_theta1, prev_theta2, Wtheta1, Wtheta2, prev_linear, prev_z, z)
+        
+        except Exception as e:
+            print(f"Error drawing waypoints: {e}")
 
     def draw_path_between_waypoints(self, painter, start_point, end_point, start_theta1, start_theta2, 
-                                  end_theta1, end_theta2, is_linear_path):
+                                  end_theta1, end_theta2, is_linear_path, start_z, end_z):
         """Draw path between waypoints, either linear or curved."""
         # If it's a linear path, draw straight line
         painter.setRenderHint(QPainter.HighQualityAntialiasing)
         if is_linear_path:
             painter.setPen(QPen(RED, 1, Qt.SolidLine))
             painter.drawLine(start_point, end_point)
+            p.addUserDebugLine(
+                [start_point.x/1000, start_point.y/1000, start_z/1000],  # Start point
+                [end_point.x/1000, end_point.y/1000, end_z/1000],      # End point
+                [1, 0, 0],                  # Red color
+                2,                          # Line width
+                0                           # Lifetime (0 = permanent)
+            )
             return
 
         # If any angles are None (point outside workspace), draw dashed line
@@ -633,6 +675,9 @@ class SimulationWidget2D(QWidget):
 
         steps = 30  # Number of intermediate points to check
         points = []
+        bullet_pointx = []
+        bullet_pointy = []
+        bullet_pointz = []
         valid_path = True
 
         for i in range(steps + 1):
@@ -643,6 +688,7 @@ class SimulationWidget2D(QWidget):
             # Interpolate joint angles
             curr_theta1 = start_theta1 + (end_theta1 - start_theta1) * t
             curr_theta2 = start_theta2 + (end_theta2 - start_theta2) * t
+            curr_z = start_z + (end_z - start_z) * t
             
             # Check if this position is valid
             if not is_valid_position(curr_theta1, curr_theta2):
@@ -660,6 +706,9 @@ class SimulationWidget2D(QWidget):
                 int((SIMULATION_WIDTH // 2) - 100 + (x * SCALE)),
                 int(WINDOW_HEIGHT // 2 + (y * SCALE))
             )
+            bullet_pointx.append(x)
+            bullet_pointy.append(-y)
+            bullet_pointz.append(curr_z+105)
             points.append(point)
 
         # Draw the path
@@ -667,6 +716,13 @@ class SimulationWidget2D(QWidget):
             painter.setPen(QPen(RED, 1, Qt.SolidLine))
             for i in range(len(points) - 1):
                 painter.drawLine(points[i], points[i + 1])
+                p.addUserDebugLine(
+                    [bullet_pointx[i]/1000, bullet_pointy[i]/1000, bullet_pointz[i]/1000],  # Start point
+                    [bullet_pointx[i+1]/1000, bullet_pointy[i+1]/1000, bullet_pointz[i+1]/1000],      # End point
+                    [1, 0, 0],                  # Red color
+                    2,                          # Line width
+                    0                           # Lifetime (0 = permanent)
+                )
         else:
             # Draw a dashed line to indicate invalid path
             painter.setPen(QPen(RED, 1, Qt.DashLine))
