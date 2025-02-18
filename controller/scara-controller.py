@@ -8,7 +8,7 @@ import win32process
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
                            QLabel, QLineEdit, QPushButton, QListWidget, 
                            QListWidgetItem, QGridLayout, QFileDialog, 
-                           QCheckBox, QTabWidget, QOpenGLWidget)
+                           QCheckBox, QTabWidget, QOpenGLWidget, QMessageBox)
 from PyQt5.QtGui import QPainter, QPen, QBrush, QColor, QImage
 from PyQt5.QtCore import Qt, QTimer, QRect, QPoint
 from ctypes import windll
