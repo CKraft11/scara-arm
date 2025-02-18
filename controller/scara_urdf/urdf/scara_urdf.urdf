@@ -8,17 +8,17 @@
     name="base_link">
     <inertial>
       <origin
-        xyz="-0.071864 -0.0016854 0.1342"
+        xyz="-0.0724451209297505 -0.00169490514125891 0.13495229694996"
         rpy="0 0 0" />
       <mass
-        value="2.4522" />
+        value="2.43844795753921" />
       <inertia
-        ixx="0.006445"
-        ixy="5.7529E-06"
-        ixz="-0.00021594"
-        iyy="0.014561"
-        iyz="-4.8187E-05"
-        izz="0.01477" />
+        ixx="0.00572142222327542"
+        ixy="5.75288828851013E-06"
+        ixz="-0.000215941509317393"
+        iyy="0.0140204306732194"
+        iyz="-4.81871142900031E-05"
+        izz="0.0135052162908249" />
     </inertial>
     <visual>
       <origin
@@ -31,7 +31,7 @@
       <material
         name="">
         <color
-          rgba="0.75294 0.75294 0.75294 1" />
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
       </material>
     </visual>
     <collision>
@@ -48,17 +48,17 @@
     name="link1">
     <inertial>
       <origin
-        xyz="0.053526 7.6033E-06 0.039571"
+        xyz="0.0535255412687628 7.60944450067281E-06 0.0395708859948246"
         rpy="0 0 0" />
       <mass
-        value="0.67597" />
+        value="0.675965693614735" />
       <inertia
-        ixx="0.00039875"
-        ixy="1.0033E-07"
-        ixz="7.7182E-07"
-        iyy="0.0015746"
-        iyz="-4.5315E-07"
-        izz="0.0016679" />
+        ixx="0.000398753747820581"
+        ixy="1.00373518445255E-07"
+        ixz="7.71840425493183E-07"
+        iyy="0.00157464429840515"
+        iyz="-4.53199274783608E-07"
+        izz="0.00166794015798005" />
     </inertial>
     <visual>
       <origin
@@ -71,7 +71,7 @@
       <material
         name="">
         <color
-          rgba="0.75294 0.75294 0.75294 1" />
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
       </material>
     </visual>
     <collision>
@@ -106,17 +106,17 @@
     name="link2">
     <inertial>
       <origin
-        xyz="0.071772 -5.4121E-06 0.051655"
+        xyz="0.0717718775403977 -5.41469243531961E-06 0.0516550257671754"
         rpy="0 0 0" />
       <mass
-        value="0.45238" />
+        value="0.452384401379192" />
       <inertia
-        ixx="0.00041579"
-        ixy="4.6245E-09"
-        ixz="-3.3368E-06"
-        iyy="0.0011455"
-        iyz="2.203E-08"
-        izz="0.0012642" />
+        ixx="0.000415787209152929"
+        ixy="2.07643213876645E-09"
+        ixz="-3.3368239960559E-06"
+        iyy="0.00114546231355492"
+        iyz="1.70092895160159E-08"
+        izz="0.00126424595479926" />
     </inertial>
     <visual>
       <origin
@@ -129,7 +129,7 @@
       <material
         name="">
         <color
-          rgba="0.75294 0.75294 0.75294 1" />
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
       </material>
     </visual>
     <collision>
@@ -164,17 +164,17 @@
     name="endZ">
     <inertial>
       <origin
-        xyz="0.00023774 -7.5992E-05 0.0071622"
+        xyz="0.000237739865850295 -7.59919950097665E-05 0.00716223142348732"
         rpy="0 0 0" />
       <mass
-        value="0.0047788" />
+        value="0.00477877779368" />
       <inertia
-        ixx="2.1565E-07"
-        ixy="-2.2784E-09"
-        ixz="-1.5351E-09"
-        iyy="2.1033E-07"
-        iyz="3.4652E-10"
-        izz="3.4179E-07" />
+        ixx="2.15647835378644E-07"
+        ixy="-2.27835558055193E-09"
+        ixz="-1.53512292670032E-09"
+        iyy="2.10332410214968E-07"
+        iyz="3.46521209030421E-10"
+        izz="3.41793886457667E-07" />
     </inertial>
     <visual>
       <origin
@@ -187,7 +187,7 @@
       <material
         name="">
         <color
-          rgba="0.79216 0.81961 0.93333 1" />
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
       </material>
     </visual>
     <collision>
@@ -204,7 +204,7 @@
     name="jointz"
     type="prismatic">
     <origin
-      xyz="0.18 0 0.12133"
+      xyz="0.18 0 0.12109"
       rpy="0 0 0" />
     <parent
       link="link2" />
@@ -222,17 +222,17 @@
     name="endR">
     <inertial>
       <origin
-        xyz="6.29184166989205E-08 4.12390357973358E-07 0.112723585858063"
+        xyz="-3.45965166098638E-07 2.33142264494113E-07 0.112723585919605"
         rpy="0 0 0" />
       <mass
-        value="0.0124115438821334" />
+        value="0.0124115439277917" />
       <inertia
-        ixx="4.49421786349982E-05"
-        ixy="-2.10306440427476E-09"
-        ixz="8.06542420704352E-11"
-        iyy="4.49414485455288E-05"
-        iyz="1.77882640289398E-10"
-        izz="1.64519393558298E-07" />
+        ixx="4.4943207224967E-05"
+        ixy="1.61676927082879E-09"
+        ixz="-1.26336175121223E-10"
+        iyy="4.49404199813663E-05"
+        iyz="1.48946021032303E-10"
+        izz="1.64519394162119E-07" />
     </inertial>
     <visual>
       <origin
@@ -270,5 +270,217 @@
       link="endR" />
     <axis
       xyz="0 0 -1" />
+  </joint>
+  <link
+    name="coordx">
+    <inertial>
+      <origin
+        xyz="-1.3878E-17 -0.024728 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.0021586" />
+      <inertia
+        ixx="8.3055E-07"
+        ixy="-1.6752E-24"
+        ixz="-2.8212E-24"
+        iyy="1.4535E-08"
+        iyz="-3.9142E-23"
+        izz="8.3055E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://scara_urdf/meshes/coordx.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 0 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://scara_urdf/meshes/coordx.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="coordx"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="endR" />
+    <child
+      link="coordx" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="coordy">
+    <inertial>
+      <origin
+        xyz="-0.024728 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.0021586" />
+      <inertia
+        ixx="1.4535E-08"
+        ixy="1.9215E-23"
+        ixz="-5.5603E-24"
+        iyy="8.3055E-07"
+        iyz="-1.0733E-40"
+        izz="8.3055E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://scara_urdf/meshes/coordy.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 1 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://scara_urdf/meshes/coordy.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="coordy"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="endR" />
+    <child
+      link="coordy" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="coordz">
+    <inertial>
+      <origin
+        xyz="-1.3878E-17 0 -0.024728"
+        rpy="0 0 0" />
+      <mass
+        value="0.0021586" />
+      <inertia
+        ixx="8.3055E-07"
+        ixy="-2.3523E-24"
+        ixz="-1.3197E-23"
+        iyy="8.3055E-07"
+        iyz="-9.895E-24"
+        izz="1.4535E-08" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://scara_urdf/meshes/coordz.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0 0 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://scara_urdf/meshes/coordz.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="coordz"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="endR" />
+    <child
+      link="coordz" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="perimeter">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0" />
+      <inertia
+        ixx="0"
+        ixy="0"
+        ixz="0"
+        iyy="0"
+        iyz="0"
+        izz="0" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://scara_urdf/meshes/perimeter.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 0 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://scara_urdf/meshes/perimeter.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="perimeter"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="perimeter" />
+    <axis
+      xyz="0 0 0" />
   </joint>
 </robot>
