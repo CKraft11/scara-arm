@@ -452,13 +452,16 @@ class TabbedSimulationWidget(QWidget):
         self.tab_widget = QTabWidget(self)
         self.tab_widget.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
         
+        # Create 3D view tab first
+        self.view_3d = SimulationWidget3D(self)
+        self.tab_widget.addTab(self.view_3d, "3D View")
+        
         # Create 2D view tab
         self.view_2d = SimulationWidget2D(self)
         self.tab_widget.addTab(self.view_2d, "2D View")
         
-        # Create 3D view tab
-        self.view_3d = SimulationWidget3D(self)
-        self.tab_widget.addTab(self.view_3d, "3D View")
+        # Set 3D view as default
+        self.tab_widget.setCurrentIndex(0)
         
         # Set up layout
         layout = QVBoxLayout()
@@ -472,8 +475,8 @@ class TabbedSimulationWidget(QWidget):
         self.update_timer.start(16)  # 60 FPS
 
     def update_simulation(self):
-        """Update both views"""
-        # Update positions
+        """Update both views regardless of which tab is active"""
+        # Update positions for both views
         self.view_2d.theta1 = self.theta1
         self.view_2d.theta2 = self.theta2
         self.view_2d.z = self.z
@@ -484,10 +487,9 @@ class TabbedSimulationWidget(QWidget):
         self.view_3d.z = self.z
         self.view_3d.rotation = self.rotation
         
-        # Update current view
-        current_index = self.tab_widget.currentIndex()
-        if current_index == 0:
-            self.view_2d.update()
+        # Force update both views
+        self.view_2d.update()
+        # 3D view updates automatically through its own timer
 
     def closeEvent(self, event):
         """Handle cleanup when closing"""
@@ -738,13 +740,43 @@ class SimulationWidget3D(QWidget):
         self.rotation = 0
         self.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
         
-        # Initialize PyBullet
+        # Initialize PyBullet with direct OpenGL
         self.physics_client = p.connect(p.GUI)
+        
+        # Configure debug visualizer
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
-        p.configureDebugVisualizer(p.COV_ENABLE_KEYBOARD_SHORTCUTS, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_KEYBOARD_SHORTCUTS, 1)
         p.configureDebugVisualizer(p.COV_ENABLE_MOUSE_PICKING, 0)
         p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 1)
+        p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
+        p.configureDebugVisualizer(p.COV_ENABLE_TINY_RENDERER, 1)
+        
+        # Disable VR and buffer previews
+        p.configureDebugVisualizer(p.COV_ENABLE_VR_PICKING, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_VR_RENDER_CONTROLLERS, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_DEPTH_BUFFER_PREVIEW, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_SEGMENTATION_MARK_PREVIEW, 0)
+        
         p.setGravity(0, 0, 0)
+        p.setRealTimeSimulation(1)
+        
+        # Add ground plane with grid
+        gridSize = 20  # Your preferred grid size
+        numLines = 400
+        gridSpacing = gridSize / numLines
+        
+        for i in range(-numLines//2, numLines//2 + 1):
+            p.addUserDebugLine(
+                [i * gridSpacing, -gridSize/2, 0],
+                [i * gridSpacing, gridSize/2, 0],
+                [0.5, 0.5, 0.5]  # Gray color
+            )
+            p.addUserDebugLine(
+                [-gridSize/2, i * gridSpacing, 0],
+                [gridSize/2, i * gridSpacing, 0],
+                [0.5, 0.5, 0.5]  # Gray color
+            )
         
         # Load URDF
         self.robot = p.loadURDF("scara_urdf/urdf/scara_urdf.urdf", [0, 0, 0], useFixedBase=1)
@@ -754,13 +786,13 @@ class SimulationWidget3D(QWidget):
             cameraDistance=0.6,
             cameraYaw=45,
             cameraPitch=-30,
-            cameraTargetPosition=[0, 0, 0]
+            cameraTargetPosition=[0.1, 0, 0]
         )
         
         # Start window embedding timer
         self.embed_timer = QTimer(self)
         self.embed_timer.timeout.connect(self.try_embed_window)
-        self.embed_timer.start(100)  # Try every 100ms
+        self.embed_timer.start(100)
         self.pybullet_hwnd = None
         
         # Update timer
@@ -771,14 +803,12 @@ class SimulationWidget3D(QWidget):
     def try_embed_window(self):
         """Try to find and embed the PyBullet window"""
         if self.pybullet_hwnd is None:
-            # Find all windows from our process
-            current_pid = win32process.GetCurrentProcessId()
             def callback(hwnd, results):
                 if win32gui.IsWindowVisible(hwnd):
-                    _, window_pid = win32process.GetWindowThreadProcessId(hwnd)
-                    if window_pid == current_pid:
-                        title = win32gui.GetWindowText(hwnd)
-                        if "OpenGL" in title:  # PyBullet window typically has "OpenGL" in the title
+                    title = win32gui.GetWindowText(hwnd)
+                    if "OpenGL" in title:
+                        _, pid = win32process.GetWindowThreadProcessId(hwnd)
+                        if pid == win32process.GetCurrentProcessId():
                             results.append(hwnd)
                 return True
 
@@ -789,26 +819,20 @@ class SimulationWidget3D(QWidget):
                 self.pybullet_hwnd = results[0]
                 parent_hwnd = int(self.winId())
                 
-                # Remove window decorations
+                # Minimal window style modifications
                 style = win32gui.GetWindowLong(self.pybullet_hwnd, win32con.GWL_STYLE)
-                style = style & ~(win32con.WS_CAPTION | win32con.WS_THICKFRAME | win32con.WS_MINIMIZE | 
-                                win32con.WS_MAXIMIZE | win32con.WS_SYSMENU)
+                style = style & ~(win32con.WS_CAPTION | win32con.WS_THICKFRAME)
                 style = style | win32con.WS_CHILD
                 win32gui.SetWindowLong(self.pybullet_hwnd, win32con.GWL_STYLE, style)
-                
-                # Remove extended window styles
-                ex_style = win32gui.GetWindowLong(self.pybullet_hwnd, win32con.GWL_EXSTYLE)
-                ex_style = ex_style & ~(win32con.WS_EX_CONTEXTHELP | win32con.WS_EX_WINDOWEDGE)
-                win32gui.SetWindowLong(self.pybullet_hwnd, win32con.GWL_EXSTYLE, ex_style)
                 
                 # Set parent and position
                 win32gui.SetParent(self.pybullet_hwnd, parent_hwnd)
                 win32gui.MoveWindow(self.pybullet_hwnd, 0, 0, self.width(), self.height(), True)
-                
-                # Make sure the window is visible and properly sized
                 win32gui.ShowWindow(self.pybullet_hwnd, win32con.SW_SHOW)
                 
-                # Stop the embed timer
+                # Ensure input focus
+                win32gui.SetFocus(self.pybullet_hwnd)
+                
                 self.embed_timer.stop()
                 print("Successfully embedded PyBullet window")
 
