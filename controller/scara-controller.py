@@ -837,6 +837,16 @@ class SimulationWidget3D(QWidget):
         # Load URDF
         self.robot = p.loadURDF("scara_urdf/urdf/scara_urdf.urdf", [0, 0, 0], useFixedBase=1)
         
+        p.changeVisualShape(self.robot, -1, rgbaColor=[0.75, 0.75, 0.75, 1])  # base_link
+        p.changeVisualShape(self.robot, 0, rgbaColor=[0.75, 0.75, 0.75, 1])   # link1
+        p.changeVisualShape(self.robot, 1, rgbaColor=[0.75, 0.75, 0.75, 1])   # link2
+        p.changeVisualShape(self.robot, 2, rgbaColor=[0.79, 0.82, 0.93, 1])   # endZ
+        p.changeVisualShape(self.robot, 3, rgbaColor=[0.65, 0.62, 0.59, 1])   # endR
+        p.changeVisualShape(self.robot, 4, rgbaColor=[1, 0, 0, 1])            # coordx
+        p.changeVisualShape(self.robot, 5, rgbaColor=[0, 1, 0, 1])            # coordy
+        p.changeVisualShape(self.robot, 6, rgbaColor=[0, 0, 1, 1])            # coordz
+        p.changeVisualShape(self.robot, 7, rgbaColor=[1, 0, 0, 0.5])          # perimeter
+        
         # Configure camera view
         p.resetDebugVisualizerCamera(
             cameraDistance=0.6,
