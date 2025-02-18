@@ -1,13 +1,26 @@
 import sys
 import math
 import csv 
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QListWidget, QListWidgetItem, QGridLayout, QFileDialog, QCheckBox
-from PyQt5.QtGui import QPainter, QPen, QBrush, QColor
+import win32gui
+import win32con
+import win32process
+from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
+                           QLabel, QLineEdit, QPushButton, QListWidget, 
+                           QListWidgetItem, QGridLayout, QFileDialog, 
+                           QCheckBox, QTabWidget, QOpenGLWidget)
+from PyQt5.QtGui import QPainter, QPen, QBrush, QColor, QImage
 from PyQt5.QtCore import Qt, QTimer, QRect, QPoint
+from ctypes import windll
 import pyqtgraph as pg
 import numpy as np
+import pkgutil
 import time
+import subprocess
 import pybullet as p
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
+import multiprocessing
+from multiprocessing import Process, Value, Array
 pg.setConfigOptions(antialias=True)
 
 # SCARA robot dimensions
@@ -370,8 +383,118 @@ class AngleGraphWidget(QWidget):
         self.theta3_line.setData([], [])
         self.vel1_line.setData([], [])
         self.vel2_line.setData([], [])
+        
+class PyBulletProcess(Process):
+    def __init__(self):
+        super().__init__()
+        # Shared memory for joint angles
+        self.theta1 = Value('d', 0.0)
+        self.theta2 = Value('d', 0.0)
+        self.z = Value('d', 0.0)
+        self.rotation = Value('d', 0.0)
+        self.running = Value('i', 1)
+        
+    def run(self):
+        import pybullet as p
+        import math
+        import time
+        
+        # Initialize PyBullet
+        physicsClient = p.connect(p.GUI)
+        p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 1)
+        p.setGravity(0, 0, 0)
+        
+        # Load URDF
+        robot = p.loadURDF("scara_urdf/urdf/scara_urdf.urdf", [0, 0, 0], useFixedBase=1)
+        
+        # Configure camera view
+        p.resetDebugVisualizerCamera(
+            cameraDistance=0.6,
+            cameraYaw=45,
+            cameraPitch=-30,
+            cameraTargetPosition=[0, 0, 0]
+        )
+        
+        # Main loop
+        while self.running.value:
+            # Get current angles from shared memory
+            theta1_rad = math.radians(self.theta1.value)
+            theta2_rad = math.radians(self.theta2.value)
+            end_rotation = -(theta1_rad + theta2_rad + math.radians(self.rotation.value))
+            
+            # Update joint positions
+            p.resetJointState(robot, 0, theta1_rad)
+            p.resetJointState(robot, 1, theta2_rad)
+            p.resetJointState(robot, 2, -self.z.value / 1000.0)
+            p.resetJointState(robot, 3, end_rotation)
+            
+            # Step simulation
+            p.stepSimulation()
+            time.sleep(0.016)  # 60 FPS
+            
+        # Cleanup
+        p.disconnect()
 
-class SimulationWidget(QWidget):
+class TabbedSimulationWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
+        self.theta1 = 0
+        self.theta2 = 0
+        self.z = 0
+        self.rotation = 0
+        
+        # Initialize motion controller
+        self.motion_controller = SCARAMotionController()
+        
+        # Create tab widget
+        self.tab_widget = QTabWidget(self)
+        self.tab_widget.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
+        
+        # Create 2D view tab
+        self.view_2d = SimulationWidget2D(self)
+        self.tab_widget.addTab(self.view_2d, "2D View")
+        
+        # Create 3D view tab
+        self.view_3d = SimulationWidget3D(self)
+        self.tab_widget.addTab(self.view_3d, "3D View")
+        
+        # Set up layout
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.tab_widget)
+        self.setLayout(layout)
+        
+        # Timer for updating views
+        self.update_timer = QTimer()
+        self.update_timer.timeout.connect(self.update_simulation)
+        self.update_timer.start(16)  # 60 FPS
+
+    def update_simulation(self):
+        """Update both views"""
+        # Update positions
+        self.view_2d.theta1 = self.theta1
+        self.view_2d.theta2 = self.theta2
+        self.view_2d.z = self.z
+        self.view_2d.rotation = self.rotation
+        
+        self.view_3d.theta1 = self.theta1
+        self.view_3d.theta2 = self.theta2
+        self.view_3d.z = self.z
+        self.view_3d.rotation = self.rotation
+        
+        # Update current view
+        current_index = self.tab_widget.currentIndex()
+        if current_index == 0:
+            self.view_2d.update()
+
+    def closeEvent(self, event):
+        """Handle cleanup when closing"""
+        self.update_timer.stop()
+        self.view_3d.closeEvent(event)
+        super().closeEvent(event)  # 60 FPS
+class SimulationWidget2D(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.theta1 = 0
@@ -381,70 +504,10 @@ class SimulationWidget(QWidget):
         self.angle = 0
         self.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
         
-        # Initialize stepper drive system
-        self.motion_controller = SCARAMotionController()
-
-        # Initialize PyBullet
-        p.connect(p.GUI)
-        p.resetSimulation()
-        
-        # Configure view and gravity
-        p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)  # Disable default GUI
-        p.setGravity(0, 0, 0)  # Zero gravity
-        
-        # Load URDF
-        self.robot = p.loadURDF("scara_urdf/urdf/scara_urdf.urdf", [0, 0, 0], useFixedBase=1)  # Fix the base
-        
-        # Print joint info for debugging
-        self.num_joints = p.getNumJoints(self.robot)
-        print(f"Number of joints: {self.num_joints}")
-        for i in range(self.num_joints):
-            info = p.getJointInfo(self.robot, i)
-            print(f"Joint {i}: {info[1].decode('utf-8')}, Type: {info[2]}")
-        
-        # Configure camera view
-        target_pos = [0, 0, 0]  # Look at robot center
-        camera_distance = 0.6    # Distance from target (in meters)
-        camera_yaw = 45         # Rotation around Z axis in degrees
-        camera_pitch = -30      # Rotation around Y axis in degrees
-        
-        # Set initial camera view
-        p.resetDebugVisualizerCamera(
-            cameraDistance=camera_distance,
-            cameraYaw=camera_yaw,
-            cameraPitch=camera_pitch,
-            cameraTargetPosition=target_pos
-        )
-
         self.setAttribute(Qt.WA_OpaquePaintEvent)
         self.setAttribute(Qt.WA_NoSystemBackground)
 
-    def update_pybullet(self):
-        """Update PyBullet joint positions"""
-        try:
-            # Convert angles to radians for PyBullet
-            theta1_rad = math.radians(self.theta1)
-            theta2_rad = math.radians(self.theta2)
-            end_rotation = -(theta1_rad + theta2_rad + math.radians(self.rotation))
-            
-            # Reset the base position and orientation
-            p.resetBasePositionAndOrientation(self.robot, [0, 0, 0], [0, 0, 0, 1])
-            
-            # Update joint positions
-            p.resetJointState(self.robot, 0, theta1_rad)  # base_link_to_shoulder
-            p.resetJointState(self.robot, 1, theta2_rad)  # shoulder_to_elbow
-            p.resetJointState(self.robot, 2, -self.z / 1000.0)  # elbow_to_endZ (convert mm to m)
-            p.resetJointState(self.robot, 3, end_rotation)  # endZ_to_endR
-            
-            # Step simulation
-            p.stepSimulation()
-            
-        except Exception as e:
-            print(f"Error updating PyBullet: {e}")
-
     def paintEvent(self, event):
-        # Update PyBullet before painting Qt widget
-        self.update_pybullet()
         painter = QPainter(self)
         painter.setRenderHint(QPainter.HighQualityAntialiasing)
 
@@ -486,7 +549,8 @@ class SimulationWidget(QWidget):
 
         # Draw the robot links
         base = QPoint((SIMULATION_WIDTH // 2) -100, WINDOW_HEIGHT // 2)
-        joint1 = QPoint(base.x() + int(L1 * SCALE * math.cos(theta1_rad)), base.y() + int(L1 * SCALE * math.sin(theta1_rad)))
+        joint1 = QPoint(base.x() + int(L1 * SCALE * math.cos(theta1_rad)), 
+                       base.y() + int(L1 * SCALE * math.sin(theta1_rad)))
         end_effector = QPoint(base.x() + int(x * SCALE), base.y() + int(y * SCALE))
 
         painter.setPen(QPen(WHITE, 5))
@@ -498,30 +562,6 @@ class SimulationWidget(QWidget):
         painter.drawEllipse(base, 10, 10)
         painter.setBrush(BLUE)
         painter.drawEllipse(end_effector, 10, 10)
-
-        # # Visualize angles
-        # angle_radius = 50
-        # angle1_x = base.x() + int(angle_radius * math.cos(theta1_rad))
-        # angle1_y = base.y() + int(angle_radius * math.sin(theta1_rad))
-        # angle2_x = joint1.x() + int(angle_radius * math.sin(theta1_rad))
-        # angle2_y = joint1.y() + int(angle_radius * math.cos(theta1_rad))
-
-        # painter.setPen(QPen(RED, 4))
-        # painter.drawLine(base, QPoint(angle1_x, angle1_y))
-        # painter.drawLine(base, QPoint(base.x() + angle_radius, base.y()))
-
-        # if theta1_rad < 0:
-        #     painter.drawArc(QRect(base.x() - (angle_radius), base.y() - (angle_radius), 2 * (angle_radius), 2 * (angle_radius)), int(-theta1_rad * 16 * 180 / math.pi), 0)
-        # elif theta1_rad >= 0:
-        #     painter.drawArc(QRect(base.x() - (angle_radius), base.y() - (angle_radius), 2 * (angle_radius), 2 * (angle_radius)), 0, int(-theta1_rad * 16 * 180 / math.pi))
-        
-        # painter.setPen(QPen(GREEN, 4))
-        # painter.drawLine(joint1, QPoint(angle2_x, angle2_y))
-        # painter.drawLine(joint1, QPoint(joint1.x() + angle_radius, joint1.y()))
-        # if y >= 0:
-        #     painter.drawArc(QRect(joint1.x() - (angle_radius), joint1.y() - (angle_radius), 2 * (angle_radius), 2 * (angle_radius)), int(-(theta2_rad + theta1_rad) * 16 * 180 / math.pi), int(theta1_rad * 16 * 180 / math.pi))
-        # elif y < 0:
-        #     painter.drawArc(QRect(joint1.x() - (angle_radius), joint1.y() - (angle_radius), 2 * (angle_radius), 2 * (angle_radius)), int(theta1_rad * 16 * 180 / math.pi), int((theta2_rad + theta1_rad) * 16 * 180 / math.pi))
 
         return base, joint1, end_effector
     
@@ -688,6 +728,144 @@ class SimulationWidget(QWidget):
         end_effector = QPoint(base.x() + int(x * SCALE), base.y() + int(y * SCALE))
 
         return base, joint1, end_effector
+
+class SimulationWidget3D(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.theta1 = 0
+        self.theta2 = 0
+        self.z = 0
+        self.rotation = 0
+        self.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
+        
+        # Initialize PyBullet
+        self.physics_client = p.connect(p.GUI)
+        p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_KEYBOARD_SHORTCUTS, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_MOUSE_PICKING, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 1)
+        p.setGravity(0, 0, 0)
+        
+        # Load URDF
+        self.robot = p.loadURDF("scara_urdf/urdf/scara_urdf.urdf", [0, 0, 0], useFixedBase=1)
+        
+        # Configure camera view
+        p.resetDebugVisualizerCamera(
+            cameraDistance=0.6,
+            cameraYaw=45,
+            cameraPitch=-30,
+            cameraTargetPosition=[0, 0, 0]
+        )
+        
+        # Start window embedding timer
+        self.embed_timer = QTimer(self)
+        self.embed_timer.timeout.connect(self.try_embed_window)
+        self.embed_timer.start(100)  # Try every 100ms
+        self.pybullet_hwnd = None
+        
+        # Update timer
+        self.update_timer = QTimer(self)
+        self.update_timer.timeout.connect(self.update_robot)
+        self.update_timer.start(16)  # 60 FPS
+
+    def try_embed_window(self):
+        """Try to find and embed the PyBullet window"""
+        if self.pybullet_hwnd is None:
+            # Find all windows from our process
+            current_pid = win32process.GetCurrentProcessId()
+            def callback(hwnd, results):
+                if win32gui.IsWindowVisible(hwnd):
+                    _, window_pid = win32process.GetWindowThreadProcessId(hwnd)
+                    if window_pid == current_pid:
+                        title = win32gui.GetWindowText(hwnd)
+                        if "OpenGL" in title:  # PyBullet window typically has "OpenGL" in the title
+                            results.append(hwnd)
+                return True
+
+            results = []
+            win32gui.EnumWindows(callback, results)
+            
+            if results:
+                self.pybullet_hwnd = results[0]
+                parent_hwnd = int(self.winId())
+                
+                # Remove window decorations
+                style = win32gui.GetWindowLong(self.pybullet_hwnd, win32con.GWL_STYLE)
+                style = style & ~(win32con.WS_CAPTION | win32con.WS_THICKFRAME | win32con.WS_MINIMIZE | 
+                                win32con.WS_MAXIMIZE | win32con.WS_SYSMENU)
+                style = style | win32con.WS_CHILD
+                win32gui.SetWindowLong(self.pybullet_hwnd, win32con.GWL_STYLE, style)
+                
+                # Remove extended window styles
+                ex_style = win32gui.GetWindowLong(self.pybullet_hwnd, win32con.GWL_EXSTYLE)
+                ex_style = ex_style & ~(win32con.WS_EX_CONTEXTHELP | win32con.WS_EX_WINDOWEDGE)
+                win32gui.SetWindowLong(self.pybullet_hwnd, win32con.GWL_EXSTYLE, ex_style)
+                
+                # Set parent and position
+                win32gui.SetParent(self.pybullet_hwnd, parent_hwnd)
+                win32gui.MoveWindow(self.pybullet_hwnd, 0, 0, self.width(), self.height(), True)
+                
+                # Make sure the window is visible and properly sized
+                win32gui.ShowWindow(self.pybullet_hwnd, win32con.SW_SHOW)
+                
+                # Stop the embed timer
+                self.embed_timer.stop()
+                print("Successfully embedded PyBullet window")
+
+    def update_robot(self):
+        """Update robot state"""
+        try:
+            # Convert angles to radians for PyBullet
+            theta1_rad = math.radians(self.theta1)
+            theta2_rad = math.radians(self.theta2)
+            end_rotation = -(theta1_rad + theta2_rad + math.radians(self.rotation))
+            
+            # Update joint positions
+            p.resetJointState(self.robot, 0, theta1_rad)
+            p.resetJointState(self.robot, 1, theta2_rad)
+            p.resetJointState(self.robot, 2, -self.z / 1000.0)
+            p.resetJointState(self.robot, 3, end_rotation)
+            
+            # Step simulation
+            p.stepSimulation()
+            
+        except Exception as e:
+            print(f"Error updating PyBullet: {e}")
+
+    def resizeEvent(self, event):
+        """Handle resize events"""
+        super().resizeEvent(event)
+        if self.pybullet_hwnd:
+            win32gui.MoveWindow(self.pybullet_hwnd, 0, 0, self.width(), self.height(), True)
+
+    def showEvent(self, event):
+        """Handle show events"""
+        super().showEvent(event)
+        if self.pybullet_hwnd:
+            win32gui.ShowWindow(self.pybullet_hwnd, win32con.SW_SHOW)
+
+    def hideEvent(self, event):
+        """Handle hide events"""
+        super().hideEvent(event)
+        if self.pybullet_hwnd:
+            win32gui.ShowWindow(self.pybullet_hwnd, win32con.SW_HIDE)
+
+    def closeEvent(self, event):
+        """Handle cleanup when closing"""
+        try:
+            self.update_timer.stop()
+            self.embed_timer.stop()
+            if self.pybullet_hwnd:
+                # Restore window to normal state before closing
+                style = win32gui.GetWindowLong(self.pybullet_hwnd, win32con.GWL_STYLE)
+                style = style & ~win32con.WS_CHILD
+                style = style | win32con.WS_POPUP
+                win32gui.SetWindowLong(self.pybullet_hwnd, win32con.GWL_STYLE, style)
+                win32gui.SetParent(self.pybullet_hwnd, None)
+            p.disconnect(self.physics_client)
+        except:
+            pass
+        super().closeEvent(event)
 
 class Sidebar(QWidget):
     def __init__(self, simulation_widget):
@@ -1365,7 +1543,7 @@ class Sidebar(QWidget):
         current_theta1, current_theta2, current_z, current_rotation, vel1, vel2 = \
             self.simulation_widget.motion_controller.update()
 
-        # Update simulation widget
+        # Update simulation widget positions
         self.simulation_widget.theta1 = current_theta1
         self.simulation_widget.theta2 = current_theta2
         self.simulation_widget.z = current_z
@@ -1409,8 +1587,8 @@ class Sidebar(QWidget):
                                     current_theta1, current_theta2)
         self.graph_widget.update_plot(current_theta1, current_theta2, theta3, vel1, vel2, is_waiting)
 
-        # Update simulation display
-        self.simulation_widget.update()
+        # Trigger simulation update
+        self.simulation_widget.update_simulation()
         QApplication.processEvents()
 
     def update_end_effector_info(self, end_effector_x, end_effector_y, end_effector_z, end_effector_rotation, theta1, theta2):
@@ -1550,11 +1728,12 @@ class Sidebar(QWidget):
             print(f"Load error: {e}")
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
     app = QApplication(sys.argv)
 
     # Create widgets
     graph_widget = AngleGraphWidget()
-    simulation_widget = SimulationWidget()
+    simulation_widget = TabbedSimulationWidget()  # Use the new tabbed widget
     sidebar = Sidebar(simulation_widget)
 
     # Store graph widget reference in sidebar for updates
@@ -1570,7 +1749,7 @@ if __name__ == '__main__':
     main_window.setLayout(layout)
     main_window.show()
 
-    # Populate current position data when the application starts
+    # Initial position update
     end_effector_x = L1 * math.cos(math.radians(45)) + L2 * math.cos(math.radians(45 + 45))
     end_effector_y = -1 * (L1 * math.sin(math.radians(45)) + L2 * math.sin(math.radians(45 + 45)))
     end_effector_z = 0
