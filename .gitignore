@@ -1,3 +1,5 @@
 scara-arm.venv/
 .vscode/
 .pio/
+firmware/.vscode/
+firmware/.pio

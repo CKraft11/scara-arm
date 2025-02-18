@@ -393,7 +393,7 @@ class SimulationWidget(QWidget):
         p.setGravity(0, 0, 0)  # Zero gravity
         
         # Load URDF
-        self.robot = p.loadURDF("scara.urdf", [0, 0, 0], useFixedBase=1)  # Fix the base
+        self.robot = p.loadURDF("scara_urdf/urdf/scara_urdf.urdf", [0, 0, 0], useFixedBase=1)  # Fix the base
         
         # Print joint info for debugging
         self.num_joints = p.getNumJoints(self.robot)
@@ -431,10 +431,10 @@ class SimulationWidget(QWidget):
             p.resetBasePositionAndOrientation(self.robot, [0, 0, 0], [0, 0, 0, 1])
             
             # Update joint positions
-            p.resetJointState(self.robot, 1, theta1_rad)  # base_link_to_shoulder
-            p.resetJointState(self.robot, 2, theta2_rad)  # shoulder_to_elbow
-            p.resetJointState(self.robot, 3, self.z / 1000.0)  # elbow_to_endZ (convert mm to m)
-            p.resetJointState(self.robot, 4, end_rotation)  # endZ_to_endR
+            p.resetJointState(self.robot, 0, theta1_rad)  # base_link_to_shoulder
+            p.resetJointState(self.robot, 1, theta2_rad)  # shoulder_to_elbow
+            p.resetJointState(self.robot, 2, -self.z / 1000.0)  # elbow_to_endZ (convert mm to m)
+            p.resetJointState(self.robot, 3, end_rotation)  # endZ_to_endR
             
             # Step simulation
             p.stepSimulation()
