@@ -202,7 +202,10 @@ class SCARAMotionController:
             self.shoulder.set_target(theta1, move_duration)
             self.elbow.set_target(theta2, move_duration)
         
-        self.z_axis.set_target(z)
+        if (2*abs(self.z_axis.current_position))/move_duration**2<72 and move_duration > 0:
+            self.z_axis.set_target(z, move_duration)
+        else:
+            self.z_axis.set_target(z)
         self.end_effector.set_target(rotation)
 
     def update(self) -> tuple[float, float, float, float, float, float]:
@@ -651,15 +654,15 @@ class SimulationWidget2D(QWidget):
         """Draw path between waypoints, either linear or curved."""
         # If it's a linear path, draw straight line
         # bring z coords from the ground to the tip of the end effector
-        start_z = start_z + 105
-        end_z = end_z + 105
+        start_z = start_z
+        end_z = end_z
         painter.setRenderHint(QPainter.HighQualityAntialiasing)
         if is_linear_path:
             painter.setPen(QPen(RED, 1, Qt.SolidLine))
             painter.drawLine(start_point, end_point)
             p.addUserDebugLine(
-                [start_x/1000, start_y/1000, start_z/1000],  # Start point
-                [end_x/1000, end_y/1000, end_z/1000],      # End point
+                [start_x/1000, start_y/1000, (start_z+105)/1000],  # Start point
+                [end_x/1000, end_y/1000, (end_z+105)/1000],      # End point
                 [1, 0, 0],                  # Red color
                 2,                          # Line width
                 0                           # Lifetime (0 = permanent)
@@ -689,10 +692,14 @@ class SimulationWidget2D(QWidget):
             # Smooth acceleration curve
             t = t * t * (3 - 2 * t)
             
+            tz = math.sqrt(abs((2*(end_z-start_z))/72)) # is acceleration in mm/s
+            
+            curr_z =-np.sign(end_z-start_z)*(0.5*72*(((steps-i)/steps)*tz)**2-end_z)+105
+            
             # Interpolate joint angles
             curr_theta1 = start_theta1 + (end_theta1 - start_theta1) * t
             curr_theta2 = start_theta2 + (end_theta2 - start_theta2) * t
-            curr_z = start_z + (end_z - start_z) * t
+            # curr_z = start_z + (end_z - start_z) * t
             
             # Check if this position is valid
             if not is_valid_position(curr_theta1, curr_theta2):
