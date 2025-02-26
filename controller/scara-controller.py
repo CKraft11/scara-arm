@@ -5,6 +5,7 @@ import win32gui
 import win32con
 import win32api
 import win32process
+import os
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
                            QLabel, QLineEdit, QPushButton, QListWidget, 
                            QListWidgetItem, QGridLayout, QFileDialog, 
@@ -440,7 +441,7 @@ class PyBulletProcess(Process):
         # Cleanup
         p.disconnect()
 
-class TabbedSimulationWidget(QWidget):
+class SimulationWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
@@ -451,361 +452,6 @@ class TabbedSimulationWidget(QWidget):
         
         # Initialize motion controller
         self.motion_controller = SCARAMotionController()
-        
-        # Create tab widget
-        self.tab_widget = QTabWidget(self)
-        self.tab_widget.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
-        
-        # Create 3D view tab first
-        self.view_3d = SimulationWidget3D(self)
-        self.tab_widget.addTab(self.view_3d, "3D View")
-        
-        # Create 2D view tab
-        self.view_2d = SimulationWidget2D(self)
-        self.tab_widget.addTab(self.view_2d, "2D View")
-        
-        # Set 3D view as default
-        self.tab_widget.setCurrentIndex(0)
-        
-        # Set up layout
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(self.tab_widget)
-        self.setLayout(layout)
-        
-        # Timer for updating views
-        self.update_timer = QTimer()
-        self.update_timer.timeout.connect(self.update_simulation)
-        self.update_timer.start(16)  # 60 FPS
-
-    def update_simulation(self):
-        """Update both views regardless of which tab is active"""
-        # Update positions for both views
-        self.view_2d.theta1 = self.theta1
-        self.view_2d.theta2 = self.theta2
-        self.view_2d.z = self.z
-        self.view_2d.rotation = self.rotation
-        
-        self.view_3d.theta1 = self.theta1
-        self.view_3d.theta2 = self.theta2
-        self.view_3d.z = self.z
-        self.view_3d.rotation = self.rotation
-        
-        # Force update both views
-        self.view_2d.update()
-        # 3D view updates automatically through its own timer
-
-    def closeEvent(self, event):
-        """Handle cleanup when closing"""
-        self.update_timer.stop()
-        self.view_3d.closeEvent(event)
-        super().closeEvent(event)  # 60 FPS
-class SimulationWidget2D(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.theta1 = 0
-        self.theta2 = 0
-        self.z = 0
-        self.rotation = 0
-        self.angle = 0
-        self.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
-        
-        self.setAttribute(Qt.WA_OpaquePaintEvent)
-        self.setAttribute(Qt.WA_NoSystemBackground)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.HighQualityAntialiasing)
-
-        # Draw the background
-        painter.fillRect(self.rect(), BLACK)
-
-        # Draw the workspace limits first
-        self.draw_workspace_limits(painter)
-        
-        # Draw the robot
-        base, joint1, end_effector = self.draw_robot(painter)
-        
-        # Draw waypoints
-        self.draw_waypoints(painter, draw_paths=True)
-
-        # Draw Z-axis
-        self.draw_z_axis(painter)
-
-        # Draw end-effector rotation last
-        self.draw_end_effector_rotation(painter, end_effector)
-
-    def closeEvent(self, event):
-        """Handle PyBullet cleanup when closing"""
-        try:
-            p.disconnect()
-        except:
-            pass
-        super().closeEvent(event)
-    
-    def draw_robot(self, painter):
-        # Convert angles to radians
-        theta1_rad = math.radians(self.theta1)
-        theta2_rad = math.radians(self.theta2)
-
-        # Calculate end-effector position
-        x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
-        y = L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad)
-        theta = math.atan2(y, x)
-
-        # Draw the robot links
-        base = QPoint((SIMULATION_WIDTH // 2) -100, WINDOW_HEIGHT // 2)
-        joint1 = QPoint(base.x() + int(L1 * SCALE * math.cos(theta1_rad)), 
-                       base.y() + int(L1 * SCALE * math.sin(theta1_rad)))
-        end_effector = QPoint(base.x() + int(x * SCALE), base.y() + int(y * SCALE))
-
-        painter.setPen(QPen(WHITE, 5))
-        painter.drawLine(base, joint1)
-        painter.drawLine(joint1, end_effector)
-
-        # Draw circles at joints and end-effector
-        painter.setBrush(WHITE)
-        painter.drawEllipse(base, 10, 10)
-        painter.setBrush(BLUE)
-        painter.drawEllipse(end_effector, 10, 10)
-
-        return base, joint1, end_effector
-    
-    def draw_workspace_limits(self, painter):
-        # Draw a circle representing the workspace limits
-        workspace_radius = (L1 + L2) * SCALE
-        workspace_center = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET, WINDOW_HEIGHT // 2)
-        painter.setPen(QPen(GRAY, 2))
-        painter.drawArc(QRect(workspace_center.x() - (L2 + L1), workspace_center.y() - (L2 + L1), 2 * L2 + 2 * L1, 2 * L2 + 2 * L1), int(math.radians(-THETA1_LIMIT) * 16 * 180 / math.pi), int(math.radians(2*THETA1_LIMIT) * 16 * 180 / math.pi))
-
-        # Draw two lines representing the joint1 rotation limits
-        joint1_limit_x1 = workspace_center.x() + int(L1 * SCALE * math.cos(math.radians(-THETA1_LIMIT)))
-        joint1_limit_y1 = workspace_center.y() + int(L1 * SCALE * math.sin(math.radians(-THETA1_LIMIT)))
-        joint1_limit_x2 = workspace_center.x() + int(L1 * SCALE * math.cos(math.radians(THETA1_LIMIT)))
-        joint1_limit_y2 = workspace_center.y() + int(L1 * SCALE * math.sin(math.radians(THETA1_LIMIT)))
-        painter.drawLine(workspace_center, QPoint(joint1_limit_x1, joint1_limit_y1))
-        painter.drawLine(workspace_center, QPoint(joint1_limit_x2, joint1_limit_y2))
-        painter.drawLine(QPoint(joint1_limit_x1, joint1_limit_y1), QPoint(joint1_limit_x1 - L2, joint1_limit_y1))
-        painter.drawLine(QPoint(joint1_limit_x2, joint1_limit_y2), QPoint(joint1_limit_x2 - L2, joint1_limit_y2))
-        painter.drawArc(QRect(workspace_center.x() - L2 + int(L2 * SCALE * math.cos(math.radians(-THETA1_LIMIT))), workspace_center.y() - L2 + int(L2 * SCALE * math.sin(math.radians(-THETA1_LIMIT)))-1, 2 * L2, 2 * L2), int(math.radians(THETA1_LIMIT) * 16 * 180 / math.pi), int(math.radians(180-THETA1_LIMIT) * 16 * 180 / math.pi))
-        painter.drawArc(QRect(workspace_center.x() - L2 + int(L2 * SCALE * math.cos(math.radians(THETA1_LIMIT))), workspace_center.y() - L2 + int(L2 * SCALE * math.sin(math.radians(THETA1_LIMIT)))+1, 2 * L2, 2 * L2), int(math.radians(-THETA1_LIMIT) * 16 * 180 / math.pi), int(math.radians(THETA1_LIMIT-180) * 16 * 180 / math.pi))
-
-    def draw_waypoints(self, painter, draw_paths=True):
-        # First remove any existing debug points
-        try:
-            # Clear any existing debug points (store their IDs as a class attribute)
-            if not hasattr(self, 'debug_point_ids'):
-                self.debug_point_ids = []
-            
-            # # Remove old points
-            for point_id in self.debug_point_ids:
-                p.removeUserDebugItem(point_id)
-            self.debug_point_ids = []
-            
-            for i in range(len(waypoints)):
-                x, y, z, rotation, Wtheta1, Wtheta2, stop_at_point, duration, linear_path = waypoints[i]
-                
-                # Draw 2D visualization
-                end_effector = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET + int(x), WINDOW_HEIGHT // 2 - int(y))
-                
-                # Convert coordinates to meters for PyBullet
-                pb_x = x / 1000.0  # Convert mm to meters
-                pb_y = y / 1000.0
-                pb_z = (z+105) / 1000.0
-                
-                if stop_at_point:
-                    # Draw 2D
-                    painter.setBrush(RED)
-                    painter.drawEllipse(end_effector, 5, 5)
-                    
-                    # Draw 3D - red point
-                    point_id = p.addUserDebugPoints(
-                        [[pb_x, pb_y, pb_z]],  # Point position
-                        [[1, 0, 0]],           # Red color
-                        pointSize=6            # Make points more visible
-                    )
-                else:
-                    # Draw 2D
-                    painter.setBrush(GREEN)
-                    painter.drawEllipse(end_effector, 5, 5)
-                    
-                    # Draw 3D - green point
-                    point_id = p.addUserDebugPoints(
-                        [[pb_x, pb_y, pb_z]],  # Point position
-                        [[0, 1, 0]],           # Green color
-                        pointSize=6            # Make points more visible
-                    )
-                
-                # Store the debug point ID
-                if isinstance(point_id, int):
-                    self.debug_point_ids.append(point_id)
-                
-                if draw_paths and i > 0:
-                    prev_x, prev_y, prev_z, prev_rotation, prev_theta1, prev_theta2, _, _, prev_linear = waypoints[i - 1]
-                    prev_end_effector = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET + int(prev_x), WINDOW_HEIGHT // 2 - int(prev_y))
-                    self.draw_path_between_waypoints(painter, prev_end_effector, end_effector,
-                                                prev_theta1, prev_theta2, Wtheta1, Wtheta2, prev_linear, prev_x, x, prev_y, y, prev_z, z)
-        
-        except Exception as e:
-            print(f"Error drawing waypoints: {e}")
-
-    def draw_path_between_waypoints(self, painter, start_point, end_point, start_theta1, start_theta2, 
-                                  end_theta1, end_theta2, is_linear_path, start_x, end_x, start_y, end_y, start_z, end_z):
-        """Draw path between waypoints, either linear or curved."""
-        # If it's a linear path, draw straight line
-        # bring z coords from the ground to the tip of the end effector
-        start_z = start_z
-        end_z = end_z
-        painter.setRenderHint(QPainter.HighQualityAntialiasing)
-        if is_linear_path:
-            painter.setPen(QPen(RED, 1, Qt.SolidLine))
-            painter.drawLine(start_point, end_point)
-            p.addUserDebugLine(
-                [start_x/1000, start_y/1000, (start_z+105)/1000],  # Start point
-                [end_x/1000, end_y/1000, (end_z+105)/1000],      # End point
-                [1, 0, 0],                  # Red color
-                2,                          # Line width
-                0                           # Lifetime (0 = permanent)
-            )
-            return
-
-        # If any angles are None (point outside workspace), draw dashed line
-        if None in (start_theta1, start_theta2, end_theta1, end_theta2):
-            painter.setPen(QPen(RED, 1, Qt.DashLine))
-            painter.drawLine(start_point, end_point)
-            return
-
-
-        # Function to check if a point along the path is valid
-        def is_valid_position(theta1, theta2):
-            return -THETA1_LIMIT <= theta1 <= THETA1_LIMIT and -THETA2_LIMIT <= theta2 <= THETA2_LIMIT
-
-        steps = 30  # Number of intermediate points to check
-        points = []
-        bullet_pointx = []
-        bullet_pointy = []
-        bullet_pointz = []
-        valid_path = True
-
-        for i in range(steps + 1):
-            t = i / steps
-            # Smooth acceleration curve
-            t = t * t * (3 - 2 * t)
-            
-            tz = math.sqrt(abs((2*(end_z-start_z))/72)) # is acceleration in mm/s
-            
-            curr_z =-np.sign(end_z-start_z)*(0.5*72*(((steps-i)/steps)*tz)**2-end_z)+105
-            
-            # Interpolate joint angles
-            curr_theta1 = start_theta1 + (end_theta1 - start_theta1) * t
-            curr_theta2 = start_theta2 + (end_theta2 - start_theta2) * t
-            # curr_z = start_z + (end_z - start_z) * t
-            
-            # Check if this position is valid
-            if not is_valid_position(curr_theta1, curr_theta2):
-                valid_path = False
-                break
-                
-            # Calculate end effector position
-            theta1_rad = math.radians(curr_theta1)
-            theta2_rad = math.radians(curr_theta2)
-            
-            x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
-            y = L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad)
-            
-            point = QPoint(
-                int((SIMULATION_WIDTH // 2) - 100 + (x * SCALE)),
-                int(WINDOW_HEIGHT // 2 + (y * SCALE))
-            )
-            bullet_pointx.append(x)
-            bullet_pointy.append(-y)
-            bullet_pointz.append(curr_z)
-            points.append(point)
-
-        # Draw the path
-        if valid_path:
-            painter.setPen(QPen(RED, 1, Qt.SolidLine))
-            for i in range(len(points) - 1):
-                painter.drawLine(points[i], points[i + 1])
-                p.addUserDebugLine(
-                    [bullet_pointx[i]/1000, bullet_pointy[i]/1000, bullet_pointz[i]/1000],  # Start point
-                    [bullet_pointx[i+1]/1000, bullet_pointy[i+1]/1000, bullet_pointz[i+1]/1000],      # End point
-                    [1, 0, 0],                  # Red color
-                    2,                          # Line width
-                    0                           # Lifetime (0 = permanent)
-                )
-        else:
-            # Draw a dashed line to indicate invalid path
-            painter.setPen(QPen(RED, 1, Qt.DashLine))
-            painter.drawLine(start_point, end_point)
-
-    def draw_z_axis(self, painter):
-        z_axis_x = int(SIMULATION_WIDTH - 50)
-        z_axis_y = 50
-        z_axis_width = 20
-        z_axis_height = WINDOW_HEIGHT - 100
-
-        painter.setPen(QPen(WHITE, 1))
-        painter.setBrush(QBrush(BLACK))
-        painter.drawRect(z_axis_x, z_axis_y, z_axis_width, z_axis_height)
-
-        z_position = int(z_axis_y + z_axis_height - ((self.z - Z_MIN) / (Z_MAX - Z_MIN)) * z_axis_height)
-        painter.setBrush(QBrush(BLUE))
-        painter.drawRect(z_axis_x, z_position, z_axis_width, 10)
-
-    def draw_end_effector_rotation(self, painter, end_effector):
-        # Calculate total rotation (theta1 + theta2 + theta3)
-        absolute_angle = self.theta1 + self.theta2
-        corrective_angle = self.rotation - absolute_angle
-        
-        # Convert to radians for drawing
-        rotation_rad = math.radians(self.rotation)
-        
-        mask_length = 18
-        arrow_1_x = int(end_effector.x() + 24 * math.cos(rotation_rad))
-        arrow_1_y = int(end_effector.y() + 24 * math.sin(rotation_rad))
-        arrow_2_x = int(end_effector.x() + 26 * math.cos(rotation_rad))
-        arrow_2_y = int(end_effector.y() + 26 * math.sin(rotation_rad))
-        arrow_3_x = int(end_effector.x() + 28 * math.cos(rotation_rad))
-        arrow_3_y = int(end_effector.y() + 28 * math.sin(rotation_rad))
-
-        mask_end_x = int(end_effector.x() + mask_length * math.cos(rotation_rad))
-        mask_end_y = int(end_effector.y() + mask_length * math.sin(rotation_rad))
-
-        # Draw the indicator
-        painter.setPen(QPen(QColor(255, 255, 0), 4))
-        painter.drawLine(QPoint(mask_end_x, mask_end_y), QPoint(arrow_1_x, arrow_1_y))
-        painter.setPen(QPen(QColor(255, 255, 0), 3))
-        painter.drawLine(QPoint(mask_end_x, mask_end_y), QPoint(arrow_2_x, arrow_2_y))
-        painter.setPen(QPen(QColor(255, 255, 0), 2))
-        painter.drawLine(QPoint(mask_end_x, mask_end_y), QPoint(arrow_3_x, arrow_3_y))
-        
-        return corrective_angle
-
-    def calculate_robot_points(self, theta1, theta2):
-        # Convert angles to radians
-        theta1_rad = math.radians(theta1)
-        theta2_rad = math.radians(theta2)
-
-        # Calculate end-effector position
-        x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
-        y = L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad)
-
-        # Calculate the points
-        base = QPoint((SIMULATION_WIDTH // 2)-50, WINDOW_HEIGHT // 2)
-        joint1 = QPoint(base.x() + int(L1 * SCALE * math.cos(theta1_rad)), base.y() + int(L1 * SCALE * math.sin(theta1_rad)))
-        end_effector = QPoint(base.x() + int(x * SCALE), base.y() + int(y * SCALE))
-
-        return base, joint1, end_effector
-
-class SimulationWidget3D(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.theta1 = 0
-        self.theta2 = 0
-        self.z = 0
-        self.rotation = 0
-        self.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
         
         # Initialize PyBullet with direct OpenGL
         self.physics_client = p.connect(p.GUI)
@@ -823,7 +469,7 @@ class SimulationWidget3D(QWidget):
         
         # Important: Configure mouse movement parameters
         p.configureDebugVisualizer(p.COV_ENABLE_MOUSE_PICKING, 0)
-        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 1)
+        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 0)  # Disable for performance
         p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
         p.configureDebugVisualizer(p.COV_ENABLE_TINY_RENDERER, 1)
         p.configureDebugVisualizer(p.COV_ENABLE_VR_PICKING, 0)
@@ -837,12 +483,9 @@ class SimulationWidget3D(QWidget):
             cameraTargetPosition=[0, 0, 0]
         )
 
-        # Disable shadows and keep rest of visualization settings
-        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 0)
-        
-        # Add ground plane with grid
-        gridSize = 20  # Your preferred grid size
-        numLines = 400
+        # Add ground plane with grid (use fewer lines for better performance)
+        gridSize = 20
+        numLines = 20  # Reduced from 400 for performance
         gridSpacing = gridSize / numLines
         
         for i in range(-numLines//2, numLines//2 + 1):
@@ -881,6 +524,13 @@ class SimulationWidget3D(QWidget):
         self.update_timer = QTimer(self)
         self.update_timer.timeout.connect(self.update_robot)
         self.update_timer.start(16)  # 60 FPS
+        
+        # Waypoint handling
+        self.debug_point_ids = []
+        self.waypoints_initialized = False
+        
+        # Less frequent waypoint updates - but start immediately
+        self.update_waypoints()
 
     def try_embed_window(self):
         """Try to find and embed the PyBullet window and simulate Ctrl key press"""
@@ -942,6 +592,63 @@ class SimulationWidget3D(QWidget):
             
         except Exception as e:
             print(f"Error updating PyBullet: {e}")
+    
+    # Add this method to match the expected interface for the animate function
+    def update_simulation(self):
+        """Compatible method for animation - just updates robot position"""
+        self.update_robot()
+
+    def update_waypoints(self):
+        """Simplified waypoint visualization that's more reliable"""
+        try:
+            # First remove all existing debug points
+            for point_id in self.debug_point_ids:
+                try:
+                    p.removeUserDebugItem(point_id)
+                except:
+                    pass
+            self.debug_point_ids = []
+            
+            # Process one point at a time - slower but more reliable
+            for i, waypoint in enumerate(waypoints):
+                try:
+                    x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path = waypoint
+                    
+                    # Convert coordinates to meters for PyBullet
+                    pb_x = x / 1000.0  # Convert mm to meters
+                    pb_y = y / 1000.0
+                    pb_z = (z+105) / 1000.0
+                    
+                    # Choose color based on stop_at_point flag
+                    color = [1, 0, 0] if stop_at_point else [0, 1, 0]
+                    
+                    # Add a single point
+                    point_id = p.addUserDebugPoints(
+                        [[pb_x, pb_y, pb_z]],
+                        [color],
+                        pointSize=6
+                    )
+                    
+                    if isinstance(point_id, int):
+                        self.debug_point_ids.append(point_id)
+                        
+                    # Process events every few points to keep UI responsive
+                    if i % 5 == 0:
+                        QApplication.processEvents()
+                        
+                except Exception as e:
+                    print(f"Error visualizing waypoint {i}: {e}")
+                    continue
+                    
+            print(f"Successfully visualized {len(waypoints)} waypoints")
+            
+        except Exception as e:
+            print(f"Error updating waypoints: {e}")
+    
+    def reload_waypoints(self):
+        """Call this when waypoints are added/updated/deleted"""
+        self.waypoints_initialized = False
+        self.update_waypoints()
 
     def resizeEvent(self, event):
         """Handle resize events"""
@@ -966,6 +673,14 @@ class SimulationWidget3D(QWidget):
         try:
             self.update_timer.stop()
             self.embed_timer.stop()
+            
+            # Clean up debug points
+            for point_id in self.debug_point_ids:
+                try:
+                    p.removeUserDebugItem(point_id)
+                except:
+                    pass
+                
             if self.pybullet_hwnd:
                 # Restore window to normal state before closing
                 style = win32gui.GetWindowLong(self.pybullet_hwnd, win32con.GWL_STYLE)
@@ -974,8 +689,8 @@ class SimulationWidget3D(QWidget):
                 win32gui.SetWindowLong(self.pybullet_hwnd, win32con.GWL_STYLE, style)
                 win32gui.SetParent(self.pybullet_hwnd, None)
             p.disconnect(self.physics_client)
-        except:
-            pass
+        except Exception as e:
+            print(f"Error during cleanup: {e}")
         super().closeEvent(event)
 
 class Sidebar(QWidget):
@@ -1470,7 +1185,8 @@ class Sidebar(QWidget):
         self.stop_at_point_check.setChecked(False)
         self.linear_path_check.setChecked(False)
         self.duration_input.clear()
-        self.simulation_widget.update()
+        self.simulation_widget.reload_waypoints()
+        self.update_waypoint_visualization()
 
     def update_waypoint(self):
         """Update existing waypoint with input validation"""
@@ -1527,7 +1243,8 @@ class Sidebar(QWidget):
         self.edit_stop_at_point_check.setChecked(False)
         self.edit_linear_path_check.setChecked(False)
         self.edit_duration_input.clear()
-        self.simulation_widget.update()
+        self.simulation_widget.reload_waypoints()
+        self.update_waypoint_visualization()
 
     def select_waypoint(self, item):
         index = self.waypoints_list.row(item)
@@ -1550,6 +1267,8 @@ class Sidebar(QWidget):
             self.edit_y_input.clear()
             self.edit_z_input.clear()
             self.edit_rotation_input.clear()
+            self.simulation_widget.reload_waypoints()
+            self.update_waypoint_visualization()
 
     def play_animation(self):
         if self.is_paused:
@@ -1779,6 +1498,7 @@ class Sidebar(QWidget):
             print(f"Save error: {e}")
 
     def load_waypoints_from_csv(self):
+        """Simplified and more robust CSV loading"""
         try:
             file_path, _ = QFileDialog.getOpenFileName(
                 self,
@@ -1789,20 +1509,133 @@ class Sidebar(QWidget):
             
             if not file_path:
                 return
-
-            loaded_points = []
+                
+            # Show wait cursor
+            QApplication.setOverrideCursor(Qt.WaitCursor)
+            
             try:
+                # Clear existing waypoints
+                global waypoints
+                waypoints = []
+                
+                # Read CSV file
                 with open(file_path, 'r', newline='') as f:
                     reader = csv.reader(f)
-                    header = next(reader)  # Read header
+                    header = next(reader)  # Skip header
                     
-                    # Verify header format
-                    expected_header = ['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'Theta3', 
-                                    'StopAtPoint', 'Duration', 'LinearPath']
-                    if not all(h1.lower() == h2.lower() for h1, h2 in zip(header[:len(expected_header)], expected_header)):
-                        print("Warning: CSV header format doesn't match expected format")
+                    # Read and process rows one at a time
+                    row_count = 0
+                    for row in reader:
+                        try:
+                            if len(row) < 9:  # Basic validation
+                                continue
+                                
+                            x = float(row[0].strip())
+                            y = float(row[1].strip())
+                            z = float(row[2].strip())
+                            rotation = float(row[3].strip())
+                            
+                            # Handle theta values that might be 'None'
+                            theta1 = None
+                            if row[4].strip().lower() != 'none':
+                                theta1 = float(row[4].strip())
+                                
+                            theta2 = None
+                            if row[5].strip().lower() != 'none':
+                                theta2 = float(row[5].strip())
+                                
+                            # Get other fields
+                            stop_at_point = bool(int(row[7].strip()))
+                            duration = float(row[8].strip())
+                            
+                            # Handle optional linear_path field
+                            linear_path = False
+                            if len(row) > 9:
+                                linear_path = bool(int(row[9].strip()))
+                            
+                            # Add waypoint
+                            waypoints.append((x, y, z, rotation, theta1, theta2, 
+                                        stop_at_point, duration, linear_path))
+                            
+                            row_count += 1
+                            
+                            # Update UI occasionally
+                            if row_count % 10 == 0:
+                                QApplication.processEvents()
+                                
+                        except Exception as e:
+                            print(f"Error parsing row: {e}")
+                            continue
+                
+                # Update the UI list
+                self.update_waypoints_list()
+                QApplication.processEvents()
+                
+                print(f"Successfully loaded {len(waypoints)} waypoints")
+                
+                # Add a small delay to ensure UI updates before 3D
+                QTimer.singleShot(100, self.delayed_waypoint_update)
+                
+            except Exception as e:
+                print(f"CSV error: {e}")
+                
+        except Exception as e:
+            print(f"File selection error: {e}")
+            
+        finally:
+            # Always restore cursor
+            QApplication.restoreOverrideCursor()
+            
+    def delayed_waypoint_update(self):
+        """Update waypoints after a slight delay to prevent UI freezing"""
+        try:
+            # Ensure waypoints list is up to date
+            self.update_waypoints_list()
+            
+            # Update 3D visualization one point at a time
+            self.simulation_widget.update_waypoints()
+            
+        except Exception as e:
+            print(f"Delayed update error: {e}")
+
+
+    # Additional helper method for the Sidebar class
+
+    def update_waypoint_visualization(self):
+        """Called after any waypoint changes to update 3D view"""
+        try:
+            self.simulation_widget.update_waypoints()
+        except Exception as e:
+            print(f"Error updating waypoint visualization: {e}")
+
+    def process_csv(self, file_path):
+        """Process CSV file with UI updates to prevent freezing"""
+        try:
+            # Open and read the CSV file
+            with open(file_path, 'r', newline='') as f:
+                reader = csv.reader(f)
+                header = next(reader)  # Read header
+                
+                # Verify header format
+                expected_header = ['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'Theta3', 
+                                'StopAtPoint', 'Duration', 'LinearPath']
+                if not all(h1.lower() == h2.lower() for h1, h2 in zip(header[:len(expected_header)], expected_header)):
+                    print("Warning: CSV header format doesn't match expected format")
+                
+                # Read all rows into memory (should be safe for reasonable CSV sizes)
+                all_rows = list(reader)
+                
+                # Process in batches with UI updates
+                batch_size = 10
+                total_rows = len(all_rows)
+                loaded_points = []
+                
+                for batch_start in range(0, total_rows, batch_size):
+                    batch_end = min(batch_start + batch_size, total_rows)
+                    current_batch = all_rows[batch_start:batch_end]
                     
-                    for i, row in enumerate(reader, start=2):  # start=2 because row 1 is header
+                    # Process this batch
+                    for i, row in enumerate(current_batch, start=batch_start+2):
                         try:
                             x = float(row[0].strip())
                             y = float(row[1].strip())
@@ -1815,28 +1648,37 @@ class Sidebar(QWidget):
                             duration = float(row[8].strip())
                             linear_path = bool(int(row[9].strip())) if len(row) > 9 else False
                             
-                            # Store waypoint without theta3 as it's dynamically calculated
+                            # Store waypoint
                             loaded_points.append((x, y, z, rotation, theta1, theta2, 
                                             stop_at_point, duration, linear_path))
                         except (ValueError, IndexError) as e:
                             print(f"Warning: Error parsing row {i}: {e}")
                             continue
-
-                if loaded_points:
-                    global waypoints
-                    waypoints = loaded_points
-                    self.update_waypoints_list()
-                    self.simulation_widget.update()
-                    print(f"Successfully loaded {len(loaded_points)} waypoints")
-                else:
-                    print("Warning: No valid waypoints found in CSV")
                     
-            except csv.Error as e:
-                print(f"CSV Error: {e}")
-                return
+                    # Update UI to prevent freezing
+                    QApplication.processEvents()
+                
+                # Update the global waypoints list
+                global waypoints
+                waypoints = loaded_points
+                
+                # Update UI
+                self.update_waypoints_list()
+                QApplication.processEvents()
+                
+                # Update visualization after all points are loaded
+                self.simulation_widget.update_waypoints()
+                
+                # Re-enable UI
+                self.waypoints_list.setEnabled(True)
+                QApplication.restoreOverrideCursor()
+                
+                print(f"Successfully loaded {len(loaded_points)} waypoints")
                 
         except Exception as e:
-            print(f"Load error: {e}")
+            print(f"CSV processing error: {e}")
+            self.waypoints_list.setEnabled(True)
+            QApplication.restoreOverrideCursor()
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
@@ -1844,7 +1686,9 @@ if __name__ == '__main__':
 
     # Create widgets
     graph_widget = AngleGraphWidget()
-    simulation_widget = TabbedSimulationWidget()  # Use the new tabbed widget
+    
+    # Use the 3D-only widget instead of tabbed widget
+    simulation_widget = SimulationWidget()  # Use the new 3D-only widget
     sidebar = Sidebar(simulation_widget)
 
     # Store graph widget reference in sidebar for updates
