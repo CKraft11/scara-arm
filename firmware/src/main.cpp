@@ -31,8 +31,10 @@ const int BASE_STEPS_PER_REV = 200;
 
 // End Effector
 Servo gripper;
-const float MIN_FREQ = 1208.33; // 37.5 degrees
-const float MAX_FREQ = 1763.89; // 137.5 degrees
+const float MIN_ANGLE = 36;
+const float MAX_ANGLE = 138;
+const float ANGLE_OFFSET = -0.5;
+const float JAW_OFFSET = -5;
 int pos = 0;  // Variable to store the servo position
 const int sweepDelay = 60;  // Delay between servo position increments (milliseconds)
 const int endDelay = 500;  // Pause at the end positions (milliseconds)
@@ -117,26 +119,24 @@ AccelStepper MOTOR4(AccelStepper::DRIVER, STEP_PIN_4, DIR_PIN_4);
 // [4] = Theta1 (degrees)
 // [5] = Theta2 (degrees)
 // [6] = Theta3 (degrees)
-// [7] = StopAtPoint (1.0 = stop, 0.0 = don't stop)
-// [8] = Duration (seconds)
+// [7] = Duration (s)
+// [8] = GripperWidth (mm)
 // [9] = LinearPath (1.0 = linear movement, 0.0 = curved movement)
 const float waypoints[][10] = {
-    {150.000000, 150.000000, 0.000000, 0.000000, -98.895795, 107.791591, -8.895796, 0.0, 0.000000, 0.0},
-    {150.000000, -150.000000, 0.000000, 0.000000, -8.895795, 107.791591, -98.895796, 0.0, 0.000000, 0.0},
-    {-150.000000, 250.000000, 65.000000, 0.000000, -85.045468, -71.836577, 156.882045, 0.0, 0.000000, 0.0},
-    {-150.000000, -250.000000, 0.000000, 0.000000, 85.045468, 71.836577, -156.882045, 0.0, 0.000000, 0.0},
-    {150.000000, 150.000000, 0.000000, 0.000000, -98.895795, 107.791591, -8.895796, 0.0, 0.000000, 0.0},
-    {200.000000, 150.000000, 0.000000, 0.000000, -82.886935, 92.034074, -9.147139, 0.0, 0.000000, 0.0},
-    {150.000000, 200.000000, 0.000000, 0.000000, -99.147139, 92.034074, 7.113065, 0.0, 0.000000, 0.0},
-    {200.000000, 200.000000, 0.000000, 0.000000, -83.216923, 76.433847, 6.783077, 0.0, 0.000000, 0.0}
+    {150.000000, 150.000000, 50.000000, 0.000000, -98.895795, 107.791591, -8.895795, 0.0, 45.000000, 0.0},
+    {150.000000, 150.000000, 0.000000, 0.000000, -98.895795, 107.791591, -8.895795, 1.0, 40.000000, 0.0},
+    {150.000000, 150.000000, 50.000000, 0.000000, -98.895795, 107.791591, -8.895795, 0.0, 40.000000, 0.0},
+    {150.000000, -150.000000, 50.000000, 0.000000, -8.895795, 107.791591, -98.895795, 0.0, 40.000000, 0.0},
+    {150.000000, -150.000000, 0.000000, 0.000000, -8.895795, 107.791591, -98.895795, 0.0, 40.000000, 0.0},
+    {150.000000, -150.000000, 0.000000, 0.000000, -8.895795, 107.791591, -98.895795, 0.0, 50.000000, 0.0}
 };
 
 // Global variables to track movement and waypoints
 bool isHomed = false;
-bool staticDebug = true; //homes and rotates theta1 and 2 90 degrees for calibration
+bool staticDebug = false; //homes and rotates theta1 and 2 90 degrees for calibration
 bool movementComplete = false;
 int currentWaypoint = 0;
-const int TOTAL_WAYPOINTS = 8;  // Total number of waypoints in the array
+const int TOTAL_WAYPOINTS = 6;  // Total number of waypoints in the array
 
 // Add this function after constants but before setup()
 int32_t degreesToSteps(float degrees, int stepsPerRev) {
@@ -373,9 +373,9 @@ void moveToAngles(float theta1Target, float theta2Target, float theta3Target, fl
 }
 
 void moveServo(float width) {
-    float theta = acos((width+0.6)/2*(30))*(180/pi);
+    float theta = acos((width+0.6)/(60+JAW_OFFSET))*(180/pi);
     Serial.println("Synchronized movement completed");
-    gripper.write(37.5+(theta));
+    gripper.write((MIN_ANGLE+90)-theta+ANGLE_OFFSET);
   }
 
 void home() {
@@ -383,153 +383,153 @@ void home() {
     digitalWrite(ENABLE_PIN_2, HIGH);  // Disable MOTOR2 (HIGH = disabled)
     digitalWrite(ENABLE_PIN_4, HIGH);
 
-//    MOTOR3.setSpeed(-HOME_SLOW_SPEED);
-//    MOTOR3.setAcceleration(0);
-//    while (digitalRead(HALL_EFFECT_1) == HIGH) {
-//        MOTOR3.runSpeed();
-//    }
+   MOTOR3.setSpeed(-HOME_SLOW_SPEED);
+   MOTOR3.setAcceleration(0);
+   while (digitalRead(HALL_EFFECT_1) == HIGH) {
+       MOTOR3.runSpeed();
+   }
 
-//    digitalWrite(ENABLE_PIN_4, LOW);
-//    delay(500);
-//    MOTOR4.setSpeed(HOME_SLOW_SPEED);
-//    MOTOR4.setAcceleration(0);
-//    MOTOR4.move(degreesToSteps(-45, STEPS_PER_REV_4));
-//    while (MOTOR4.distanceToGo() != 0) {
-//        MOTOR4.run();
-//    }
-//    MOTOR4.stop();
-//    digitalWrite(ENABLE_PIN_4, HIGH);
-//    delay(500);
-//    MOTOR3.setSpeed(-HOME_SLOW_SPEED);
-//    MOTOR3.setAcceleration(0);
-//    MOTOR3.move(degreesToSteps(-120, STEPS_PER_REV_3));
-//    while (MOTOR3.distanceToGo() != 0) {
-//        MOTOR3.run();
-//    }
-//    MOTOR3.stop();
-//    MOTOR3.setSpeed(-HOME_SLOW_SPEED);
-//    MOTOR3.setAcceleration(0);
-//    while (digitalRead(HALL_EFFECT_1) == HIGH) {
-//        MOTOR3.runSpeed();
-//    }
-//    MOTOR3.move(degreesToSteps(190, STEPS_PER_REV_3));
-//    while (MOTOR3.distanceToGo() != 0) {
-//        MOTOR3.run();
-//    }
-//    MOTOR3.stop();
-//    delay(1000);
-//    digitalWrite(ENABLE_PIN_4, LOW);
+   digitalWrite(ENABLE_PIN_4, LOW);
+   delay(500);
+   MOTOR4.setSpeed(HOME_SLOW_SPEED);
+   MOTOR4.setAcceleration(0);
+   MOTOR4.move(degreesToSteps(-45, STEPS_PER_REV_4));
+   while (MOTOR4.distanceToGo() != 0) {
+       MOTOR4.run();
+   }
+   MOTOR4.stop();
+   digitalWrite(ENABLE_PIN_4, HIGH);
+   delay(500);
+   MOTOR3.setSpeed(-HOME_SLOW_SPEED);
+   MOTOR3.setAcceleration(0);
+   MOTOR3.move(degreesToSteps(-120, STEPS_PER_REV_3));
+   while (MOTOR3.distanceToGo() != 0) {
+       MOTOR3.run();
+   }
+   MOTOR3.stop();
+   MOTOR3.setSpeed(-HOME_SLOW_SPEED);
+   MOTOR3.setAcceleration(0);
+   while (digitalRead(HALL_EFFECT_1) == HIGH) {
+       MOTOR3.runSpeed();
+   }
+   MOTOR3.move(degreesToSteps(190, STEPS_PER_REV_3));
+   while (MOTOR3.distanceToGo() != 0) {
+       MOTOR3.run();
+   }
+   MOTOR3.stop();
+   delay(1000);
+   digitalWrite(ENABLE_PIN_4, LOW);
    
-//    MOTOR4.setSpeed(HOME_SLOW_SPEED);
-//    MOTOR4.setAcceleration(0);
-//    MOTOR4.move(degreesToSteps(150, STEPS_PER_REV_4));
-//    while (MOTOR4.distanceToGo() != 0) {
-//        MOTOR4.run();
-//    }
-//    MOTOR4.stop();
+   MOTOR4.setSpeed(HOME_SLOW_SPEED);
+   MOTOR4.setAcceleration(0);
+   MOTOR4.move(degreesToSteps(150, STEPS_PER_REV_4));
+   while (MOTOR4.distanceToGo() != 0) {
+       MOTOR4.run();
+   }
+   MOTOR4.stop();
 
-//    MOTOR1.setSpeed(500);
-//    MOTOR1.setAcceleration(0);
+   MOTOR1.setSpeed(500);
+   MOTOR1.setAcceleration(0);
    
-//    // Original MOTOR2 pre-movement can be removed since motor is disabled
+   // Original MOTOR2 pre-movement can be removed since motor is disabled
    
-//    MOTOR1.setSpeed(HOME_SLOW_SPEED);
-//    while (digitalRead(LIMIT_SWITCH_1) == HIGH) {
-//        MOTOR1.runSpeed();
-//    }
-//    MOTOR1.stop();
-//    delay(100);
+   MOTOR1.setSpeed(HOME_SLOW_SPEED);
+   while (digitalRead(LIMIT_SWITCH_1) == HIGH) {
+       MOTOR1.runSpeed();
+   }
+   MOTOR1.stop();
+   delay(100);
    
-//    // Back off slowly until switch releases, then go extra distance
-//    MOTOR1.setSpeed(-HOME_SLOW_SPEED);
-//    while (digitalRead(LIMIT_SWITCH_1) == LOW) {  // Until switch releases
-//        MOTOR1.runSpeed();
-//    }
-//    // Extra backoff distance
-//    int32_t extraSteps1 = degreesToSteps(HOME_BACKOFF_DEGREES, STEPS_PER_REV_1);
-//    for(int32_t i = 0; i < extraSteps1; i++) {
-//        MOTOR1.runSpeed();
-//    }
-//    MOTOR1.stop();
-//    delay(100);
+   // Back off slowly until switch releases, then go extra distance
+   MOTOR1.setSpeed(-HOME_SLOW_SPEED);
+   while (digitalRead(LIMIT_SWITCH_1) == LOW) {  // Until switch releases
+       MOTOR1.runSpeed();
+   }
+   // Extra backoff distance
+   int32_t extraSteps1 = degreesToSteps(HOME_BACKOFF_DEGREES, STEPS_PER_REV_1);
+   for(int32_t i = 0; i < extraSteps1; i++) {
+       MOTOR1.runSpeed();
+   }
+   MOTOR1.stop();
+   delay(100);
 
-//    MOTOR1.setSpeed(HOME_SLOW_SPEED);
-//    while (digitalRead(LIMIT_SWITCH_1) == HIGH) {
-//        MOTOR1.runSpeed();
-//    }
-//    MOTOR1.stop();
-//    delay(1000);
+   MOTOR1.setSpeed(HOME_SLOW_SPEED);
+   while (digitalRead(LIMIT_SWITCH_1) == HIGH) {
+       MOTOR1.runSpeed();
+   }
+   MOTOR1.stop();
+   delay(1000);
    
-//    MOTOR1.setSpeed(HOME_SLOW_SPEED);
-//    MOTOR1.move(degreesToSteps(1, STEPS_PER_REV_1));
-//    while (MOTOR1.distanceToGo() != 0) {
-//        MOTOR1.run();
-//    }
-//    MOTOR1.stop();
-//    delay(1000);
+   MOTOR1.setSpeed(HOME_SLOW_SPEED);
+   MOTOR1.move(degreesToSteps(1, STEPS_PER_REV_1));
+   while (MOTOR1.distanceToGo() != 0) {
+       MOTOR1.run();
+   }
+   MOTOR1.stop();
+   delay(1000);
 
-//    // Now that MOTOR1 is at its limit switch, we can safely enable MOTOR2
-//    digitalWrite(ENABLE_PIN_2, LOW);  // Enable MOTOR2
-//    delay(100);  // Give a small delay for the enable to take effect
+   // Now that MOTOR1 is at its limit switch, we can safely enable MOTOR2
+   digitalWrite(ENABLE_PIN_2, LOW);  // Enable MOTOR2
+   delay(100);  // Give a small delay for the enable to take effect
 
-//    // Now continue with MOTOR2 homing sequence as before
-//    MOTOR2.setSpeed(-HOME_SLOW_SPEED/2);
-//    while (digitalRead(LIMIT_SWITCH_2) == HIGH) {
-//        MOTOR2.runSpeed();
-//    }
-//    MOTOR2.stop();
-//    delay(100);
+   // Now continue with MOTOR2 homing sequence as before
+   MOTOR2.setSpeed(-HOME_SLOW_SPEED/2);
+   while (digitalRead(LIMIT_SWITCH_2) == HIGH) {
+       MOTOR2.runSpeed();
+   }
+   MOTOR2.stop();
+   delay(100);
 
-//    // Back off slowly until switch releases, then go extra distance
-//    MOTOR2.setSpeed(HOME_SLOW_SPEED/2);
-//    while (digitalRead(LIMIT_SWITCH_2) == LOW) {  // Until switch releases
-//        MOTOR2.runSpeed();
-//    }
-//    // Extra backoff distance
-//    int32_t extraSteps2 = degreesToSteps(HOME_BACKOFF_DEGREES, STEPS_PER_REV_2);
-//    for(int32_t i = 0; i < extraSteps2; i++) {
-//        MOTOR2.runSpeed();
-//    }
-//    delay(100);
+   // Back off slowly until switch releases, then go extra distance
+   MOTOR2.setSpeed(HOME_SLOW_SPEED/2);
+   while (digitalRead(LIMIT_SWITCH_2) == LOW) {  // Until switch releases
+       MOTOR2.runSpeed();
+   }
+   // Extra backoff distance
+   int32_t extraSteps2 = degreesToSteps(HOME_BACKOFF_DEGREES, STEPS_PER_REV_2);
+   for(int32_t i = 0; i < extraSteps2; i++) {
+       MOTOR2.runSpeed();
+   }
+   delay(100);
    
-//    MOTOR2.setSpeed(-HOME_SLOW_SPEED/2);
-//    while (digitalRead(LIMIT_SWITCH_2) == HIGH) {
-//        MOTOR2.runSpeed();
-//    }
-//    MOTOR2.stop();
-//    delay(100);
+   MOTOR2.setSpeed(-HOME_SLOW_SPEED/2);
+   while (digitalRead(LIMIT_SWITCH_2) == HIGH) {
+       MOTOR2.runSpeed();
+   }
+   MOTOR2.stop();
+   delay(100);
    
-//    MOTOR2.setSpeed(HOME_SLOW_SPEED/2);
-//    MOTOR2.move(degreesToSteps(-1, STEPS_PER_REV_2));
-//    while (MOTOR2.distanceToGo() != 0) {
-//        MOTOR2.run();
-//    }
-//    MOTOR2.stop();
-//    delay(100);
+   MOTOR2.setSpeed(HOME_SLOW_SPEED/2);
+   MOTOR2.move(degreesToSteps(-1, STEPS_PER_REV_2));
+   while (MOTOR2.distanceToGo() != 0) {
+       MOTOR2.run();
+   }
+   MOTOR2.stop();
+   delay(100);
 
-//    MOTOR2.setSpeed(HOME_SLOW_SPEED);
-//    MOTOR2.setAcceleration(0);
-//    MOTOR2.move(degreesToSteps(M2_HOME_OFFSET, STEPS_PER_REV_2));
-//    while (MOTOR2.distanceToGo() != 0) {
-//        MOTOR2.run();
-//    }
-//    MOTOR2.stop();
-//    delay(100);
+   MOTOR2.setSpeed(HOME_SLOW_SPEED);
+   MOTOR2.setAcceleration(0);
+   MOTOR2.move(degreesToSteps(M2_HOME_OFFSET, STEPS_PER_REV_2));
+   while (MOTOR2.distanceToGo() != 0) {
+       MOTOR2.run();
+   }
+   MOTOR2.stop();
+   delay(100);
    
-//    MOTOR1.setSpeed(HOME_SLOW_SPEED*2);
-//    MOTOR1.setAcceleration(0);
-//    MOTOR1.move(degreesToSteps(-M1_HOME_OFFSET, STEPS_PER_REV_1));
-//    while (MOTOR1.distanceToGo() != 0) {
-//        MOTOR1.run();
-//    }
-//    MOTOR1.stop();
-//    delay(1000);
-//    // After moving to the straight-out position, set this as our zero
-//    MOTOR1.setCurrentPosition(0);
-//    MOTOR2.setCurrentPosition(0);
-//    MOTOR3.setCurrentPosition(0);
-//    MOTOR4.setCurrentPosition(0);
-//    Serial.println("Homing complete - Position reset to 0,0");
+   MOTOR1.setSpeed(HOME_SLOW_SPEED*2);
+   MOTOR1.setAcceleration(0);
+   MOTOR1.move(degreesToSteps(-M1_HOME_OFFSET, STEPS_PER_REV_1));
+   while (MOTOR1.distanceToGo() != 0) {
+       MOTOR1.run();
+   }
+   MOTOR1.stop();
+   delay(1000);
+   // After moving to the straight-out position, set this as our zero
+   MOTOR1.setCurrentPosition(0);
+   MOTOR2.setCurrentPosition(0);
+   MOTOR3.setCurrentPosition(0);
+   MOTOR4.setCurrentPosition(0);
+   Serial.println("Homing complete - Position reset to 0,0");
    isHomed = true;
 }
 
@@ -553,11 +553,9 @@ void setup() {
   gripper.attach(SERVO_PIN);
   gripper.write(90);
   delay(5000);
-  gripper.write(37.5);
+  gripper.write(MIN_ANGLE);
   delay(5000);
-  gripper.write(137.5);
-  delay(5000);
-  moveServo(10);
+  gripper.write(MAX_ANGLE);
   
   MOTOR1.setMaxSpeed(MAX_SPEED_1);
   MOTOR1.setAcceleration(ACCELERATION_1);
@@ -601,7 +599,9 @@ void loop() {
                         waypoints[currentWaypoint][5],    // theta2
                         endEffectorAngles.motor3_angle,        // Convert z and rotation to motor3 angle
                         endEffectorAngles.motor4_angle);       // Convert z and rotation to motor4 angle
+            
             if (movementComplete) {
+                moveServo(waypoints[currentWaypoint][8]);
                 Serial.println("Waypoint reached");
                 movementComplete = false;
                 moveStarted = false;
@@ -617,6 +617,6 @@ void loop() {
     }
     else {
         
-        // moveToAngles(90,90,0,0);
+        moveToAngles(90,90,0,0);
     }    
 }

@@ -5,7 +5,6 @@ import win32gui
 import win32con
 import win32api
 import win32process
-import os
 from PyQt5.QtWidgets import (QApplication, QWidget, QVBoxLayout, QHBoxLayout, 
                            QLabel, QLineEdit, QPushButton, QListWidget, 
                            QListWidgetItem, QGridLayout, QFileDialog, 
@@ -32,6 +31,8 @@ THETA1_LIMIT = 110  #Angular Limit of Theta 1 angle to prevent crashing (degrees
 THETA2_LIMIT = 160  #Angular Limit of Theta 2 angle to prevent crashing (degrees)
 Z_MIN = 0  # Minimum Z value
 Z_MAX = 80  # Maximum Z value
+GRIPPER_MIN = 0  # Minimum gripper width (mm)
+GRIPPER_MAX = 58  # Maximum gripper width (mm)
 
 GRAPH_WIDTH = 700 
 SIMULATION_WIDTH = 800
@@ -168,8 +169,9 @@ class SCARAMotionController:
         self.elbow = JointStepper()
         self.z_axis = JointStepper()
         self.end_effector = JointStepper()
+        self.gripper = JointStepper()  # Added gripper control
 
-    def set_target(self, theta1: float, theta2: float, z: float, rotation: float):
+    def set_target(self, theta1: float, theta2: float, z: float, rotation: float, gripper_width: float):
         """Set target positions for all joints with synchronized timing"""
         shoulder_dist = abs(theta1 - self.shoulder.current_position)
         elbow_dist = abs(theta2 - self.elbow.current_position)
@@ -208,23 +210,25 @@ class SCARAMotionController:
         else:
             self.z_axis.set_target(z)
         self.end_effector.set_target(rotation)
+        self.gripper.set_target(gripper_width)  # Set gripper width target
 
-    def update(self) -> tuple[float, float, float, float, float, float]:
+    def update(self) -> tuple[float, float, float, float, float, float, float]:
         """Update all joints and return current positions and velocities"""
         theta1, vel1 = self.shoulder.update()
         theta2, vel2 = self.elbow.update()
         z, _ = self.z_axis.update()
         rotation, _ = self.end_effector.update()
+        gripper_width, _ = self.gripper.update()  # Update gripper
         
-        return theta1, theta2, z, rotation, vel1, vel2  # Now returns velocities too
+        return theta1, theta2, z, rotation, gripper_width, vel1, vel2
 
     def is_at_target(self, threshold: float = 0.1) -> bool:
         """Check if all joints are at their targets"""
         return (abs(self.shoulder.current_position - self.shoulder.target_position) < threshold and
                 abs(self.elbow.current_position - self.elbow.target_position) < threshold and
                 abs(self.z_axis.current_position - self.z_axis.target_position) < threshold and
-                abs(self.end_effector.current_position - self.end_effector.target_position) < threshold)
-    
+                abs(self.end_effector.current_position - self.end_effector.target_position) < threshold and
+                abs(self.gripper.current_position - self.gripper.target_position) < threshold)
 
 class AngleGraphWidget(QWidget):
     def __init__(self, parent=None):
@@ -258,6 +262,7 @@ class AngleGraphWidget(QWidget):
         self.theta1_line = self.angle_plot.plot(pen=pg.mkPen('b', width=2))
         self.theta2_line = self.angle_plot.plot(pen=pg.mkPen('g', width=2))
         self.theta3_line = self.angle_plot.plot(pen=pg.mkPen('r', width=2))
+        self.gripper_line = self.angle_plot.plot(pen=pg.mkPen('y', width=2))  # Added gripper line
         self.vel1_line = self.velocity_plot.plot(pen=pg.mkPen('b', width=2))
         self.vel2_line = self.velocity_plot.plot(pen=pg.mkPen('g', width=2))
         
@@ -267,6 +272,7 @@ class AngleGraphWidget(QWidget):
         angle_legend.addItem(self.theta1_line, "Theta 1 (Shoulder)")
         angle_legend.addItem(self.theta2_line, "Theta 2 (Elbow)")
         angle_legend.addItem(self.theta3_line, "Theta 3 (Wrist)")
+        angle_legend.addItem(self.gripper_line, "Gripper Width (mm)")  # Added gripper to legend
         
         velocity_legend = pg.LegendItem(offset=(50,10))
         velocity_legend.setParentItem(self.velocity_plot.graphicsItem())
@@ -283,6 +289,7 @@ class AngleGraphWidget(QWidget):
         self.theta1_data = []
         self.theta2_data = []
         self.theta3_data = []
+        self.gripper_data = []  # Added gripper data buffer
         self.vel1_data = []
         self.vel2_data = []
         
@@ -297,9 +304,8 @@ class AngleGraphWidget(QWidget):
         self.update_timer.timeout.connect(self.update_display)
         self.update_timer.start(50)  # 20 FPS update rate
 
-    # 2. Add this new update_plot method:
-    def update_plot(self, theta1, theta2, theta3, vel1, vel2, is_paused=False):
-        """Update plots with new data including theta3"""
+    def update_plot(self, theta1, theta2, theta3, gripper_width, vel1, vel2, is_paused=False):
+        """Update plots with new data including theta3 and gripper width"""
         current_time = time.time()
         
         if self.start_time is None:
@@ -318,6 +324,7 @@ class AngleGraphWidget(QWidget):
         self.theta1_data.append(theta1)
         self.theta2_data.append(theta2)
         self.theta3_data.append(theta3)
+        self.gripper_data.append(gripper_width)  # Add gripper width data
         self.vel1_data.append(vel1)
         self.vel2_data.append(vel2)
         
@@ -327,12 +334,12 @@ class AngleGraphWidget(QWidget):
             self.theta1_data.pop(0)
             self.theta2_data.pop(0)
             self.theta3_data.pop(0)
+            self.gripper_data.pop(0)  # Maintain gripper data buffer
             self.vel1_data.pop(0)
             self.vel2_data.pop(0)
         
         self.last_update = current_time
 
-    # 3. Update the update_display method:
     def update_display(self):
         """Update the plot display"""
         if not self.time_data:
@@ -344,6 +351,7 @@ class AngleGraphWidget(QWidget):
                            len(self.theta1_data), 
                            len(self.theta2_data),
                            len(self.theta3_data),
+                           len(self.gripper_data),  # Include gripper data
                            len(self.vel1_data),
                            len(self.vel2_data))
             
@@ -351,6 +359,7 @@ class AngleGraphWidget(QWidget):
             theta1_data = self.theta1_data[-min_length:]
             theta2_data = self.theta2_data[-min_length:]
             theta3_data = self.theta3_data[-min_length:]
+            gripper_data = self.gripper_data[-min_length:]  # Get gripper data
             vel1_data = self.vel1_data[-min_length:]
             vel2_data = self.vel2_data[-min_length:]
             
@@ -358,6 +367,7 @@ class AngleGraphWidget(QWidget):
             self.theta1_line.setData(time_data, theta1_data)
             self.theta2_line.setData(time_data, theta2_data)
             self.theta3_line.setData(time_data, theta3_data)
+            self.gripper_line.setData(time_data, gripper_data)  # Plot gripper data
             self.vel1_line.setData(time_data, vel1_data)
             self.vel2_line.setData(time_data, vel2_data)
             
@@ -369,13 +379,13 @@ class AngleGraphWidget(QWidget):
             print(f"Error updating display: {e}")
             return
 
-    # 4. Update the reset_plot method:
     def reset_plot(self):
         """Clear all plot data"""
         self.time_data = []
         self.theta1_data = []
         self.theta2_data = []
         self.theta3_data = []
+        self.gripper_data = []  # Reset gripper data
         self.vel1_data = []
         self.vel2_data = []
         self.start_time = None
@@ -386,6 +396,7 @@ class AngleGraphWidget(QWidget):
         self.theta1_line.setData([], [])
         self.theta2_line.setData([], [])
         self.theta3_line.setData([], [])
+        self.gripper_line.setData([], [])  # Clear gripper plot
         self.vel1_line.setData([], [])
         self.vel2_line.setData([], [])
         
@@ -397,6 +408,7 @@ class PyBulletProcess(Process):
         self.theta2 = Value('d', 0.0)
         self.z = Value('d', 0.0)
         self.rotation = Value('d', 0.0)
+        self.gripper_width = Value('d', 0.0)  # Added gripper width
         self.running = Value('i', 1)
         
     def run(self):
@@ -413,14 +425,6 @@ class PyBulletProcess(Process):
         # Load URDF
         robot = p.loadURDF("scara_urdf/urdf/scara_urdf.urdf", [0, 0, 0], useFixedBase=1)
         
-        # # Configure camera view
-        # p.resetDebugVisualizerCamera(
-        #     cameraDistance=0.6,
-        #     cameraYaw=45,
-        #     cameraPitch=-30,
-        #     cameraTargetPosition=[0, 0, 0]
-        # )
-        
         # Main loop
         while self.running.value:
             # Get current angles from shared memory
@@ -434,6 +438,10 @@ class PyBulletProcess(Process):
             p.resetJointState(robot, 2, self.z.value / 1000.0)
             p.resetJointState(robot, 3, end_rotation)
             
+            # Update gripper position (if your URDF supports it)
+            # This will depend on how the gripper is defined in your URDF
+            # p.resetJointState(robot, 4, self.gripper_width.value / 1000.0)
+            
             # Step simulation
             p.stepSimulation()
             time.sleep(0.016)  # 60 FPS
@@ -441,7 +449,7 @@ class PyBulletProcess(Process):
         # Cleanup
         p.disconnect()
 
-class SimulationWidget(QWidget):
+class TabbedSimulationWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
@@ -449,9 +457,435 @@ class SimulationWidget(QWidget):
         self.theta2 = 0
         self.z = 0
         self.rotation = 0
+        self.gripper_width = 0  # Added gripper width
         
         # Initialize motion controller
         self.motion_controller = SCARAMotionController()
+        
+        # Create tab widget
+        self.tab_widget = QTabWidget(self)
+        self.tab_widget.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
+        
+        # Create 3D view tab first
+        self.view_3d = SimulationWidget3D(self)
+        self.tab_widget.addTab(self.view_3d, "3D View")
+        
+        # Create 2D view tab
+        self.view_2d = SimulationWidget2D(self)
+        self.tab_widget.addTab(self.view_2d, "2D View")
+        
+        # Set 3D view as default
+        self.tab_widget.setCurrentIndex(0)
+        
+        # Set up layout
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(self.tab_widget)
+        self.setLayout(layout)
+        
+        # Timer for updating views
+        self.update_timer = QTimer()
+        self.update_timer.timeout.connect(self.update_simulation)
+        self.update_timer.start(16)  # 60 FPS
+
+    def update_simulation(self):
+        """Update both views regardless of which tab is active"""
+        # Update positions for both views
+        self.view_2d.theta1 = self.theta1
+        self.view_2d.theta2 = self.theta2
+        self.view_2d.z = self.z
+        self.view_2d.rotation = self.rotation
+        self.view_2d.gripper_width = self.gripper_width  # Update gripper width
+        
+        self.view_3d.theta1 = self.theta1
+        self.view_3d.theta2 = self.theta2
+        self.view_3d.z = self.z
+        self.view_3d.rotation = self.rotation
+        self.view_3d.gripper_width = self.gripper_width  # Update gripper width
+        
+        # Force update both views
+        self.view_2d.update()
+        # 3D view updates automatically through its own timer
+
+    def closeEvent(self, event):
+        """Handle cleanup when closing"""
+        self.update_timer.stop()
+        self.view_3d.closeEvent(event)
+        super().closeEvent(event)
+class SimulationWidget2D(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.theta1 = 0
+        self.theta2 = 0
+        self.z = 0
+        self.rotation = 0
+        self.gripper_width = 0  # Added gripper width
+        self.angle = 0
+        self.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
+        
+        self.setAttribute(Qt.WA_OpaquePaintEvent)
+        self.setAttribute(Qt.WA_NoSystemBackground)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.HighQualityAntialiasing)
+
+        # Draw the background
+        painter.fillRect(self.rect(), BLACK)
+
+        # Draw the workspace limits first
+        self.draw_workspace_limits(painter)
+        
+        # Draw the robot
+        base, joint1, end_effector = self.draw_robot(painter)
+        
+        # Draw waypoints
+        self.draw_waypoints(painter, draw_paths=True)
+
+        # Draw Z-axis
+        self.draw_z_axis(painter)
+        
+        # Draw gripper width indicator
+        self.draw_gripper_indicator(painter)
+
+        # Draw end-effector rotation last
+        self.draw_end_effector_rotation(painter, end_effector)
+
+    def closeEvent(self, event):
+        """Handle PyBullet cleanup when closing"""
+        try:
+            p.disconnect()
+        except:
+            pass
+        super().closeEvent(event)
+    
+    def draw_robot(self, painter):
+        # Convert angles to radians
+        theta1_rad = math.radians(self.theta1)
+        theta2_rad = math.radians(self.theta2)
+
+        # Calculate end-effector position
+        x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
+        y = L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad)
+        theta = math.atan2(y, x)
+
+        # Draw the robot links
+        base = QPoint((SIMULATION_WIDTH // 2) -100, WINDOW_HEIGHT // 2)
+        joint1 = QPoint(base.x() + int(L1 * SCALE * math.cos(theta1_rad)), 
+                       base.y() + int(L1 * SCALE * math.sin(theta1_rad)))
+        end_effector = QPoint(base.x() + int(x * SCALE), base.y() + int(y * SCALE))
+
+        painter.setPen(QPen(WHITE, 5))
+        painter.drawLine(base, joint1)
+        painter.drawLine(joint1, end_effector)
+
+        # Draw circles at joints and end-effector
+        painter.setBrush(WHITE)
+        painter.drawEllipse(base, 10, 10)
+        painter.setBrush(BLUE)
+        painter.drawEllipse(end_effector, 10, 10)
+        
+        # Draw gripper indicator at end-effector
+        self.draw_gripper_at_end_effector(painter, end_effector, theta1_rad + theta2_rad)
+
+        return base, joint1, end_effector
+    
+    def draw_gripper_at_end_effector(self, painter, end_effector, angle):
+        """Draw a visual representation of the gripper at the end effector"""
+        # Normalize gripper width for visualization (scale from 0-58mm to a reasonable pixel size)
+        grip_width = (self.gripper_width / GRIPPER_MAX) * 40  # Max visual width of 40 pixels
+        
+        # Calculate gripper jaw positions
+        jaw_len = 20  # Length of gripper jaws
+        jaw_angle = angle + math.pi/2  # Perpendicular to arm
+        
+        # Left jaw
+        left_x = end_effector.x() - int((grip_width/2) * math.cos(jaw_angle))
+        left_y = end_effector.y() - int((grip_width/2) * math.sin(jaw_angle))
+        left_end_x = left_x + int(jaw_len * math.cos(angle))
+        left_end_y = left_y + int(jaw_len * math.sin(angle))
+        
+        # Right jaw
+        right_x = end_effector.x() + int((grip_width/2) * math.cos(jaw_angle))
+        right_y = end_effector.y() + int((grip_width/2) * math.sin(jaw_angle))
+        right_end_x = right_x + int(jaw_len * math.cos(angle))
+        right_end_y = right_y + int(jaw_len * math.sin(angle))
+        
+        # Draw gripper jaws
+        painter.setPen(QPen(QColor(255, 165, 0), 3))  # Orange color for gripper
+        painter.drawLine(QPoint(left_x, left_y), QPoint(left_end_x, left_end_y))
+        painter.drawLine(QPoint(right_x, right_y), QPoint(right_end_x, right_end_y))
+    
+    def draw_workspace_limits(self, painter):
+        # Draw a circle representing the workspace limits
+        workspace_radius = (L1 + L2) * SCALE
+        workspace_center = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET, WINDOW_HEIGHT // 2)
+        painter.setPen(QPen(GRAY, 2))
+        painter.drawArc(QRect(workspace_center.x() - (L2 + L1), workspace_center.y() - (L2 + L1), 2 * L2 + 2 * L1, 2 * L2 + 2 * L1), int(math.radians(-THETA1_LIMIT) * 16 * 180 / math.pi), int(math.radians(2*THETA1_LIMIT) * 16 * 180 / math.pi))
+
+        # Draw two lines representing the joint1 rotation limits
+        joint1_limit_x1 = workspace_center.x() + int(L1 * SCALE * math.cos(math.radians(-THETA1_LIMIT)))
+        joint1_limit_y1 = workspace_center.y() + int(L1 * SCALE * math.sin(math.radians(-THETA1_LIMIT)))
+        joint1_limit_x2 = workspace_center.x() + int(L1 * SCALE * math.cos(math.radians(THETA1_LIMIT)))
+        joint1_limit_y2 = workspace_center.y() + int(L1 * SCALE * math.sin(math.radians(THETA1_LIMIT)))
+        painter.drawLine(workspace_center, QPoint(joint1_limit_x1, joint1_limit_y1))
+        painter.drawLine(workspace_center, QPoint(joint1_limit_x2, joint1_limit_y2))
+        painter.drawLine(QPoint(joint1_limit_x1, joint1_limit_y1), QPoint(joint1_limit_x1 - L2, joint1_limit_y1))
+        painter.drawLine(QPoint(joint1_limit_x2, joint1_limit_y2), QPoint(joint1_limit_x2 - L2, joint1_limit_y2))
+        painter.drawArc(QRect(workspace_center.x() - L2 + int(L2 * SCALE * math.cos(math.radians(-THETA1_LIMIT))), workspace_center.y() - L2 + int(L2 * SCALE * math.sin(math.radians(-THETA1_LIMIT)))-1, 2 * L2, 2 * L2), int(math.radians(THETA1_LIMIT) * 16 * 180 / math.pi), int(math.radians(180-THETA1_LIMIT) * 16 * 180 / math.pi))
+        painter.drawArc(QRect(workspace_center.x() - L2 + int(L2 * SCALE * math.cos(math.radians(THETA1_LIMIT))), workspace_center.y() - L2 + int(L2 * SCALE * math.sin(math.radians(THETA1_LIMIT)))+1, 2 * L2, 2 * L2), int(math.radians(-THETA1_LIMIT) * 16 * 180 / math.pi), int(math.radians(THETA1_LIMIT-180) * 16 * 180 / math.pi))
+
+    def draw_gripper_indicator(self, painter):
+        """Draw gripper width indicator bar"""
+        gripper_x = int(SIMULATION_WIDTH - 90)
+        gripper_y = 50
+        gripper_width_px = 20
+        gripper_height = WINDOW_HEIGHT - 100
+        
+        # Draw background bar
+        painter.setPen(QPen(WHITE, 1))
+        painter.setBrush(QBrush(BLACK))
+        painter.drawRect(gripper_x, gripper_y, gripper_width_px, gripper_height)
+        
+        # Calculate gripper position proportional to min/max range
+        gripper_position = int(gripper_y + gripper_height - ((self.gripper_width - GRIPPER_MIN) / (GRIPPER_MAX - GRIPPER_MIN)) * gripper_height)
+        
+        # Draw indicator
+        painter.setBrush(QBrush(QColor(255, 165, 0)))  # Orange for gripper
+        painter.drawRect(gripper_x, gripper_position, gripper_width_px, 10)
+        
+        # Draw min/max labels
+        painter.setPen(QPen(WHITE, 1))
+        painter.drawText(gripper_x + gripper_width_px + 5, gripper_y + 10, f"{GRIPPER_MAX}")
+        painter.drawText(gripper_x + gripper_width_px + 5, gripper_y + gripper_height, f"{GRIPPER_MIN}")
+        painter.drawText(gripper_x - 30, gripper_y - 10, "Gripper (mm)")
+        
+    def draw_waypoints(self, painter, draw_paths=True):
+        # First remove any existing debug points
+        try:
+            # Clear any existing debug points (store their IDs as a class attribute)
+            if not hasattr(self, 'debug_point_ids'):
+                self.debug_point_ids = []
+            
+            # # Remove old points
+            for point_id in self.debug_point_ids:
+                p.removeUserDebugItem(point_id)
+            self.debug_point_ids = []
+            
+            for i in range(len(waypoints)):
+                x, y, z, rotation, Wtheta1, Wtheta2, duration, gripper_width, linear_path = waypoints[i]
+                
+                # Draw 2D visualization
+                end_effector = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET + int(x), WINDOW_HEIGHT // 2 - int(y))
+                
+                # Convert coordinates to meters for PyBullet
+                pb_x = x / 1000.0  # Convert mm to meters
+                pb_y = y / 1000.0
+                pb_z = (z+105) / 1000.0
+                
+                # Draw waypoint color based on duration (red for waiting points, green for pass-through)
+                if duration > 0:
+                    # Draw 2D
+                    painter.setBrush(RED)
+                    painter.drawEllipse(end_effector, 5, 5)
+                    
+                    # Draw small text showing duration and gripper width
+                    painter.setPen(QPen(WHITE, 1))
+                    painter.drawText(end_effector.x() + 10, end_effector.y() - 5, f"{duration}s, {gripper_width}mm")
+                    
+                    # Draw 3D - red point
+                    point_id = p.addUserDebugPoints(
+                        [[pb_x, pb_y, pb_z]],  # Point position
+                        [[1, 0, 0]],           # Red color
+                        pointSize=6            # Make points more visible
+                    )
+                else:
+                    # Draw 2D
+                    painter.setBrush(GREEN)
+                    painter.drawEllipse(end_effector, 5, 5)
+                    
+                    # Draw small text showing gripper width
+                    painter.setPen(QPen(WHITE, 1))
+                    painter.drawText(end_effector.x() + 10, end_effector.y() - 5, f"{gripper_width}mm")
+                    
+                    # Draw 3D - green point
+                    point_id = p.addUserDebugPoints(
+                        [[pb_x, pb_y, pb_z]],  # Point position
+                        [[0, 1, 0]],           # Green color
+                        pointSize=6            # Make points more visible
+                    )
+                
+                # Store the debug point ID
+                if isinstance(point_id, int):
+                    self.debug_point_ids.append(point_id)
+                
+                if draw_paths and i > 0:
+                    prev_x, prev_y, prev_z, prev_rotation, prev_theta1, prev_theta2, _, _, prev_linear = waypoints[i - 1]
+                    prev_end_effector = QPoint((SIMULATION_WIDTH // 2)-SIMULATION_OFFSET + int(prev_x), WINDOW_HEIGHT // 2 - int(prev_y))
+                    self.draw_path_between_waypoints(painter, prev_end_effector, end_effector,
+                                                prev_theta1, prev_theta2, Wtheta1, Wtheta2, prev_linear, prev_x, x, prev_y, y, prev_z, z)
+        
+        except Exception as e:
+            print(f"Error drawing waypoints: {e}")
+
+    def draw_path_between_waypoints(self, painter, start_point, end_point, start_theta1, start_theta2, 
+                                  end_theta1, end_theta2, is_linear_path, start_x, end_x, start_y, end_y, start_z, end_z):
+        """Draw path between waypoints, either linear or curved."""
+        # If it's a linear path, draw straight line
+        # bring z coords from the ground to the tip of the end effector
+        start_z = start_z
+        end_z = end_z
+        painter.setRenderHint(QPainter.HighQualityAntialiasing)
+        if is_linear_path:
+            painter.setPen(QPen(RED, 1, Qt.SolidLine))
+            painter.drawLine(start_point, end_point)
+            p.addUserDebugLine(
+                [start_x/1000, start_y/1000, (start_z+105)/1000],  # Start point
+                [end_x/1000, end_y/1000, (end_z+105)/1000],      # End point
+                [1, 0, 0],                  # Red color
+                2,                          # Line width
+                0                           # Lifetime (0 = permanent)
+            )
+            return
+
+        # If any angles are None (point outside workspace), draw dashed line
+        if None in (start_theta1, start_theta2, end_theta1, end_theta2):
+            painter.setPen(QPen(RED, 1, Qt.DashLine))
+            painter.drawLine(start_point, end_point)
+            return
+
+
+        # Function to check if a point along the path is valid
+        def is_valid_position(theta1, theta2):
+            return -THETA1_LIMIT <= theta1 <= THETA1_LIMIT and -THETA2_LIMIT <= theta2 <= THETA2_LIMIT
+
+        steps = 30  # Number of intermediate points to check
+        points = []
+        bullet_pointx = []
+        bullet_pointy = []
+        bullet_pointz = []
+        valid_path = True
+
+        for i in range(steps + 1):
+            t = i / steps
+            # Smooth acceleration curve
+            t = t * t * (3 - 2 * t)
+            
+            tz = math.sqrt(abs((2*(end_z-start_z))/72)) # is acceleration in mm/s
+            
+            curr_z =-np.sign(end_z-start_z)*(0.5*72*(((steps-i)/steps)*tz)**2-end_z)+105
+            
+            # Interpolate joint angles
+            curr_theta1 = start_theta1 + (end_theta1 - start_theta1) * t
+            curr_theta2 = start_theta2 + (end_theta2 - start_theta2) * t
+            # curr_z = start_z + (end_z - start_z) * t
+            
+            # Check if this position is valid
+            if not is_valid_position(curr_theta1, curr_theta2):
+                valid_path = False
+                break
+                
+            # Calculate end effector position
+            theta1_rad = math.radians(curr_theta1)
+            theta2_rad = math.radians(curr_theta2)
+            
+            x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
+            y = L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad)
+            
+            point = QPoint(
+                int((SIMULATION_WIDTH // 2) - 100 + (x * SCALE)),
+                int(WINDOW_HEIGHT // 2 + (y * SCALE))
+            )
+            bullet_pointx.append(x)
+            bullet_pointy.append(-y)
+            bullet_pointz.append(curr_z)
+            points.append(point)
+
+        # Draw the path
+        if valid_path:
+            painter.setPen(QPen(RED, 1, Qt.SolidLine))
+            for i in range(len(points) - 1):
+                painter.drawLine(points[i], points[i + 1])
+                p.addUserDebugLine(
+                    [bullet_pointx[i]/1000, bullet_pointy[i]/1000, bullet_pointz[i]/1000],  # Start point
+                    [bullet_pointx[i+1]/1000, bullet_pointy[i+1]/1000, bullet_pointz[i+1]/1000],      # End point
+                    [1, 0, 0],                  # Red color
+                    2,                          # Line width
+                    0                           # Lifetime (0 = permanent)
+                )
+        else:
+            # Draw a dashed line to indicate invalid path
+            painter.setPen(QPen(RED, 1, Qt.DashLine))
+            painter.drawLine(start_point, end_point)
+
+    def draw_z_axis(self, painter):
+        z_axis_x = int(SIMULATION_WIDTH - 50)
+        z_axis_y = 50
+        z_axis_width = 20
+        z_axis_height = WINDOW_HEIGHT - 100
+
+        painter.setPen(QPen(WHITE, 1))
+        painter.setBrush(QBrush(BLACK))
+        painter.drawRect(z_axis_x, z_axis_y, z_axis_width, z_axis_height)
+
+        z_position = int(z_axis_y + z_axis_height - ((self.z - Z_MIN) / (Z_MAX - Z_MIN)) * z_axis_height)
+        painter.setBrush(QBrush(BLUE))
+        painter.drawRect(z_axis_x, z_position, z_axis_width, 10)
+
+    def draw_end_effector_rotation(self, painter, end_effector):
+        # Calculate total rotation (theta1 + theta2 + theta3)
+        absolute_angle = self.theta1 + self.theta2
+        corrective_angle = self.rotation - absolute_angle
+        
+        # Convert to radians for drawing
+        rotation_rad = math.radians(self.rotation)
+        
+        mask_length = 18
+        arrow_1_x = int(end_effector.x() + 24 * math.cos(rotation_rad))
+        arrow_1_y = int(end_effector.y() + 24 * math.sin(rotation_rad))
+        arrow_2_x = int(end_effector.x() + 26 * math.cos(rotation_rad))
+        arrow_2_y = int(end_effector.y() + 26 * math.sin(rotation_rad))
+        arrow_3_x = int(end_effector.x() + 28 * math.cos(rotation_rad))
+        arrow_3_y = int(end_effector.y() + 28 * math.sin(rotation_rad))
+
+        mask_end_x = int(end_effector.x() + mask_length * math.cos(rotation_rad))
+        mask_end_y = int(end_effector.y() + mask_length * math.sin(rotation_rad))
+
+        # Draw the indicator
+        painter.setPen(QPen(QColor(255, 255, 0), 4))
+        painter.drawLine(QPoint(mask_end_x, mask_end_y), QPoint(arrow_1_x, arrow_1_y))
+        painter.setPen(QPen(QColor(255, 255, 0), 3))
+        painter.drawLine(QPoint(mask_end_x, mask_end_y), QPoint(arrow_2_x, arrow_2_y))
+        painter.setPen(QPen(QColor(255, 255, 0), 2))
+        painter.drawLine(QPoint(mask_end_x, mask_end_y), QPoint(arrow_3_x, arrow_3_y))
+        
+        return corrective_angle
+
+    def calculate_robot_points(self, theta1, theta2):
+        # Convert angles to radians
+        theta1_rad = math.radians(theta1)
+        theta2_rad = math.radians(theta2)
+
+        # Calculate end-effector position
+        x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
+        y = L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad)
+
+        # Calculate the points
+        base = QPoint((SIMULATION_WIDTH // 2)-50, WINDOW_HEIGHT // 2)
+        joint1 = QPoint(base.x() + int(L1 * SCALE * math.cos(theta1_rad)), base.y() + int(L1 * SCALE * math.sin(theta1_rad)))
+        end_effector = QPoint(base.x() + int(x * SCALE), base.y() + int(y * SCALE))
+
+        return base, joint1, end_effector
+
+class SimulationWidget3D(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.theta1 = 0
+        self.theta2 = 0
+        self.z = 0
+        self.rotation = 0
+        self.gripper_width = 0  # Added gripper width
+        self.setFixedSize(SIMULATION_WIDTH, WINDOW_HEIGHT)
         
         # Initialize PyBullet with direct OpenGL
         self.physics_client = p.connect(p.GUI)
@@ -469,7 +903,7 @@ class SimulationWidget(QWidget):
         
         # Important: Configure mouse movement parameters
         p.configureDebugVisualizer(p.COV_ENABLE_MOUSE_PICKING, 0)
-        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 0)  # Disable for performance
+        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 1)
         p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
         p.configureDebugVisualizer(p.COV_ENABLE_TINY_RENDERER, 1)
         p.configureDebugVisualizer(p.COV_ENABLE_VR_PICKING, 0)
@@ -483,9 +917,12 @@ class SimulationWidget(QWidget):
             cameraTargetPosition=[0, 0, 0]
         )
 
-        # Add ground plane with grid (use fewer lines for better performance)
-        gridSize = 20
-        numLines = 20  # Reduced from 400 for performance
+        # Disable shadows and keep rest of visualization settings
+        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 0)
+        
+        # Add ground plane with grid
+        gridSize = 20  # Your preferred grid size
+        numLines = 400
         gridSpacing = gridSize / numLines
         
         for i in range(-numLines//2, numLines//2 + 1):
@@ -524,13 +961,72 @@ class SimulationWidget(QWidget):
         self.update_timer = QTimer(self)
         self.update_timer.timeout.connect(self.update_robot)
         self.update_timer.start(16)  # 60 FPS
+
+        # Create gripper visualization 
+        self.left_gripper_id = None
+        self.right_gripper_id = None
+        self.create_gripper_visualization()
+
+    def create_gripper_visualization(self):
+        """Create a simple visual representation of the gripper in PyBullet"""
+        # This method adds visual debug lines to represent the gripper
+        # We'll store their IDs so we can update them later
+        # self.left_gripper_id = p.addUserDebugLine([0, 0, 0], [0, 0, 0], [1, 0.5, 0], 2, 0)
+        # self.right_gripper_id = p.addUserDebugLine([0, 0, 0], [0, 0, 0], [1, 0.5, 0], 2, 0)
+
+    def update_gripper_visualization(self):
+        """Update the gripper visualization based on current position and width"""
+        # Get end effector position and orientation
+        # end_effector_pos, end_effector_orn = p.getLinkState(self.robot, 3)[:2]
         
-        # Waypoint handling
-        self.debug_point_ids = []
-        self.waypoints_initialized = False
+        # # Convert quaternion to euler angles
+        # euler = p.getEulerFromQuaternion(end_effector_orn)
         
-        # Less frequent waypoint updates - but start immediately
-        self.update_waypoints()
+        # # Calculate gripper jaw positions
+        # grip_width = self.gripper_width / 1000.0  # Convert mm to meters
+        # half_width = grip_width / 2.0
+        # jaw_length = 0.03  # 3cm jaw length
+        
+        # # Create rotation matrix from euler angles
+        # # Note: We're simplifying this by just using the yaw angle for 2D rotation
+        # cos_angle = math.cos(euler[2])
+        # sin_angle = math.sin(euler[2])
+        
+        # # Left gripper jaw
+        # left_start_x = end_effector_pos[0] - half_width * sin_angle
+        # left_start_y = end_effector_pos[1] + half_width * cos_angle
+        # left_end_x = left_start_x + jaw_length * cos_angle
+        # left_end_y = left_start_y + jaw_length * sin_angle
+        
+        # # Right gripper jaw
+        # right_start_x = end_effector_pos[0] + half_width * sin_angle
+        # right_start_y = end_effector_pos[1] - half_width * cos_angle
+        # right_end_x = right_start_x + jaw_length * cos_angle
+        # right_end_y = right_start_y + jaw_length * sin_angle
+        
+        # # Update the debug lines
+        # if self.left_gripper_id is not None:
+        #     p.removeUserDebugItem(self.left_gripper_id)
+        # if self.right_gripper_id is not None:
+        #     p.removeUserDebugItem(self.right_gripper_id)
+            
+        # z_offset = end_effector_pos[2]
+        
+        # self.left_gripper_id = p.addUserDebugLine(
+        #     [left_start_x, left_start_y, z_offset],
+        #     [left_end_x, left_end_y, z_offset],
+        #     [1, 0.5, 0],  # Orange color
+        #     2,
+        #     0
+        # )
+        
+        # self.right_gripper_id = p.addUserDebugLine(
+        #     [right_start_x, right_start_y, z_offset],
+        #     [right_end_x, right_end_y, z_offset],
+        #     [1, 0.5, 0],  # Orange color
+        #     2,
+        #     0
+        # )
 
     def try_embed_window(self):
         """Try to find and embed the PyBullet window and simulate Ctrl key press"""
@@ -587,68 +1083,15 @@ class SimulationWidget(QWidget):
             p.resetJointState(self.robot, 2, -self.z / 1000.0)
             p.resetJointState(self.robot, 3, end_rotation)
             
+            # If URDF supports gripper joints, update them here
+            # For now, we'll just update our visualization
+            self.update_gripper_visualization()
+            
             # Step simulation
             p.stepSimulation()
             
         except Exception as e:
             print(f"Error updating PyBullet: {e}")
-    
-    # Add this method to match the expected interface for the animate function
-    def update_simulation(self):
-        """Compatible method for animation - just updates robot position"""
-        self.update_robot()
-
-    def update_waypoints(self):
-        """Simplified waypoint visualization that's more reliable"""
-        try:
-            # First remove all existing debug points
-            for point_id in self.debug_point_ids:
-                try:
-                    p.removeUserDebugItem(point_id)
-                except:
-                    pass
-            self.debug_point_ids = []
-            
-            # Process one point at a time - slower but more reliable
-            for i, waypoint in enumerate(waypoints):
-                try:
-                    x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path = waypoint
-                    
-                    # Convert coordinates to meters for PyBullet
-                    pb_x = x / 1000.0  # Convert mm to meters
-                    pb_y = y / 1000.0
-                    pb_z = (z+105) / 1000.0
-                    
-                    # Choose color based on stop_at_point flag
-                    color = [1, 0, 0] if stop_at_point else [0, 1, 0]
-                    
-                    # Add a single point
-                    point_id = p.addUserDebugPoints(
-                        [[pb_x, pb_y, pb_z]],
-                        [color],
-                        pointSize=6
-                    )
-                    
-                    if isinstance(point_id, int):
-                        self.debug_point_ids.append(point_id)
-                        
-                    # Process events every few points to keep UI responsive
-                    if i % 5 == 0:
-                        QApplication.processEvents()
-                        
-                except Exception as e:
-                    print(f"Error visualizing waypoint {i}: {e}")
-                    continue
-                    
-            print(f"Successfully visualized {len(waypoints)} waypoints")
-            
-        except Exception as e:
-            print(f"Error updating waypoints: {e}")
-    
-    def reload_waypoints(self):
-        """Call this when waypoints are added/updated/deleted"""
-        self.waypoints_initialized = False
-        self.update_waypoints()
 
     def resizeEvent(self, event):
         """Handle resize events"""
@@ -673,14 +1116,6 @@ class SimulationWidget(QWidget):
         try:
             self.update_timer.stop()
             self.embed_timer.stop()
-            
-            # Clean up debug points
-            for point_id in self.debug_point_ids:
-                try:
-                    p.removeUserDebugItem(point_id)
-                except:
-                    pass
-                
             if self.pybullet_hwnd:
                 # Restore window to normal state before closing
                 style = win32gui.GetWindowLong(self.pybullet_hwnd, win32con.GWL_STYLE)
@@ -689,8 +1124,8 @@ class SimulationWidget(QWidget):
                 win32gui.SetWindowLong(self.pybullet_hwnd, win32con.GWL_STYLE, style)
                 win32gui.SetParent(self.pybullet_hwnd, None)
             p.disconnect(self.physics_client)
-        except Exception as e:
-            print(f"Error during cleanup: {e}")
+        except:
+            pass
         super().closeEvent(event)
 
 class Sidebar(QWidget):
@@ -725,6 +1160,10 @@ class Sidebar(QWidget):
         self.end_effector_rotation_label = QLabel("End Effector Rotation:")
         self.end_effector_rotation_text = QLineEdit()
         self.end_effector_rotation_text.setReadOnly(True)
+        
+        self.gripper_width_label = QLabel("Gripper Width (mm):")  # Added gripper width display
+        self.gripper_width_text = QLineEdit()
+        self.gripper_width_text.setReadOnly(True)
 
         self.theta1_label = QLabel("Theta1:")
         self.theta1_text = QLineEdit()
@@ -747,12 +1186,14 @@ class Sidebar(QWidget):
         info_layout.addWidget(self.end_effector_z_text, 2, 1)
         info_layout.addWidget(self.end_effector_rotation_label, 3, 0)
         info_layout.addWidget(self.end_effector_rotation_text, 3, 1)
-        info_layout.addWidget(self.theta1_label, 4, 0)
-        info_layout.addWidget(self.theta1_text, 4, 1)
-        info_layout.addWidget(self.theta2_label, 5, 0)
-        info_layout.addWidget(self.theta2_text, 5, 1)
-        info_layout.addWidget(self.theta3_label, 6, 0)
-        info_layout.addWidget(self.theta3_text, 6, 1)
+        info_layout.addWidget(self.gripper_width_label, 4, 0)  # Added gripper width to layout
+        info_layout.addWidget(self.gripper_width_text, 4, 1)
+        info_layout.addWidget(self.theta1_label, 5, 0)
+        info_layout.addWidget(self.theta1_text, 5, 1)
+        info_layout.addWidget(self.theta2_label, 6, 0)
+        info_layout.addWidget(self.theta2_text, 6, 1)
+        info_layout.addWidget(self.theta3_label, 7, 0)
+        info_layout.addWidget(self.theta3_text, 7, 1)
         layout.addLayout(info_layout)
 
         title_label = QLabel("Waypoints")
@@ -775,14 +1216,19 @@ class Sidebar(QWidget):
         input_layout.addWidget(self.z_input, 2, 1)
         input_layout.addWidget(rotation_label, 3, 0)
         input_layout.addWidget(self.rotation_input, 3, 1)
-
-        self.stop_at_point_check = QCheckBox("Stop at Point")
+        
+        # Replace "Stop at Point" with gripper width
+        gripper_label = QLabel("Gripper Width (mm):")
+        self.gripper_input = QLineEdit()
+        self.gripper_input.setText("0")  # Default to 0
+        input_layout.addWidget(gripper_label, 4, 0)
+        input_layout.addWidget(self.gripper_input, 4, 1)
+        
+        # Duration field (always enabled now)
         self.duration_label = QLabel("Duration (s):")
         self.duration_input = QLineEdit()
-        self.duration_input.setEnabled(False)  # Disabled by default
-        self.stop_at_point_check.stateChanged.connect(self.toggle_duration_input)
+        self.duration_input.setText("0")  # Default to 0
         
-        input_layout.addWidget(self.stop_at_point_check, 4, 0)
         input_layout.addWidget(self.duration_label, 5, 0)
         input_layout.addWidget(self.duration_input, 5, 1)
         self.linear_path_check = QCheckBox("Linear Path to Next Point")
@@ -823,13 +1269,17 @@ class Sidebar(QWidget):
         edit_layout.addWidget(self.edit_z_input, 2, 1)
         edit_layout.addWidget(edit_rotation_label, 3, 0)
         edit_layout.addWidget(self.edit_rotation_input, 3, 1)
-        self.edit_stop_at_point_check = QCheckBox("Stop at Point")
-        self.edit_duration_label = QLabel("Duration (s):")
-        self.edit_duration_input = QLineEdit()
-        self.edit_duration_input.setEnabled(False)
-        self.edit_stop_at_point_check.stateChanged.connect(self.toggle_edit_duration_input)
         
-        edit_layout.addWidget(self.edit_stop_at_point_check, 4, 0)
+        # Replace "Edit Stop at Point" with edit gripper width
+        edit_gripper_label = QLabel("Edit Gripper Width (mm):")
+        self.edit_gripper_input = QLineEdit()
+        edit_layout.addWidget(edit_gripper_label, 4, 0)
+        edit_layout.addWidget(self.edit_gripper_input, 4, 1)
+        
+        # Edit duration field (always enabled now)
+        self.edit_duration_label = QLabel("Edit Duration (s):")
+        self.edit_duration_input = QLineEdit()
+        
         edit_layout.addWidget(self.edit_duration_label, 5, 0)
         edit_layout.addWidget(self.edit_duration_input, 5, 1)
         self.edit_linear_path_check = QCheckBox("Linear Path to Next Point")
@@ -879,6 +1329,37 @@ class Sidebar(QWidget):
         self.loop_animation = False
         self.reverse_animation = False
 
+    def update_waypoints_list(self):
+        self.waypoints_list.clear()
+        for i, waypoint in enumerate(waypoints):
+            x, y, z, rotation, theta1, theta2, duration, gripper_width, linear_path = waypoint
+            # Calculate theta3 for display
+            theta3 = rotation - (theta1 + theta2) if theta1 is not None and theta2 is not None else None
+            
+            if theta1 is None or theta2 is None:
+                item = QListWidgetItem(f"{i+1}. ({x}, {y}, {z}, R:{rotation}) - Outside workspace")
+            else:
+                duration_text = f" - Stop for {duration}s" if duration > 0 else " - Pass through"
+                linear_text = " - Linear path" if linear_path else ""
+                gripper_text = f" - Grip: {gripper_width}mm"
+                theta3_text = f", Theta3: {theta3:.2f}" if theta3 is not None else ""
+                item = QListWidgetItem(
+                    f"{i+1}. ({x}, {y}, {z}, R:{rotation}) - " + 
+                    f"Theta1: {theta1:.2f}, Theta2: {theta2:.2f}{theta3_text}{gripper_text}{duration_text}{linear_text}"
+                )
+            self.waypoints_list.addItem(item)
+    def initialize_file_handling(self):
+        """Initialize file handling system - call this in __init__"""
+        # Create a dummy file operation to initialize the system
+        try:
+            with open('_init.csv', 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(['init'])
+            import os
+            if os.path.exists('_init.csv'):
+                os.remove('_init.csv')
+        except Exception as e:
+            print(f"Initialization note: {str(e)}")
     def validate_input_fields(self):
         """Validate all input fields before adding or updating waypoints"""
         error_messages = []
@@ -930,19 +1411,29 @@ class Sidebar(QWidget):
                     error_messages.append("Rotation must be between -360 and 360 degrees")
         except ValueError:
             error_messages.append("Rotation must be a number")
+            
+        # Validate gripper width
+        try:
+            gripper_width = self.gripper_input.text().strip()
+            if not gripper_width:
+                error_messages.append("Gripper width is required")
+            else:
+                gripper_width = float(gripper_width)
+                if not (GRIPPER_MIN <= gripper_width <= GRIPPER_MAX):
+                    error_messages.append(f"Gripper width must be between {GRIPPER_MIN} and {GRIPPER_MAX} mm")
+        except ValueError:
+            error_messages.append("Gripper width must be a number")
 
-        # Validate duration if stop at point is checked
-        if self.stop_at_point_check.isChecked():
-            try:
-                duration = self.duration_input.text().strip()
-                if not duration:
-                    error_messages.append("Duration is required when 'Stop at Point' is checked")
-                else:
-                    duration = float(duration)
-                    if duration <= 0:
-                        error_messages.append("Duration must be greater than 0")
-            except ValueError:
-                error_messages.append("Duration must be a number")
+        # Validate duration
+        try:
+            duration = self.duration_input.text().strip()
+            if not duration:
+                duration = "0"  # Default to 0 if empty
+            duration = float(duration)
+            if duration < 0:
+                error_messages.append("Duration must be 0 or positive")
+        except ValueError:
+            error_messages.append("Duration must be a number")
 
         if error_messages:
             error_dialog = QMessageBox()
@@ -958,7 +1449,8 @@ class Sidebar(QWidget):
             'y': float(y),
             'z': float(z),
             'rotation': float(rotation),
-            'duration': float(duration) if self.stop_at_point_check.isChecked() else 0.0
+            'gripper_width': float(gripper_width),
+            'duration': float(duration)
         }
 
     def validate_edit_fields(self):
@@ -1013,18 +1505,28 @@ class Sidebar(QWidget):
         except ValueError:
             error_messages.append("Rotation must be a number")
 
-        # Validate duration if stop at point is checked
-        if self.edit_stop_at_point_check.isChecked():
-            try:
-                duration = self.edit_duration_input.text().strip()
-                if not duration:
-                    error_messages.append("Duration is required when 'Stop at Point' is checked")
-                else:
-                    duration = float(duration)
-                    if duration <= 0:
-                        error_messages.append("Duration must be greater than 0")
-            except ValueError:
-                error_messages.append("Duration must be a number")
+        # Validate gripper width
+        try:
+            gripper_width = self.edit_gripper_input.text().strip()
+            if not gripper_width:
+                error_messages.append("Gripper width is required")
+            else:
+                gripper_width = float(gripper_width)
+                if not (GRIPPER_MIN <= gripper_width <= GRIPPER_MAX):
+                    error_messages.append(f"Gripper width must be between {GRIPPER_MIN} and {GRIPPER_MAX} mm")
+        except ValueError:
+            error_messages.append("Gripper width must be a number")
+
+        # Validate duration
+        try:
+            duration = self.edit_duration_input.text().strip()
+            if not duration:
+                duration = "0"  # Default to 0 if empty
+            duration = float(duration)
+            if duration < 0:
+                error_messages.append("Duration must be 0 or positive")
+        except ValueError:
+            error_messages.append("Duration must be a number")
 
         if error_messages:
             error_dialog = QMessageBox()
@@ -1040,40 +1542,268 @@ class Sidebar(QWidget):
             'y': float(y),
             'z': float(z),
             'rotation': float(rotation),
-            'duration': float(duration) if self.edit_stop_at_point_check.isChecked() else 0.0
+            'gripper_width': float(gripper_width),
+            'duration': float(duration)
         }
 
-    def toggle_duration_input(self, state):
-        self.duration_input.setEnabled(state == Qt.Checked)
-        if state != Qt.Checked:
-            self.duration_input.clear()
+    def add_waypoint(self):
+        """Add a new waypoint with input validation"""
+        # First validate all inputs
+        validated_data = self.validate_input_fields()
+        if validated_data is None:
+            return
+        
+        x = validated_data['x']
+        y = validated_data['y']
+        z = validated_data['z']
+        rotation = validated_data['rotation']
+        gripper_width = validated_data['gripper_width']
+        duration = validated_data['duration']
+        
+        linear_path = self.linear_path_check.isChecked()
+        
+        # Get previous angles for configuration preference
+        prev_theta1 = None
+        prev_theta2 = None
+        if waypoints:
+            _, _, _, _, prev_theta1, prev_theta2, _, _, _ = waypoints[-1]
+        
+        # Calculate target angles
+        theta1, theta2 = self.calculate_target_angles((x, y, z, rotation), prev_theta1, prev_theta2)
+        
+        # Check if point is reachable
+        if theta1 is None or theta2 is None:
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Warning)
+            error_dialog.setWindowTitle("Unreachable Point")
+            error_dialog.setText("The specified point is outside the robot's reachable workspace.")
+            error_dialog.exec_()
+            return
+        
+        # Add the waypoint (with new format - duration instead of stop_at_point)
+        waypoints.append((x, y, z, rotation, theta1, theta2, duration, gripper_width, linear_path))
+        self.update_waypoints_list()
+        
+        # Clear inputs
+        self.x_input.clear()
+        self.y_input.clear()
+        self.z_input.clear()
+        self.rotation_input.clear()
+        self.gripper_input.setText("0")  # Reset to 0
+        self.duration_input.setText("0")  # Reset to 0
+        self.linear_path_check.setChecked(False)
+        self.simulation_widget.update()
 
-    def toggle_edit_duration_input(self, state):
-        self.edit_duration_input.setEnabled(state == Qt.Checked)
-        if state != Qt.Checked:
+    def update_waypoint(self):
+        """Update existing waypoint with input validation"""
+        index = self.waypoints_list.currentRow()
+        if index == -1:
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Warning)
+            error_dialog.setWindowTitle("No Selection")
+            error_dialog.setText("Please select a waypoint to update.")
+            error_dialog.exec_()
+            return
+            
+        # Validate all inputs
+        validated_data = self.validate_edit_fields()
+        if validated_data is None:
+            return
+        
+        x = validated_data['x']
+        y = validated_data['y']
+        z = validated_data['z']
+        rotation = validated_data['rotation']
+        gripper_width = validated_data['gripper_width']
+        duration = validated_data['duration']
+        
+        linear_path = self.edit_linear_path_check.isChecked()
+        
+        # Get previous angles for configuration preference
+        prev_theta1 = None
+        prev_theta2 = None
+        if index > 0:
+            _, _, _, _, prev_theta1, prev_theta2, _, _, _ = waypoints[index - 1]
+        
+        # Calculate target angles
+        theta1, theta2 = self.calculate_target_angles((x, y, z, rotation), prev_theta1, prev_theta2)
+        
+        # Check if point is reachable
+        if theta1 is None or theta2 is None:
+            error_dialog = QMessageBox()
+            error_dialog.setIcon(QMessageBox.Warning)
+            error_dialog.setWindowTitle("Unreachable Point")
+            error_dialog.setText("The specified point is outside the robot's reachable workspace.")
+            error_dialog.exec_()
+            return
+        
+        # Update the waypoint (with new format - duration instead of stop_at_point)
+        waypoints[index] = (x, y, z, rotation, theta1, theta2, duration, gripper_width, linear_path)
+        self.update_waypoints_list()
+        
+        # Clear inputs
+        self.edit_x_input.clear()
+        self.edit_y_input.clear()
+        self.edit_z_input.clear()
+        self.edit_rotation_input.clear()
+        self.edit_gripper_input.clear()
+        self.edit_duration_input.clear()
+        self.edit_linear_path_check.setChecked(False)
+        self.simulation_widget.update()
+
+    def select_waypoint(self, item):
+        index = self.waypoints_list.row(item)
+        x, y, z, rotation, theta1, theta2, duration, gripper_width, linear_path = waypoints[index]
+        self.edit_x_input.setText(str(x))
+        self.edit_y_input.setText(str(y))
+        self.edit_z_input.setText(str(z))
+        self.edit_rotation_input.setText(str(rotation))
+        self.edit_gripper_input.setText(str(gripper_width))
+        self.edit_duration_input.setText(str(duration))
+        self.edit_linear_path_check.setChecked(linear_path)
+
+    def delete_waypoint(self):
+        index = self.waypoints_list.currentRow()
+        if index != -1:
+            waypoints.pop(index)
+            self.update_waypoints_list()
+            self.edit_x_input.clear()
+            self.edit_y_input.clear()
+            self.edit_z_input.clear()
+            self.edit_rotation_input.clear()
+            self.edit_gripper_input.clear()
             self.edit_duration_input.clear()
 
-    def update_waypoints_list(self):
-        self.waypoints_list.clear()
-        for i, waypoint in enumerate(waypoints):
-            x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path = waypoint
-            # Calculate theta3 for display
-            theta3 = rotation - (theta1 + theta2) if theta1 is not None and theta2 is not None else None
-            
-            if theta1 is None or theta2 is None:
-                item = QListWidgetItem(f"{i+1}. ({x}, {y}, {z}, {rotation}) - Outside workspace")
+    def play_animation(self):
+        if self.is_paused:
+            self.is_paused = False
+        else:
+            self.is_animating = True
+            self.is_paused = False
+        self.timer.start(20)  # 50 FPS
+
+    def pause_animation(self):
+        self.is_paused = True
+        self.timer.stop()
+
+    def stop_animation(self):
+        self.is_animating = False
+        self.is_paused = False
+        self.timer.stop()
+        self.waypoint_index = 0
+        self.reverse_animation = False
+        self.reset_position = True
+        if hasattr(self, 'wait_time'):
+            delattr(self, 'wait_time')
+        if hasattr(self, 'wait_start_time'):
+            delattr(self, 'wait_start_time')
+
+    def animate(self):
+        if not self.is_animating or self.waypoint_index >= len(waypoints):
+            if self.loop_button.isChecked():
+                self.waypoint_index = 0
             else:
-                stop_text = f" - Stop for {duration}s" if stop_at_point else " - Pass through"
-                linear_text = " - Linear path" if linear_path else ""
-                theta3_text = f", Theta3: {theta3:.2f}" if theta3 is not None else ""
-                item = QListWidgetItem(
-                    f"{i+1}. ({x}, {y}, {z}, {rotation}) - " + 
-                    f"Theta1: {theta1:.2f}, Theta2: {theta2:.2f}{theta3_text}{stop_text}{linear_text}"
-                )
-            self.waypoints_list.addItem(item)
+                self.stop_animation()
+                return
 
-# INVERSE KINEMATICS
+        # Initialize or check interpolated points
+        if not hasattr(self, 'interpolated_points'):
+            self.interpolated_points = []
+            self.interpolated_index = 0
 
+        # Generate interpolated points if needed
+        if not self.interpolated_points:
+            current_point = waypoints[self.waypoint_index]
+            
+            if (self.waypoint_index < len(waypoints) - 1 and current_point[8]):  # linear_path flag
+                next_point = waypoints[self.waypoint_index + 1]
+                self.interpolated_points = self.generate_linear_path_points(current_point, next_point)
+                if not self.interpolated_points:
+                    self.interpolated_points = [current_point]
+                self.interpolated_index = 0
+            else:
+                self.interpolated_points = [current_point]
+                self.interpolated_index = 0
+
+        # Get current target point
+        current_point = self.interpolated_points[self.interpolated_index]
+        x, y, z, rotation, theta1, theta2, duration, gripper_width, _ = current_point
+
+        if theta1 is None or theta2 is None:
+            self.interpolated_index += 1
+            if self.interpolated_index >= len(self.interpolated_points):
+                self.interpolated_points = []
+                self.waypoint_index += 1
+            return
+
+        # Set target for motion controller (now including gripper width)
+        self.simulation_widget.motion_controller.set_target(theta1, theta2, z, rotation, gripper_width)
+
+        # Update motion using existing acceleration control
+        current_theta1, current_theta2, current_z, current_rotation, current_gripper, vel1, vel2 = \
+            self.simulation_widget.motion_controller.update()
+
+        # Update simulation widget positions
+        self.simulation_widget.theta1 = current_theta1
+        self.simulation_widget.theta2 = current_theta2
+        self.simulation_widget.z = current_z
+        self.simulation_widget.rotation = current_rotation
+        self.simulation_widget.gripper_width = current_gripper
+
+        # Calculate current end effector position
+        theta1_rad = math.radians(current_theta1)
+        theta2_rad = math.radians(current_theta2)
+        current_x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
+        current_y = -(L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad))
+
+        # Calculate theta3 (corrective angle)
+        absolute_angle = current_theta1 + current_theta2
+        theta3 = current_rotation - absolute_angle
+
+        # Check if we're at target and need to wait
+        is_waiting = False
+        if self.simulation_widget.motion_controller.is_at_target():
+            if duration > 0:  # Using duration directly now
+                current_time = time.time()
+                if not hasattr(self, 'wait_start_time'):
+                    self.wait_start_time = current_time
+                    
+                elapsed_wait = current_time - self.wait_start_time
+                if elapsed_wait < duration:
+                    is_waiting = True
+                else:
+                    delattr(self, 'wait_start_time')
+                    self.interpolated_index += 1
+                    if self.interpolated_index >= len(self.interpolated_points):
+                        self.interpolated_points = []
+                        self.waypoint_index += 1
+            else:
+                self.interpolated_index += 1
+                if self.interpolated_index >= len(self.interpolated_points):
+                    self.interpolated_points = []
+                    self.waypoint_index += 1
+
+        # Update displays
+        self.update_end_effector_info(current_x, current_y, current_z, current_rotation, current_gripper,
+                                    current_theta1, current_theta2)
+        self.graph_widget.update_plot(current_theta1, current_theta2, theta3, current_gripper, vel1, vel2, is_waiting)
+
+        # Trigger simulation update
+        self.simulation_widget.update_simulation()
+        QApplication.processEvents()
+        
+    def update_end_effector_info(self, end_effector_x, end_effector_y, end_effector_z, end_effector_rotation, gripper_width, theta1, theta2):
+        absolute_angle = theta1 + theta2
+        theta3 = end_effector_rotation - absolute_angle
+        
+        self.end_effector_x_text.setText(f"{end_effector_x:.2f}")
+        self.end_effector_y_text.setText(f"{end_effector_y:.2f}")
+        self.end_effector_z_text.setText(f"{end_effector_z:.2f}")
+        self.end_effector_rotation_text.setText(f"{end_effector_rotation:.2f}")
+        self.gripper_width_text.setText(f"{gripper_width:.2f}")  # Display gripper width
+        self.theta1_text.setText(f"{theta1:.2f}")
+        self.theta2_text.setText(f"{theta2:.2f}")
+        self.theta3_text.setText(f"{theta3:.2f}")
     def calculate_target_angles(self, waypoint, prev_theta1=None, prev_theta2=None):
         x, y, _, _ = waypoint
         # Flip the y-coordinate to match the robot's coordinate system
@@ -1139,313 +1869,6 @@ class Sidebar(QWidget):
 
         return None, None
 
-    def add_waypoint(self):
-        """Add a new waypoint with input validation"""
-        # First validate all inputs
-        validated_data = self.validate_input_fields()
-        if validated_data is None:
-            return
-        
-        x = validated_data['x']
-        y = validated_data['y']
-        z = validated_data['z']
-        rotation = validated_data['rotation']
-        duration = validated_data['duration']
-        
-        stop_at_point = self.stop_at_point_check.isChecked()
-        linear_path = self.linear_path_check.isChecked()
-        
-        # Get previous angles for configuration preference
-        prev_theta1 = None
-        prev_theta2 = None
-        if waypoints:
-            _, _, _, _, prev_theta1, prev_theta2, _, _, _ = waypoints[-1]
-        
-        # Calculate target angles
-        theta1, theta2 = self.calculate_target_angles((x, y, z, rotation), prev_theta1, prev_theta2)
-        
-        # Check if point is reachable
-        if theta1 is None or theta2 is None:
-            error_dialog = QMessageBox()
-            error_dialog.setIcon(QMessageBox.Warning)
-            error_dialog.setWindowTitle("Unreachable Point")
-            error_dialog.setText("The specified point is outside the robot's reachable workspace.")
-            error_dialog.exec_()
-            return
-        
-        # Add the waypoint
-        waypoints.append((x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path))
-        self.update_waypoints_list()
-        
-        # Clear inputs
-        self.x_input.clear()
-        self.y_input.clear()
-        self.z_input.clear()
-        self.rotation_input.clear()
-        self.stop_at_point_check.setChecked(False)
-        self.linear_path_check.setChecked(False)
-        self.duration_input.clear()
-        self.simulation_widget.reload_waypoints()
-        self.update_waypoint_visualization()
-
-    def update_waypoint(self):
-        """Update existing waypoint with input validation"""
-        index = self.waypoints_list.currentRow()
-        if index == -1:
-            error_dialog = QMessageBox()
-            error_dialog.setIcon(QMessageBox.Warning)
-            error_dialog.setWindowTitle("No Selection")
-            error_dialog.setText("Please select a waypoint to update.")
-            error_dialog.exec_()
-            return
-            
-        # Validate all inputs
-        validated_data = self.validate_edit_fields()
-        if validated_data is None:
-            return
-        
-        x = validated_data['x']
-        y = validated_data['y']
-        z = validated_data['z']
-        rotation = validated_data['rotation']
-        duration = validated_data['duration']
-        
-        stop_at_point = self.edit_stop_at_point_check.isChecked()
-        linear_path = self.edit_linear_path_check.isChecked()
-        
-        # Get previous angles for configuration preference
-        prev_theta1 = None
-        prev_theta2 = None
-        if index > 0:
-            _, _, _, _, prev_theta1, prev_theta2, _, _, _ = waypoints[index - 1]
-        
-        # Calculate target angles
-        theta1, theta2 = self.calculate_target_angles((x, y, z, rotation), prev_theta1, prev_theta2)
-        
-        # Check if point is reachable
-        if theta1 is None or theta2 is None:
-            error_dialog = QMessageBox()
-            error_dialog.setIcon(QMessageBox.Warning)
-            error_dialog.setWindowTitle("Unreachable Point")
-            error_dialog.setText("The specified point is outside the robot's reachable workspace.")
-            error_dialog.exec_()
-            return
-        
-        # Update the waypoint
-        waypoints[index] = (x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path)
-        self.update_waypoints_list()
-        
-        # Clear inputs
-        self.edit_x_input.clear()
-        self.edit_y_input.clear()
-        self.edit_z_input.clear()
-        self.edit_rotation_input.clear()
-        self.edit_stop_at_point_check.setChecked(False)
-        self.edit_linear_path_check.setChecked(False)
-        self.edit_duration_input.clear()
-        self.simulation_widget.reload_waypoints()
-        self.update_waypoint_visualization()
-
-    def select_waypoint(self, item):
-        index = self.waypoints_list.row(item)
-        x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path = waypoints[index]
-        self.edit_x_input.setText(str(x))
-        self.edit_y_input.setText(str(y))
-        self.edit_z_input.setText(str(z))
-        self.edit_rotation_input.setText(str(rotation))
-        self.edit_stop_at_point_check.setChecked(stop_at_point)
-        self.edit_linear_path_check.setChecked(linear_path)
-        if stop_at_point:
-            self.edit_duration_input.setText(str(duration))
-
-    def delete_waypoint(self):
-        index = self.waypoints_list.currentRow()
-        if index != -1:
-            waypoints.pop(index)
-            self.update_waypoints_list()
-            self.edit_x_input.clear()
-            self.edit_y_input.clear()
-            self.edit_z_input.clear()
-            self.edit_rotation_input.clear()
-            self.simulation_widget.reload_waypoints()
-            self.update_waypoint_visualization()
-
-    def play_animation(self):
-        if self.is_paused:
-            self.simulation_widget.motion_controller.reset_timing()
-        self.is_animating = True
-        self.is_paused = False
-        self.timer.start(20)  # 50 FPS
-
-    def pause_animation(self):
-        self.is_paused = True
-        self.timer.stop()
-
-    def stop_animation(self):
-        self.is_animating = False
-        self.is_paused = False
-        self.timer.stop()
-        self.waypoint_index = 0
-        self.reverse_animation = False
-        self.reset_position = True
-        if hasattr(self, 'wait_time'):
-            delattr(self, 'wait_time')
-        if hasattr(self, 'wait_start_time'):
-            delattr(self, 'wait_start_time')
-
-    def generate_linear_path_points(self, start_point, end_point, num_points=20):
-        """Generate evenly spaced points along a straight line."""
-        x1, y1, z1, r1, _, _, _, _, _ = start_point
-        x2, y2, z2, r2, _, _, _, _, _ = end_point
-        
-        points = []
-        
-        # Calculate distance and adjust number of points
-        distance = math.sqrt((x2-x1)**2 + (y2-y1)**2)
-        num_points = max(200, int(distance / 1))  # One point every 10mm
-        
-        # Store start point configuration to maintain it
-        prev_theta1, prev_theta2 = self.calculate_target_angles((x1, y1, z1, r1))
-        
-        for i in range(num_points):
-            t = i / (num_points - 1)
-            # Linear interpolation
-            x = x1 + (x2 - x1) * t
-            y = y1 + (y2 - y1) * t
-            z = z1 + (z2 - z1) * t
-            r = r1 + (r2 - r1) * t
-            
-            # Calculate angles for this point
-            theta1, theta2 = self.calculate_target_angles((x, y, z, r), prev_theta1, prev_theta2)
-            if theta1 is None or theta2 is None:
-                continue
-            
-            # Store angles for next iteration
-            prev_theta1, prev_theta2 = theta1, theta2
-            
-            # All intermediate points are pass-through
-            points.append((x, y, z, r, theta1, theta2, False, 0.0, False))
-            
-        return points
-
-    def animate(self):
-        if not self.is_animating or self.waypoint_index >= len(waypoints):
-            if self.loop_button.isChecked():
-                self.waypoint_index = 0
-            else:
-                self.stop_animation()
-                return
-
-        # Initialize or check interpolated points
-        if not hasattr(self, 'interpolated_points'):
-            self.interpolated_points = []
-            self.interpolated_index = 0
-
-        # Generate interpolated points if needed
-        if not self.interpolated_points:
-            current_point = waypoints[self.waypoint_index]
-            
-            if (self.waypoint_index < len(waypoints) - 1 and current_point[8]):  # linear_path flag
-                next_point = waypoints[self.waypoint_index + 1]
-                self.interpolated_points = self.generate_linear_path_points(current_point, next_point)
-                if not self.interpolated_points:
-                    self.interpolated_points = [current_point]
-                self.interpolated_index = 0
-            else:
-                self.interpolated_points = [current_point]
-                self.interpolated_index = 0
-
-        # Get current target point
-        current_point = self.interpolated_points[self.interpolated_index]
-        x, y, z, rotation, theta1, theta2, stop_at_point, duration, _ = current_point
-
-        if theta1 is None or theta2 is None:
-            self.interpolated_index += 1
-            if self.interpolated_index >= len(self.interpolated_points):
-                self.interpolated_points = []
-                self.waypoint_index += 1
-            return
-
-        # Set target for motion controller
-        self.simulation_widget.motion_controller.set_target(theta1, theta2, z, rotation)
-
-        # Update motion using existing acceleration control
-        current_theta1, current_theta2, current_z, current_rotation, vel1, vel2 = \
-            self.simulation_widget.motion_controller.update()
-
-        # Update simulation widget positions
-        self.simulation_widget.theta1 = current_theta1
-        self.simulation_widget.theta2 = current_theta2
-        self.simulation_widget.z = current_z
-        self.simulation_widget.rotation = current_rotation
-
-        # Calculate current end effector position
-        theta1_rad = math.radians(current_theta1)
-        theta2_rad = math.radians(current_theta2)
-        current_x = L1 * math.cos(theta1_rad) + L2 * math.cos(theta1_rad + theta2_rad)
-        current_y = -(L1 * math.sin(theta1_rad) + L2 * math.sin(theta1_rad + theta2_rad))
-
-        # Calculate theta3 (corrective angle)
-        absolute_angle = current_theta1 + current_theta2
-        theta3 = current_rotation - absolute_angle
-
-        # Check if we're at target and need to wait
-        is_waiting = False
-        if self.simulation_widget.motion_controller.is_at_target():
-            if stop_at_point:
-                current_time = time.time()
-                if not hasattr(self, 'wait_start_time'):
-                    self.wait_start_time = current_time
-                    
-                elapsed_wait = current_time - self.wait_start_time
-                if elapsed_wait < duration:
-                    is_waiting = True
-                else:
-                    delattr(self, 'wait_start_time')
-                    self.interpolated_index += 1
-                    if self.interpolated_index >= len(self.interpolated_points):
-                        self.interpolated_points = []
-                        self.waypoint_index += 1
-            else:
-                self.interpolated_index += 1
-                if self.interpolated_index >= len(self.interpolated_points):
-                    self.interpolated_points = []
-                    self.waypoint_index += 1
-
-        # Update displays
-        self.update_end_effector_info(current_x, current_y, current_z, current_rotation,
-                                    current_theta1, current_theta2)
-        self.graph_widget.update_plot(current_theta1, current_theta2, theta3, vel1, vel2, is_waiting)
-
-        # Trigger simulation update
-        self.simulation_widget.update_simulation()
-        QApplication.processEvents()
-
-    def update_end_effector_info(self, end_effector_x, end_effector_y, end_effector_z, end_effector_rotation, theta1, theta2):
-        absolute_angle = theta1 + theta2
-        theta3 = end_effector_rotation - absolute_angle
-        
-        self.end_effector_x_text.setText(f"{end_effector_x:.2f}")
-        self.end_effector_y_text.setText(f"{end_effector_y:.2f}")
-        self.end_effector_z_text.setText(f"{end_effector_z:.2f}")
-        self.end_effector_rotation_text.setText(f"{end_effector_rotation:.2f}")
-        self.theta1_text.setText(f"{theta1:.2f}")
-        self.theta2_text.setText(f"{theta2:.2f}")
-        self.theta3_text.setText(f"{theta3:.2f}")
-
-    def initialize_file_handling(self):
-        """Initialize file handling system - call this in __init__"""
-        # Create a dummy file operation to initialize the system
-        try:
-            with open('_init.csv', 'w', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow(['init'])
-            import os
-            if os.path.exists('_init.csv'):
-                os.remove('_init.csv')
-        except Exception as e:
-            print(f"Initialization note: {str(e)}")
-
     def save_waypoints_to_csv(self):
         try:
             if not waypoints:
@@ -1468,12 +1891,12 @@ class Sidebar(QWidget):
             try:
                 with open(file_path, 'w', newline='') as f:
                     writer = csv.writer(f)
-                    # Write header with theta3
+                    # Write header with updated format
                     writer.writerow(['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'Theta3', 
-                                'StopAtPoint', 'Duration', 'LinearPath'])
+                                'Duration', 'GripperWidth', 'LinearPath'])
                     # Write data
                     for wp in waypoints:
-                        x, y, z, rotation, theta1, theta2, stop_at_point, duration, linear_path = wp
+                        x, y, z, rotation, theta1, theta2, duration, gripper_width, linear_path = wp
                         # Calculate theta3 for each waypoint
                         theta3 = rotation - (theta1 + theta2) if theta1 is not None and theta2 is not None else None
                         writer.writerow([
@@ -1484,8 +1907,8 @@ class Sidebar(QWidget):
                             'None' if theta1 is None else f"{theta1:.6f}",  # theta1
                             'None' if theta2 is None else f"{theta2:.6f}",  # theta2
                             'None' if theta3 is None else f"{theta3:.6f}",  # theta3
-                            1 if stop_at_point else 0,  # stop_at_point
-                            f"{duration:.6f}",  # duration
+                            f"{duration:.6f}",  # duration (was stop_at_point)
+                            f"{gripper_width:.6f}",  # gripper width
                             1 if linear_path else 0   # linear_path
                         ])
                 print(f"Successfully saved {len(waypoints)} waypoints to {file_path}")
@@ -1498,7 +1921,6 @@ class Sidebar(QWidget):
             print(f"Save error: {e}")
 
     def load_waypoints_from_csv(self):
-        """Simplified and more robust CSV loading"""
         try:
             file_path, _ = QFileDialog.getOpenFileName(
                 self,
@@ -1509,133 +1931,18 @@ class Sidebar(QWidget):
             
             if not file_path:
                 return
-                
-            # Show wait cursor
-            QApplication.setOverrideCursor(Qt.WaitCursor)
-            
+
+            loaded_points = []
             try:
-                # Clear existing waypoints
-                global waypoints
-                waypoints = []
-                
-                # Read CSV file
                 with open(file_path, 'r', newline='') as f:
                     reader = csv.reader(f)
-                    header = next(reader)  # Skip header
+                    header = next(reader)  # Read header
                     
-                    # Read and process rows one at a time
-                    row_count = 0
-                    for row in reader:
-                        try:
-                            if len(row) < 9:  # Basic validation
-                                continue
-                                
-                            x = float(row[0].strip())
-                            y = float(row[1].strip())
-                            z = float(row[2].strip())
-                            rotation = float(row[3].strip())
-                            
-                            # Handle theta values that might be 'None'
-                            theta1 = None
-                            if row[4].strip().lower() != 'none':
-                                theta1 = float(row[4].strip())
-                                
-                            theta2 = None
-                            if row[5].strip().lower() != 'none':
-                                theta2 = float(row[5].strip())
-                                
-                            # Get other fields
-                            stop_at_point = bool(int(row[7].strip()))
-                            duration = float(row[8].strip())
-                            
-                            # Handle optional linear_path field
-                            linear_path = False
-                            if len(row) > 9:
-                                linear_path = bool(int(row[9].strip()))
-                            
-                            # Add waypoint
-                            waypoints.append((x, y, z, rotation, theta1, theta2, 
-                                        stop_at_point, duration, linear_path))
-                            
-                            row_count += 1
-                            
-                            # Update UI occasionally
-                            if row_count % 10 == 0:
-                                QApplication.processEvents()
-                                
-                        except Exception as e:
-                            print(f"Error parsing row: {e}")
-                            continue
-                
-                # Update the UI list
-                self.update_waypoints_list()
-                QApplication.processEvents()
-                
-                print(f"Successfully loaded {len(waypoints)} waypoints")
-                
-                # Add a small delay to ensure UI updates before 3D
-                QTimer.singleShot(100, self.delayed_waypoint_update)
-                
-            except Exception as e:
-                print(f"CSV error: {e}")
-                
-        except Exception as e:
-            print(f"File selection error: {e}")
-            
-        finally:
-            # Always restore cursor
-            QApplication.restoreOverrideCursor()
-            
-    def delayed_waypoint_update(self):
-        """Update waypoints after a slight delay to prevent UI freezing"""
-        try:
-            # Ensure waypoints list is up to date
-            self.update_waypoints_list()
-            
-            # Update 3D visualization one point at a time
-            self.simulation_widget.update_waypoints()
-            
-        except Exception as e:
-            print(f"Delayed update error: {e}")
-
-
-    # Additional helper method for the Sidebar class
-
-    def update_waypoint_visualization(self):
-        """Called after any waypoint changes to update 3D view"""
-        try:
-            self.simulation_widget.update_waypoints()
-        except Exception as e:
-            print(f"Error updating waypoint visualization: {e}")
-
-    def process_csv(self, file_path):
-        """Process CSV file with UI updates to prevent freezing"""
-        try:
-            # Open and read the CSV file
-            with open(file_path, 'r', newline='') as f:
-                reader = csv.reader(f)
-                header = next(reader)  # Read header
-                
-                # Verify header format
-                expected_header = ['X', 'Y', 'Z', 'Rotation', 'Theta1', 'Theta2', 'Theta3', 
-                                'StopAtPoint', 'Duration', 'LinearPath']
-                if not all(h1.lower() == h2.lower() for h1, h2 in zip(header[:len(expected_header)], expected_header)):
-                    print("Warning: CSV header format doesn't match expected format")
-                
-                # Read all rows into memory (should be safe for reasonable CSV sizes)
-                all_rows = list(reader)
-                
-                # Process in batches with UI updates
-                batch_size = 10
-                total_rows = len(all_rows)
-                loaded_points = []
-                
-                for batch_start in range(0, total_rows, batch_size):
-                    batch_end = min(batch_start + batch_size, total_rows)
-                    current_batch = all_rows[batch_start:batch_end]
+                    # Verify header format - we'll be flexible to handle both old and new formats
+                    has_new_format = 'Duration' in header and 'GripperWidth' in header
+                    has_old_format = 'StopAtPoint' in header
                     
-                    # Process this batch
-                    for i, row in enumerate(current_batch, start=batch_start+2):
+                    for i, row in enumerate(reader, start=2):  # start=2 because row 1 is header
                         try:
                             x = float(row[0].strip())
                             y = float(row[1].strip())
@@ -1643,42 +1950,52 @@ class Sidebar(QWidget):
                             rotation = float(row[3].strip())
                             theta1 = float(row[4].strip()) if row[4].strip().lower() != 'none' else None
                             theta2 = float(row[5].strip()) if row[5].strip().lower() != 'none' else None
-                            # Theta3 is read but not stored in waypoints as it's calculated
-                            stop_at_point = bool(int(row[7].strip()))
-                            duration = float(row[8].strip())
-                            linear_path = bool(int(row[9].strip())) if len(row) > 9 else False
                             
-                            # Store waypoint
+                            # Handle different CSV formats
+                            if has_new_format:
+                                # New format with Duration and GripperWidth
+                                duration = float(row[7].strip())
+                                gripper_width = float(row[8].strip())
+                                linear_path = bool(int(row[9].strip())) if len(row) > 9 else False
+                            elif has_old_format:
+                                # Old format with StopAtPoint
+                                stop_at_point = bool(int(row[7].strip()))
+                                duration = float(row[8].strip()) if stop_at_point else 0.0
+                                gripper_width = 0.0  # Default gripper width
+                                linear_path = bool(int(row[9].strip())) if len(row) > 9 else False
+                            else:
+                                # Some other format - make best guess
+                                if len(row) > 7:
+                                    duration = float(row[7].strip()) if row[7].strip() else 0.0
+                                    gripper_width = float(row[8].strip()) if len(row) > 8 and row[8].strip() else 0.0
+                                    linear_path = bool(int(row[9].strip())) if len(row) > 9 and row[9].strip() else False
+                                else:
+                                    duration = 0.0
+                                    gripper_width = 0.0
+                                    linear_path = False
+                            
+                            # Store waypoint with new format
                             loaded_points.append((x, y, z, rotation, theta1, theta2, 
-                                            stop_at_point, duration, linear_path))
+                                            duration, gripper_width, linear_path))
                         except (ValueError, IndexError) as e:
                             print(f"Warning: Error parsing row {i}: {e}")
                             continue
+
+                if loaded_points:
+                    global waypoints
+                    waypoints = loaded_points
+                    self.update_waypoints_list()
+                    self.simulation_widget.update()
+                    print(f"Successfully loaded {len(loaded_points)} waypoints")
+                else:
+                    print("Warning: No valid waypoints found in CSV")
                     
-                    # Update UI to prevent freezing
-                    QApplication.processEvents()
-                
-                # Update the global waypoints list
-                global waypoints
-                waypoints = loaded_points
-                
-                # Update UI
-                self.update_waypoints_list()
-                QApplication.processEvents()
-                
-                # Update visualization after all points are loaded
-                self.simulation_widget.update_waypoints()
-                
-                # Re-enable UI
-                self.waypoints_list.setEnabled(True)
-                QApplication.restoreOverrideCursor()
-                
-                print(f"Successfully loaded {len(loaded_points)} waypoints")
+            except csv.Error as e:
+                print(f"CSV Error: {e}")
+                return
                 
         except Exception as e:
-            print(f"CSV processing error: {e}")
-            self.waypoints_list.setEnabled(True)
-            QApplication.restoreOverrideCursor()
+            print(f"Load error: {e}")
 
 if __name__ == '__main__':
     multiprocessing.freeze_support()
@@ -1686,9 +2003,7 @@ if __name__ == '__main__':
 
     # Create widgets
     graph_widget = AngleGraphWidget()
-    
-    # Use the 3D-only widget instead of tabbed widget
-    simulation_widget = SimulationWidget()  # Use the new 3D-only widget
+    simulation_widget = TabbedSimulationWidget()  # Use the new tabbed widget
     sidebar = Sidebar(simulation_widget)
 
     # Store graph widget reference in sidebar for updates
@@ -1709,6 +2024,8 @@ if __name__ == '__main__':
     end_effector_y = -1 * (L1 * math.sin(math.radians(45)) + L2 * math.sin(math.radians(45 + 45)))
     end_effector_z = 0
     end_effector_rotation = 0
-    sidebar.update_end_effector_info(end_effector_x, end_effector_y, end_effector_z, end_effector_rotation, 45, 45)
+    end_effector_gripper_width = 0  # Default initial gripper width
+    sidebar.update_end_effector_info(end_effector_x, end_effector_y, end_effector_z, 
+                                end_effector_rotation, end_effector_gripper_width, 45, 45)
 
     sys.exit(app.exec_())
