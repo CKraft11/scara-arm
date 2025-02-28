@@ -372,11 +372,31 @@ void moveToAngles(float theta1Target, float theta2Target, float theta3Target, fl
     }
 }
 
-void moveServo(float width) {
-    float theta = acos((width+0.6)/(60+JAW_OFFSET))*(180/pi);
+void moveServo(float width, int speed = 100) {
+    float theta = acos((width+0.6)/(60+JAW_OFFSET))*(180/PI);
+    float targetAngle = (MIN_ANGLE+90)-theta+ANGLE_OFFSET;
+    
+    // Get current position
+    int currentPos = gripper.read();
+    
+    // Calculate move direction and steps based on speed parameter
+    int direction = (targetAngle > currentPos) ? 1 : -1;
+    
+    // Convert speed percentage (0-100) to delay between increments
+    // Higher speed means lower delay
+    int delayTime = map(constrain(speed, 1, 100), 1, 100, 150, 5);
+    
+    // Move the servo incrementally for smooth motion control
+    while (abs(currentPos - targetAngle) > 1) {
+        currentPos += direction;
+        gripper.write(currentPos);
+        delay(delayTime);
+    }
+    
+    // Ensure final position is exact
+    gripper.write(targetAngle);
     Serial.println("Synchronized movement completed");
-    gripper.write((MIN_ANGLE+90)-theta+ANGLE_OFFSET);
-  }
+}
 
 void home() {
     // First ensure MOTOR2 is disabled during MOTOR1's initial movement

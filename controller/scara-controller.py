@@ -241,7 +241,7 @@ class AngleGraphWidget(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         
         # Create angle plot
-        self.angle_plot = pg.PlotWidget(title="Joint Angles")
+        self.angle_plot = pg.PlotWidget(title="Joint Angles and Gripper Width")
         self.angle_plot.setLabel('left', 'Angle', units='degrees')
         self.angle_plot.setLabel('bottom', 'Time', units='s')
         self.angle_plot.setYRange(-180, 180)
@@ -773,8 +773,10 @@ class SimulationWidget2D(QWidget):
             
             tz = math.sqrt(abs((2*(end_z-start_z))/72)) # is acceleration in mm/s
             
-            curr_z =-np.sign(end_z-start_z)*(0.5*72*(((steps-i)/steps)*tz)**2-end_z)+105
-            
+            if (end_z-start_z) == 0 :
+                curr_z = start_z + 105
+            else:
+                curr_z =-np.sign(end_z-start_z)*(0.5*72*(((steps-i)/steps)*tz)**2-end_z)+105
             # Interpolate joint angles
             curr_theta1 = start_theta1 + (end_theta1 - start_theta1) * t
             curr_theta2 = start_theta2 + (end_theta2 - start_theta2) * t
@@ -1344,7 +1346,7 @@ class Sidebar(QWidget):
                 gripper_text = f" - Grip: {gripper_width}mm"
                 theta3_text = f", Theta3: {theta3:.2f}" if theta3 is not None else ""
                 item = QListWidgetItem(
-                    f"{i+1}. ({x}, {y}, {z}, R:{rotation}) - " + 
+                    f"{i+1}. ({x}, {y}, {z}, R:{rotation}, G:{gripper_width}) - " + 
                     f"Theta1: {theta1:.2f}, Theta2: {theta2:.2f}{theta3_text}{gripper_text}{duration_text}{linear_text}"
                 )
             self.waypoints_list.addItem(item)
@@ -1920,6 +1922,44 @@ class Sidebar(QWidget):
         except Exception as e:
             print(f"Save error: {e}")
 
+    def generate_linear_path_points(self, start_point, end_point, num_points=20):
+        """Generate evenly spaced points along a straight line."""
+        x1, y1, z1, r1, _, _, _, _, _ = start_point
+        x2, y2, z2, r2, _, _, _, _, _ = end_point
+        
+        points = []
+        
+        # Calculate distance and adjust number of points
+        distance = math.sqrt((x2-x1)**2 + (y2-y1)**2)
+        num_points = max(200, int(distance / 1))  # One point every mm
+        
+        # Store start point configuration to maintain it
+        prev_theta1, prev_theta2 = self.calculate_target_angles((x1, y1, z1, r1))
+        
+        for i in range(num_points):
+            t = i / (num_points - 1)
+            # Linear interpolation
+            x = x1 + (x2 - x1) * t
+            y = y1 + (y2 - y1) * t
+            z = z1 + (z2 - z1) * t
+            r = r1 + (r2 - r1) * t
+            
+            # Linearly interpolate gripper width
+            gripper_width = start_point[7] + (end_point[7] - start_point[7]) * t
+            
+            # Calculate angles for this point
+            theta1, theta2 = self.calculate_target_angles((x, y, z, r), prev_theta1, prev_theta2)
+            if theta1 is None or theta2 is None:
+                continue
+            
+            # Store angles for next iteration
+            prev_theta1, prev_theta2 = theta1, theta2
+            
+            # All intermediate points are pass-through
+            points.append((x, y, z, r, theta1, theta2, 0, gripper_width, False))
+            
+        return points
+    
     def load_waypoints_from_csv(self):
         try:
             file_path, _ = QFileDialog.getOpenFileName(
@@ -2002,16 +2042,16 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     # Create widgets
-    graph_widget = AngleGraphWidget()
+    #graph_widget = AngleGraphWidget()
     simulation_widget = TabbedSimulationWidget()  # Use the new tabbed widget
     sidebar = Sidebar(simulation_widget)
 
     # Store graph widget reference in sidebar for updates
-    sidebar.graph_widget = graph_widget
+    #sidebar.graph_widget = graph_widget
 
     # Create layout
     layout = QHBoxLayout()
-    layout.addWidget(graph_widget)
+    #layout.addWidget(graph_widget)
     layout.addWidget(simulation_widget)
     layout.addWidget(sidebar)
 
