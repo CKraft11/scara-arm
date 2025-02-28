@@ -372,7 +372,7 @@ void moveToAngles(float theta1Target, float theta2Target, float theta3Target, fl
     }
 }
 
-void moveServo(float width, int speed = 100) {
+void moveServo(float width, int speed) {
     float theta = acos((width+0.6)/(60+JAW_OFFSET))*(180/PI);
     float targetAngle = (MIN_ANGLE+90)-theta+ANGLE_OFFSET;
     
@@ -621,7 +621,7 @@ void loop() {
                         endEffectorAngles.motor4_angle);       // Convert z and rotation to motor4 angle
             
             if (movementComplete) {
-                moveServo(waypoints[currentWaypoint][8]);
+                moveServo(waypoints[currentWaypoint][8],100);
                 Serial.println("Waypoint reached");
                 movementComplete = false;
                 moveStarted = false;
