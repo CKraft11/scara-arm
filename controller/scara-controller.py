@@ -2042,16 +2042,16 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     # Create widgets
-    #graph_widget = AngleGraphWidget()
+    graph_widget = AngleGraphWidget()
     simulation_widget = TabbedSimulationWidget()  # Use the new tabbed widget
     sidebar = Sidebar(simulation_widget)
 
     # Store graph widget reference in sidebar for updates
-    #sidebar.graph_widget = graph_widget
+    sidebar.graph_widget = graph_widget
 
     # Create layout
     layout = QHBoxLayout()
-    #layout.addWidget(graph_widget)
+    layout.addWidget(graph_widget)
     layout.addWidget(simulation_widget)
     layout.addWidget(sidebar)
 
