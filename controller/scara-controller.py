@@ -970,9 +970,7 @@ class SimulationWidget3D(QWidget):
         self.create_gripper_visualization()
 
     def create_gripper_visualization(self):
-        """Create a simple visual representation of the gripper in PyBullet"""
-        # This method adds visual debug lines to represent the gripper
-        # We'll store their IDs so we can update them later
+        """Simple visual representation of the gripper in PyBullet"""
         # self.left_gripper_id = p.addUserDebugLine([0, 0, 0], [0, 0, 0], [1, 0.5, 0], 2, 0)
         # self.right_gripper_id = p.addUserDebugLine([0, 0, 0], [0, 0, 0], [1, 0.5, 0], 2, 0)
 
@@ -1030,7 +1028,7 @@ class SimulationWidget3D(QWidget):
         #     0
         # )
 
-    def try_embed_window(self):
+    def try_embed_window(self): #this function is extremely scuffed and might break on your machine
         """Try to find and embed the PyBullet window and simulate Ctrl key press"""
         if self.pybullet_hwnd is None:
             def callback(hwnd, results):
